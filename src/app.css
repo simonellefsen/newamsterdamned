@@ -1,0 +1,81 @@
+/**
+ * Global type and colour.
+ *
+ * Fonts are system stacks on purpose: the CSP-free, offline-safe, zero-request option, and
+ * a good serif at small sizes beats a webfont that arrives late. The display face reaches
+ * for the condensed slab look of a 17th-century broadsheet.
+ */
+
+:root {
+	--parchment: #e8dcc0;
+	--parchment-dim: #b6a789;
+	--gold: #c9a44f;
+	--gold-bright: #f0d68c;
+	--ink: #0c0907;
+	--ink-soft: #1a1410;
+
+	--font-body: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+		'Times New Roman', serif;
+	--font-display: 'Copperplate', 'Copperplate Gothic Light', 'Optima', 'Trajan Pro',
+		'Palatino Linotype', Georgia, serif;
+
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+}
+
+body {
+	background:
+		radial-gradient(ellipse at 50% 0%, #241b13 0%, #0c0907 62%),
+		#0c0907;
+	color: var(--parchment);
+	font-family: var(--font-body);
+	font-size: 16px;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	overflow-x: hidden;
+}
+
+button {
+	font-family: inherit;
+}
+
+/* Visible focus for keyboard users; the game is fully playable without a mouse. */
+:focus-visible {
+	outline: 2px solid var(--gold-bright);
+	outline-offset: 2px;
+}
+
+::selection {
+	background: rgba(201, 164, 79, 0.3);
+}
+
+/* Scrollbars inside the almanac and the menu. */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(201, 164, 79, 0.35) transparent;
+}
+
+*::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+	background: rgba(201, 164, 79, 0.32);
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
