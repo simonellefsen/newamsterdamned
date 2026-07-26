@@ -5,6 +5,8 @@
 	 */
 	import { pearlStreet } from '$lib/game/art/scenes';
 	import {
+		clear as clearSlot,
+		exportSaveJson,
 		formatSaveSummary,
 		formatSaveWhen,
 		hasAnySave,
@@ -84,6 +86,34 @@
 		return a ? `Act ${ACT_ROMAN[a]}` : null;
 	}
 
+	function exportSlot(slot: Slot) {
+		const json = exportSaveJson(slot);
+		if (!json) {
+			importNote = 'Nothing in that slot to export.';
+			setTimeout(() => (importNote = null), 2800);
+			return;
+		}
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `newamsterdamned-${slot === 'auto' ? 'autosave' : `slot${slot}`}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		importNote = `Exported ${slotLabel(slot)}.`;
+		setTimeout(() => (importNote = null), 2800);
+	}
+
+	function deleteSlot(slot: Slot) {
+		const label = slotLabel(slot);
+		if (!confirm(`Delete ${label}? This cannot be undone.`)) return;
+		clearSlot(slot);
+		refreshSaves();
+		importNote = `Deleted ${label}.`;
+		setTimeout(() => (importNote = null), 2800);
+		if (!canContinue) pickingSave = false;
+	}
+
 	function onImportFile(slot: Slot, file: File | undefined) {
 		if (!file || !onImport) return;
 		onImport(slot, file);
@@ -105,18 +135,38 @@
 			<p class="eyebrow">Resume where?</p>
 			<div class="slots">
 				{#each saves as { slot, state } (slot)}
-					<button class="slot" onclick={() => loadSlot(slot)}>
-						<span class="slot-name">
-							{slotLabel(slot)}
-							{#if actBadge(state.scene)}
-								<span class="slot-act">{actBadge(state.scene)}</span>
+					<div class="slot">
+						<button type="button" class="slot-main" onclick={() => loadSlot(slot)}>
+							<span class="slot-name">
+								{slotLabel(slot)}
+								{#if actBadge(state.scene)}
+									<span class="slot-act">{actBadge(state.scene)}</span>
+								{/if}
+							</span>
+							<span class="slot-sum">{formatSaveSummary(state)}</span>
+							{#if formatSaveWhen(state)}
+								<span class="slot-when">{formatSaveWhen(state)}</span>
 							{/if}
-						</span>
-						<span class="slot-sum">{formatSaveSummary(state)}</span>
-						{#if formatSaveWhen(state)}
-							<span class="slot-when">{formatSaveWhen(state)}</span>
-						{/if}
-					</button>
+						</button>
+						<div class="slot-actions">
+							<button
+								type="button"
+								class="slot-mini"
+								onclick={() => exportSlot(slot)}
+								aria-label="Export {slotLabel(slot)}"
+							>
+								Export
+							</button>
+							<button
+								type="button"
+								class="slot-mini slot-mini--danger"
+								onclick={() => deleteSlot(slot)}
+								aria-label="Delete {slotLabel(slot)}"
+							>
+								Delete
+							</button>
+						</div>
+					</div>
 				{/each}
 			</div>
 			{#if onImport}
@@ -138,9 +188,9 @@
 						</label>
 					{/each}
 				</div>
-				{#if importNote}
-					<p class="import-note">{importNote}</p>
-				{/if}
+			{/if}
+			{#if importNote}
+				<p class="import-note">{importNote}</p>
 			{/if}
 			<div class="actions">
 				<button class="btn" onclick={() => (pickingSave = false)}>Back</button>
@@ -268,25 +318,75 @@
 
 	.slot {
 		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.15rem;
+		align-items: stretch;
+		gap: 0.35rem;
 		width: 100%;
-		padding: 0.65rem 0.85rem;
 		background: rgba(20, 16, 12, 0.72);
 		border: 1px solid rgba(230, 199, 107, 0.22);
 		border-radius: 2px;
+		overflow: hidden;
+	}
+
+	.slot:hover,
+	.slot:focus-within {
+		border-color: var(--gold-bright);
+		background: rgba(64, 49, 26, 0.45);
+	}
+
+	.slot-main {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.15rem;
+		padding: 0.65rem 0.75rem;
+		background: none;
+		border: none;
 		cursor: pointer;
 		font: inherit;
 		color: inherit;
 		text-align: left;
 	}
 
-	.slot:hover,
-	.slot:focus-visible {
+	.slot-main:focus-visible {
+		outline: 2px solid var(--gold-bright);
+		outline-offset: -2px;
+	}
+
+	.slot-actions {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 0.25rem;
+		padding: 0.4rem 0.45rem 0.4rem 0;
+	}
+
+	.slot-mini {
+		font-family: var(--font-display);
+		font-size: 0.55rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.3rem 0.5rem;
+		background: rgba(40, 31, 22, 0.9);
+		border: 1px solid rgba(230, 199, 107, 0.28);
+		color: var(--parchment-dim);
+		cursor: pointer;
+		border-radius: 2px;
+		white-space: nowrap;
+	}
+
+	.slot-mini:hover,
+	.slot-mini:focus-visible {
 		border-color: var(--gold-bright);
+		color: var(--gold-bright);
 		outline: none;
-		background: rgba(64, 49, 26, 0.55);
+	}
+
+	.slot-mini--danger:hover,
+	.slot-mini--danger:focus-visible {
+		border-color: #c07060;
+		color: #e8a090;
 	}
 
 	.slot-name {

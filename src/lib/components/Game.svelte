@@ -41,11 +41,13 @@
 		type Settings
 	} from '$lib/engine/settings';
 	import {
+		clear as clearSaveSlot,
 		exportSaveJson,
 		importIntoSlot,
 		load,
 		parseImport,
 		save,
+		slotLabel,
 		SLOTS,
 		type Slot
 	} from '$lib/engine/save';
@@ -258,10 +260,22 @@
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `newamsterdamned-slot${slot}.json`;
+		a.download = `newamsterdamned-${slot === 'auto' ? 'autosave' : `slot${slot}`}.json`;
 		a.click();
 		URL.revokeObjectURL(url);
-		saveNote = `Exported slot ${slot}.`;
+		saveNote = `Exported ${slotLabel(slot)}.`;
+		setTimeout(() => (saveNote = null), 2400);
+	}
+
+	function doDelete(slot: Slot) {
+		if (!load(slot)) {
+			saveNote = 'Nothing in that slot.';
+			setTimeout(() => (saveNote = null), 2400);
+			return;
+		}
+		if (!confirm(`Delete ${slotLabel(slot)}? This cannot be undone.`)) return;
+		clearSaveSlot(slot);
+		saveNote = `Deleted ${slotLabel(slot)}.`;
 		setTimeout(() => (saveNote = null), 2400);
 	}
 
@@ -281,7 +295,7 @@
 				setTimeout(() => (saveNote = null), 3200);
 				return;
 			}
-			saveNote = `Imported into slot ${slot}. Load it when ready.`;
+			saveNote = `Imported into ${slotLabel(slot)}. Load it when ready.`;
 			setTimeout(() => (saveNote = null), 3200);
 		};
 		reader.readAsText(file);
@@ -458,27 +472,39 @@
 				<div class="menu" role="dialog" aria-modal="true" aria-label="Menu" use:focusTrap>
 					<h3>Ledger</h3>
 					<div class="slots">
-						{#each SLOTS.filter((s) => s !== 'auto') as slot (slot)}
+						{#each SLOTS as slot (slot)}
 							{@const existing = load(slot)}
+							{@const isAuto = slot === 'auto'}
 							<div class="slotrow">
-								<span class="slotname">Slot {slot}</span>
+								<span class="slotname">{slotLabel(slot)}</span>
 								<span class="slotdesc">{existing ? existing.label : '— empty —'}</span>
-								<button class="mini" onclick={() => doSave(slot)}>Save</button>
+								{#if !isAuto}
+									<button class="mini" onclick={() => doSave(slot)}>Save</button>
+								{/if}
 								<button class="mini" disabled={!existing} onclick={() => doLoad(slot)}>Load</button>
-								<button class="mini" disabled={!existing} onclick={() => downloadSave(slot)}>Export</button>
-								<label class="mini mini--file">
-									Import
-									<input
-										type="file"
-										accept="application/json,.json"
-										hidden
-										onchange={(e) => {
-											const input = e.currentTarget as HTMLInputElement;
-											onImportFile(slot, input.files?.[0]);
-											input.value = '';
-										}}
-									/>
-								</label>
+								<button class="mini" disabled={!existing} onclick={() => downloadSave(slot)}
+									>Export</button
+								>
+								{#if !isAuto}
+									<label class="mini mini--file">
+										Import
+										<input
+											type="file"
+											accept="application/json,.json"
+											hidden
+											onchange={(e) => {
+												const input = e.currentTarget as HTMLInputElement;
+												onImportFile(slot, input.files?.[0]);
+												input.value = '';
+											}}
+										/>
+									</label>
+								{/if}
+								<button
+									class="mini mini--danger"
+									disabled={!existing}
+									onclick={() => doDelete(slot)}>Delete</button
+								>
 							</div>
 						{/each}
 					</div>
@@ -802,6 +828,12 @@
 	.mini:disabled {
 		opacity: 0.35;
 		cursor: default;
+	}
+
+	.mini--danger:hover:not(:disabled),
+	.mini--danger:focus-visible:not(:disabled) {
+		border-color: #c07060;
+		color: #e8a090;
 	}
 
 	.mini--file {

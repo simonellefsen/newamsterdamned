@@ -162,7 +162,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 
-**Continue** on the title screen loads the newest save, or opens a picker when several slots exist (plus import into slot 1–3).
+**Continue** on the title screen loads the newest save, or opens a picker when several slots exist — load, export, or delete each slot, and import JSON into slots 1–3. Esc → Ledger can also delete slots (including Autosave).
 
 Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):
 
