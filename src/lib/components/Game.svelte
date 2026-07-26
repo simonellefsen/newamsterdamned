@@ -310,10 +310,14 @@
 		const p = game.pendingVerb;
 		if (p?.item) {
 			const name = getItem(p.item)?.name ?? p.item;
-			return hover ? `Use ${name} on ${hover}` : `Use ${name} on…`;
+			return hover
+				? `Use ${name} on ${hover}  ·  Esc to cancel`
+				: `Use ${name} on…  ·  Esc to cancel`;
 		}
 		return hover ?? '';
 	});
+
+	const usingItem = $derived(!!game.pendingVerb?.item);
 </script>
 
 <svelte:window
@@ -327,6 +331,8 @@
 			else if (controlsOpen) controlsOpen = false;
 			else if (almanacOpen) almanacOpen = false;
 			else if (titlePrefsOpen) titlePrefsOpen = false;
+			// Cancel inventory "use X on…" before opening the ledger.
+			else if (started && game.pendingVerb) game.setPendingVerb(null);
 			else if (started) menuOpen = !menuOpen;
 		}
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
@@ -548,7 +554,7 @@
 				onContextVerb={(itemId, x, y) => (coin = { target: { kind: 'item', itemId }, x, y })}
 				onHover={(l) => (hover = l)}
 			/>
-			<p class="status">{statusLine}</p>
+			<p class="status" class:status--use={usingItem}>{statusLine}</p>
 		</div>
 	{/if}
 </div>
@@ -924,6 +930,12 @@
 		opacity: 0.85;
 		text-align: right;
 		min-height: 1em;
+	}
+
+	.status--use {
+		color: var(--gold-bright);
+		opacity: 1;
+		text-shadow: 0 0 12px rgba(230, 199, 107, 0.35);
 	}
 
 	@keyframes slidein {

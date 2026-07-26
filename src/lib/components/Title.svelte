@@ -203,7 +203,21 @@
 			<p class="tag">A comedy of manners, mud and manifest larceny.</p>
 
 			<div class="actions">
-				<button class="btn btn--primary" onclick={() => (picking = true)}>Begin</button>
+				<button
+					class="btn btn--primary"
+					onclick={() => {
+						// Saves are never wiped by Begin — but say so when they exist.
+						if (
+							canContinue &&
+							!confirm(
+								'Start a new game?\n\nYour existing saves (including autosave) will be kept. Use Continue to resume them.'
+							)
+						) {
+							return;
+						}
+						picking = true;
+					}}>Begin</button
+				>
 				{#if canContinue}
 					<button class="btn btn--continue" onclick={openContinue}>
 						<span class="btn-main">Continue</span>

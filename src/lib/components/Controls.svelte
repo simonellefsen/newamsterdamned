@@ -65,7 +65,11 @@
 				</tr>
 				<tr>
 					<th><kbd>Esc</kbd></th>
-					<td>Menu — save, load, preferences</td>
+					<td>Cancel “use item”, close panels, or open the menu</td>
+				</tr>
+				<tr>
+					<th>Click item again</th>
+					<td>Also cancels use mode</td>
 				</tr>
 			</tbody>
 		</table>
