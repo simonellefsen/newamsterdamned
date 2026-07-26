@@ -191,7 +191,14 @@ export const PALETTES: Record<string, ActorPalette> = {
 	// Pieter Wolfertsen, pawnbroker: everything he owns was someone else's on Tuesday.
 	// Bottle-green rather than purple — Trijn wears purple, and two purple coats in one
 	// scene read as the same person at sprite size.
-	pawnbroker: { coat: '#3f5240', trim: '#2b3a2d', skin: P.skinMid, hat: '#24301f', accent: '#b1813f' }
+	pawnbroker: { coat: '#3f5240', trim: '#2b3a2d', skin: P.skinMid, hat: '#24301f', accent: '#b1813f' },
+	// Reynier Kleyn, merchant: the expensive black that only reads as black when it is dyed
+	// properly, plus gold on every button. He never once looks like he is hiding anything.
+	kleyn: { coat: '#1f2733', skin: P.skinPale, trim: '#141a24', hat: '#141a24', accent: '#e6c76b' },
+	// Mattaneck: deerskin coat, red trade-duffel trim, silver ornament. Duffel cloth was the
+	// single biggest thing the Dutch had to trade and Munsee people wore a great deal of it,
+	// so this is a working trader's dress, not a costume.
+	mattaneck: { coat: '#96794f', trim: '#8a3324', skin: P.skinMid, hat: '#3a3128', accent: '#c8ccd0' }
 };
 
 /** Per-actor sprite quirks, keyed by actor id. */
@@ -199,5 +206,9 @@ export const SPRITE_TRAITS: Record<string, Partial<SpriteOptions>> = {
 	griet: { skirt: true, apron: true, hat: false, collar: true },
 	klapperman: { noBreeches: true },
 	yankee: { hat: true, collar: false },
-	domingo: { hat: true, collar: true }
+	domingo: { hat: true, collar: true },
+	kleyn: { hat: true, collar: true },
+	// No Dutch hat and no falling band: at sprite size that silhouette alone tells you he is
+	// the one person in the market who is not dressed as a Company employee.
+	mattaneck: { hat: false, collar: false }
 };

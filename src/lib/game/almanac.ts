@@ -222,6 +222,97 @@ export const ALMANAC: LoreEntry[] = [
 		title: 'It never made money',
 		category: 'Town',
 		body: 'For all of it — the wall, the fort, the pelts, the shell money, the ordinances, the wars — New Netherland never returned a profit to the West India Company across its forty-year existence. The Company\'s money was made in the Atlantic slave trade and in Brazilian sugar, and when Brazil was lost the Company was effectively finished. New Amsterdam, the settlement it neglected, underfunded and repeatedly considered abandoning, is the only part of the enterprise anyone now remembers.'
+	},
+
+	/* ==================================================================== */
+	/* ACT II — the money, the trades that made it, and the ones that faked */
+	/* ==================================================================== */
+
+	{
+		id: 'wampum-making',
+		title: 'How a bead was actually made',
+		category: 'Money',
+		body: 'White came from the thick central pillar of a whelk shell — the only part solid enough to survive being worked. Purple came from the dark patch on the lip of a quahog clam, and there is very little of it on any one shell, which is the entire reason purple was worth about double. The blank was ground round on a stone and then drilled, using a hand- or bow-turned drill of stone or reed with wet sand as the cutting grit. A skilled maker could produce perhaps a hundred beads in a long day and would break a good number of them. Finished beads ran about a quarter of an inch long. They were strung on sinew or fibre, and the standard unit of account was the *fathom* — six feet of strung beads.',
+		caveat: 'Output figures are estimates from ethnographic and archaeological work, not from anybody\'s account book.'
+	},
+	{
+		id: 'long-island',
+		title: 'Where the money came from',
+		category: 'Money',
+		body: 'Almost all of it was made on Long Island and around Long Island Sound, by Montaukett, Shinnecock, Massapequa, Pequot, Narragansett and neighbouring communities with access to the right shell beaches. The Dutch called Long Island *Sewanhacky*, which is usually glossed as the island of shells. New Netherland\'s entire small-change supply therefore depended on the labour of people the colony did not govern, could not compel, and was frequently at odds with — a fact the Dutch record notices only when the supply is interrupted.',
+		caveat: 'The *Sewanhacky* etymology is traditional and reasonable but not certain.'
+	},
+	{
+		id: 'sewant-rate',
+		title: 'Legislating what money is worth',
+		category: 'Money',
+		body: 'Because sewant was legal tender and nobody minted it, the government kept trying to fix its value by proclamation. New Netherland ordinances set a rate — famously six white beads to the stuiver around 1650 — and distinguished "strung" wampum from "loose", the loose stuff being worth less because it had not been sorted. It never held. Poor beads kept arriving, the good ones were hoarded or exported, and each new rate was an admission that the last one had failed. By the end of the 1650s the official rate had roughly halved again, and by the 1660s sewant had collapsed as a serious currency.',
+		caveat: 'Rates differed by ordinance, by year and by jurisdiction; the numbers in the record do not form one tidy series.'
+	},
+	{
+		id: 'counterfeit',
+		title: 'Faking the money',
+		category: 'Law',
+		body: 'People counterfeited wampum more or less immediately. The commonest fraud was dyeing cheap white beads to pass as the valuable purple; others made beads from stone, bone, horn or European glass. Both the Dutch and the New England colonies legislated against bad and unstrung wampum repeatedly. The deeper problem was not fraud but productivity: Europeans introduced steel drills, and later machinery, and could make beads far faster and more uniformly than hand production ever could — which flooded the supply and helped destroy the value of the thing they were counterfeiting.',
+		caveat: 'Dyed counterfeits are attested in period complaints; how common they were is impossible to quantify.'
+	},
+	{
+		id: 'logwood',
+		title: 'The forbidden purple',
+		category: 'Work',
+		body: 'Logwood — *Haematoxylum campechianum*, also called blockwood or Campeche wood — comes from Central America and gives magnificent purples, blues and blacks. It was also notoriously *fugitive*: badly mordanted, the colour faded or washed out. England banned it outright in 1581 as a "false and deceitful" dye and ordered stocks burnt, a prohibition not lifted until 1662, by which time dyers had learned to fix it properly. Cutting logwood in the Bay of Campeche and along the Central American coast became a large, semi-piratical English business over the second half of the century.',
+		caveat: 'The English ban and its 1662 repeal are firm. The game gives a New Haven smuggler a supply in 1655, which is a few years early for the trade at its height.'
+	},
+	{
+		id: 'dyeing',
+		title: 'Mordants, and the tub behind the shed',
+		category: 'Dress',
+		body: 'A dye that merely sits on a fibre washes out. To hold, most dyes need a *mordant* — alum, iron, tannin — that binds dye to material. Alum had to be imported and cost money; stale urine did not. Left standing, urine turns alkaline and ammoniacal, and it was used across Europe for scouring wool, for fulling cloth, and in the indigo and woad vats. Households collected it and dyers, fullers and tanners bought it by the bucket. The Roman emperor Vespasian is said to have taxed the trade in it, and when his son objected, to have held up a coin and asked whether it smelled.',
+		caveat: 'The Vespasian story comes from Suetonius and may be a good anecdote rather than a true one.'
+	},
+	{
+		id: 'tanners',
+		title: 'The trade nobody wants next door',
+		category: 'Work',
+		body: 'Tanning turns a hide into leather over months or years. The hair is stripped with lime, the skin softened in a bath of dung, and then the hides are layered with ground oak bark in sunken pits and left — six months for light leather, two years or more for sole leather. It stinks so badly that towns across Europe legislated tanneries to the far side of the walls, downwind and downstream. New Amsterdam did the same, ordering its tanners repeatedly to move away from the built-up town and the canal. They were also indispensable: every shoe, belt, harness, bucket and bellows in the colony came out of one of those pits.',
+		caveat: 'The town issued several orders about tanneries over the 1650s; the exact sequence and how far they were obeyed is muddled in the record.'
+	},
+	{
+		id: 'turner',
+		title: 'The pole lathe',
+		category: 'Work',
+		body: 'A pole lathe is a springy sapling fixed above the workpiece, a cord wrapped round it and running down to a foot treadle. Press the treadle and the work spins toward the chisel and cuts; release it and the pole hauls it back. The motion is reciprocating, not continuous, so you cut on the down-stroke only — but it needs no water, no wheel and no capital beyond a tree. Turners made chair legs, bowls, tool handles, bungs and spindles on them for centuries. In a colonial town the same man was often the gunstock-maker, because boring a straight small hole was his particular skill.'
+	},
+	{
+		id: 'market',
+		title: 'Market day',
+		category: 'Town',
+		body: 'New Amsterdam established a regular weekly market in the late 1640s and later a market field — the Marckvelt, near the fort — along with annual free fairs for cattle and hogs in the autumn. The point of a fair was legal as much as commercial: for its duration, outsiders could trade in town under protections they did not otherwise have. Manhattan still carries the name: Marketfield Street runs a crooked hundred yards off Broad Street, and it is there because of a seventeenth-century Dutch cattle market.',
+		caveat: 'Dates for the market\'s founding and its moves vary between sources.'
+	},
+	{
+		id: 'weigh-house',
+		title: 'The weigh-house',
+		category: 'Town',
+		body: 'Any Dutch town of consequence had a *waag* — a public weigh-house with an official beam-scale, where goods sold by weight were weighed by a sworn weigh-master for a fee. It was a revenue device and a trust device at once: private scales could be argued with, and the public beam could not. New Amsterdam set up its own in the 1650s near the waterfront. It is a small, telling thing about how a market town works — the community will fight about almost anything, but it agrees in advance to believe one particular piece of iron.'
+	},
+	{
+		id: 'brouwer-street',
+		title: 'The first paved street',
+		category: 'Town',
+		body: 'Brouwer Straat — Brewers\' Street — was where the breweries clustered, and in 1658 it became the first street in New Amsterdam to be paved with cobblestones, reportedly after the residents petitioned and helped pay for it, because the carts and the mud together had made it impassable. It is still there. It is now called Stone Street, and it is named after the paving.'
+	},
+	{
+		id: 'duffel',
+		title: 'Duffel cloth',
+		category: 'Dress',
+		body: 'The single most important thing the Dutch had to trade was not beads or guns but *duffel* — a thick, coarse, heavily napped woollen cloth named for the town of Duffel near Antwerp. It was warm, hard-wearing, took dye well and needed no tailoring to be useful, and it appears in New Netherland trade accounts constantly, usually by the ell in red or blue. Native people across the northeast adopted it quickly and on their own terms, cutting and wearing it in their own forms rather than European ones, and traders learned that quality and colour mattered to their customers a great deal more than they had assumed.'
+	},
+	{
+		id: 'mattaneck-note',
+		title: 'A note on this character',
+		category: 'People',
+		body: 'Mattaneck is invented, and deliberately so. The Dutch records of the 1640s and 1650s name a great many real Munsee, Lenape and Long Island people — Oratam of the Hackensack, Tackapousha of the Massapequa, Mattano, Penhawitz and others — who negotiated, traded, signed deeds and argued with the colony on the record. This game does not put invented dialogue, an invented scheme or an invented change of heart into the mouth of any of them. The design document for this project originally named a documented sachem for this role; that was changed for exactly this reason. Everything Mattaneck says about how sewant was made, what it was worth, and who lost when its value fell is drawn from the historical record. Mattaneck himself is not.'
 	}
 ];
 

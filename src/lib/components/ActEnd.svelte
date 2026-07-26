@@ -1,7 +1,7 @@
 <script lang="ts">
 	/** End-of-act card. Act I's real reward is finding out what the ledger says. */
 	import { game } from '$lib/engine/state.svelte';
-	import { ACT_ONE_MAX } from '$lib/game';
+	import { SCORE_MAX } from '$lib/game';
 
 	interface Props {
 		onDismiss: () => void;
@@ -14,13 +14,17 @@
 		<div class="card">
 			<p class="rule"></p>
 			<h2>{game.actEnd.title}</h2>
-			{#each game.actEnd.body.split('\n\n') as para (para)}
-				<p class="body">{para}</p>
-			{/each}
+			<div class="prose">
+				{#each game.actEnd.body.split('\n\n') as para (para)}
+					<p class="body">{para}</p>
+				{/each}
+			</div>
 			<p class="score">
-				<span>{game.score}</span> of {ACT_ONE_MAX} points
+				<span>{game.score}</span> of {SCORE_MAX} points
 			</p>
-			<button class="btn" onclick={onDismiss}>Keep poking about</button>
+			<button class="btn" onclick={onDismiss}>
+				{game.actEnd.button ?? 'Keep poking about'}
+			</button>
 		</div>
 	</div>
 {/if}
@@ -33,20 +37,34 @@
 		display: grid;
 		place-items: center;
 		background: rgba(9, 7, 5, 0.93);
-		padding: clamp(1rem, 4vw, 3rem);
+		padding: clamp(0.8rem, 3vw, 2.4rem);
 		animation: fade 400ms ease-out;
 	}
 
+	/**
+	 * Act II's curtain runs to four paragraphs and is taller than the stage. Rather than
+	 * let the card overflow the inventory bar — or scroll the dismiss button out of reach —
+	 * the title, the score and the button stay put and only the prose scrolls.
+	 */
 	.card {
 		max-width: 58ch;
+		max-height: 100%;
 		text-align: center;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.prose {
+		overflow-y: auto;
+		min-height: 0;
 	}
 
 	.rule {
 		width: 60px;
 		height: 2px;
 		background: var(--gold);
-		margin: 0 auto 1.5rem;
+		margin: 0 auto 1.1rem;
 		opacity: 0.7;
 	}
 
@@ -56,7 +74,7 @@
 		letter-spacing: 0.16em;
 		text-transform: uppercase;
 		color: var(--gold-bright);
-		margin: 0 0 1.3rem;
+		margin: 0 0 1rem;
 	}
 
 	.body {
@@ -79,7 +97,7 @@
 		letter-spacing: 0.2em;
 		text-transform: uppercase;
 		color: var(--parchment-dim);
-		margin: 1.8rem 0 1.4rem;
+		margin: 1.1rem 0 1rem;
 	}
 
 	.score span {

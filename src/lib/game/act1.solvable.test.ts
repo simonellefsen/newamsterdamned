@@ -7,6 +7,8 @@
  * dialogue gate, this fails immediately rather than at the point a player gets stuck with
  * an unwinnable save.
  *
+ * Cross-act content integrity (ids, geometry, tokens, scoring) lives in content.test.ts.
+ *
  * Walking is the only thing stubbed: `WALK` resolves against a requestAnimationFrame loop
  * that lives in the Svelte component, so here we just resolve it instantly.
  */
@@ -17,9 +19,6 @@ import { getDialogue, getScene } from '$lib/engine/registry';
 import { run, enterScene, advance } from '$lib/engine/interpreter';
 import { interactWithHotspot } from '$lib/engine/interaction';
 import { loadContent, newGame } from './index';
-import { ALMANAC } from './almanac';
-import { SCENES } from './scenes';
-import { DIALOGUES } from './dialogue';
 import { ITEMS } from './items';
 import type { Hotspot, Verb } from '$lib/engine/types';
 
@@ -106,124 +105,6 @@ async function leaveDialogue() {
 		await settle();
 	}
 }
-
-describe('content integrity', () => {
-	it('every scene hotspot walk-to point is inside its walkbox', async () => {
-		const { pointInPolygon } = await import('$lib/engine/geometry');
-		for (const scene of SCENES) {
-			for (const h of scene.hotspots) {
-				if (!h.walkTo) continue;
-				expect(
-					pointInPolygon(h.walkTo, scene.walkbox),
-					`${scene.id}/${h.id} walkTo ${h.walkTo} is outside the walkbox`
-				).toBe(true);
-			}
-			for (const a of scene.actors ?? []) {
-				if (!a.walkTo) continue;
-				expect(
-					pointInPolygon(a.walkTo, scene.walkbox),
-					`${scene.id}/${a.id} walkTo ${a.walkTo} is outside the walkbox`
-				).toBe(true);
-			}
-			expect(
-				pointInPolygon(scene.entry, scene.walkbox),
-				`${scene.id} entry point is outside the walkbox`
-			).toBe(true);
-		}
-	});
-
-	it('every GOTO names a scene that exists', () => {
-		const ids = new Set(SCENES.map((s) => s.id));
-		const walk = (actions: unknown[], where: string) => {
-			for (const a of actions as Array<Record<string, unknown>>) {
-				if (a.op === 'GOTO') expect(ids, `${where} → ${a.scene}`).toContain(a.scene);
-				if (a.op === 'IF') {
-					walk((a.then ?? []) as unknown[], where);
-					walk((a.else ?? []) as unknown[], where);
-				}
-				if (a.op === 'CUTSCENE') walk((a.actions ?? []) as unknown[], where);
-			}
-		};
-		for (const s of SCENES) {
-			for (const h of s.hotspots) {
-				for (const [v, script] of Object.entries(h.verbs ?? {})) walk(script, `${s.id}/${h.id}.${v}`);
-				for (const [i, script] of Object.entries(h.useWith ?? {})) walk(script, `${s.id}/${h.id}+${i}`);
-			}
-			walk(s.onFirstEnter ?? [], `${s.id}.onFirstEnter`);
-			walk(s.onEnter ?? [], `${s.id}.onEnter`);
-		}
-	});
-
-	it('every GIVE/REMOVE names an item that exists', () => {
-		const ids = new Set(ITEMS.map((i) => i.id));
-		const seen = new Set<string>();
-		const walk = (actions: unknown[]) => {
-			for (const a of actions as Array<Record<string, unknown>>) {
-				if (a.op === 'GIVE' || a.op === 'REMOVE') seen.add(a.item as string);
-				if (a.op === 'IF') {
-					walk((a.then ?? []) as unknown[]);
-					walk((a.else ?? []) as unknown[]);
-				}
-				if (a.op === 'CUTSCENE') walk((a.actions ?? []) as unknown[]);
-			}
-		};
-		for (const s of SCENES) {
-			for (const h of s.hotspots) {
-				Object.values(h.verbs ?? {}).forEach(walk);
-				Object.values(h.useWith ?? {}).forEach(walk);
-			}
-			for (const a of s.actors ?? []) {
-				Object.values(a.verbs ?? {}).forEach(walk);
-				Object.values(a.useWith ?? {}).forEach(walk);
-			}
-			walk(s.onFirstEnter ?? []);
-		}
-		for (const d of DIALOGUES) for (const l of d.lines) walk(l.script);
-		for (const id of seen) expect(ids, `unknown item '${id}'`).toContain(id);
-	});
-
-	it('every DIALOGUE names a tree that exists', () => {
-		const ids = new Set(DIALOGUES.map((d) => d.id));
-		for (const s of SCENES) {
-			for (const a of s.actors ?? []) {
-				for (const script of Object.values(a.verbs ?? {})) {
-					for (const act of script) {
-						if (act.op === 'DIALOGUE') expect(ids).toContain(act.tree);
-					}
-				}
-			}
-		}
-	});
-
-	it('every LORE id resolves to an almanac entry', () => {
-		const ids = new Set(ALMANAC.map((e) => e.id));
-		const seen = new Set<string>();
-		const walk = (actions: unknown[]) => {
-			for (const a of actions as Array<Record<string, unknown>>) {
-				if (a.op === 'LORE') seen.add(a.id as string);
-				if (a.op === 'IF') {
-					walk((a.then ?? []) as unknown[]);
-					walk((a.else ?? []) as unknown[]);
-				}
-			}
-		};
-		for (const s of SCENES) {
-			for (const h of s.hotspots) {
-				Object.values(h.verbs ?? {}).forEach(walk);
-				Object.values(h.useWith ?? {}).forEach(walk);
-			}
-			for (const a of s.actors ?? []) Object.values(a.verbs ?? {}).forEach(walk);
-		}
-		for (const d of DIALOGUES) for (const l of d.lines) walk(l.script);
-		expect(seen.size, 'no almanac entries are reachable').toBeGreaterThan(10);
-		for (const id of seen) expect(ids, `unknown almanac entry '${id}'`).toContain(id);
-	});
-
-	it('the almanac has no duplicate ids', () => {
-		const ids = ALMANAC.map((e) => e.id);
-		expect(new Set(ids).size).toBe(ids.length);
-	});
-});
 
 describe.each(['joost', 'trijn'] as const)('Act I is completable as %s', (who) => {
 	beforeEach(async () => {

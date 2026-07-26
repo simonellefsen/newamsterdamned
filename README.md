@@ -18,21 +18,36 @@ Every legitimate way to raise four hundred guilders is closed to you.
 
 ## What's here
 
-**Act I — "The Wall and the Wanting" — fully playable.** Four scenes, a ten-step puzzle
-chain, five characters with branching dialogue, inventory, save/load and a scoreboard.
-Acts II–IV are written and designed in [DESIGN.md](DESIGN.md) but not yet built.
+**Acts I and II are fully playable** — eight scenes, two puzzle chains, nine characters
+with branching dialogue, inventory, save/load and a running scoreboard out of 500.
+
+**Act I — "The Wall and the Wanting."** You wake in the Strand mud with no breeches and a
+summons nailed to your shirt. It ends with a page torn out of a tavern ledger and a name.
+
+**Act II — "Sewant Standard."** Somebody is buying *white* shell money at the *purple*
+price, every Tuesday, in public, in his own hand. You decide the clever move is to get in
+on it, which means learning to counterfeit the currency of New Netherland from a sack of
+rotting whelk, a smuggled dyewood banned in England as "false and deceitful", and a tub
+behind a tannery that we will not be describing here.
+
+Your first fathom is the finest work you have ever done, and it is rejected **for being too
+good** — real beads are drilled from both ends and the two bores never quite meet, and yours
+have no fault in them at all. The fix is to do it again, worse. That is the act.
+
+Acts III–IV are written and designed in [DESIGN.md](DESIGN.md) but not yet built.
 
 **Two protagonists**, and not as a reskin. Roman-Dutch law let a woman trade, sue and hold
 property in her own name; English common law ninety miles east did not. Joost Baksteen is a
 failed brick-maker with no standing at all. Trijn Baksteen is his widow, with legal standing
-he will never have and a different set of doors closed to her. Act I opens the same door for
-both; later acts do not.
+he will never have and a different set of doors closed to her. It pays off at the end of
+Act II, where the same transaction is two different scenes: Trijn signs for herself, and
+Joost — a man whose earnings his creditor may simply take — has to sign as nobody at all.
 
-**The Almanac** — thirty historical notes on everyday life in the colony, unlocked by
+**The Almanac** — forty-three historical notes on everyday life in the colony, unlocked by
 examining the world: what a guilder bought, why everyone drank beer at breakfast, what
-half-freedom meant, how shell money worked and why it kept collapsing, what the wall was
-for and which way it faced. Everything in it is true, and entries that rest on legend or
-disputed figures say so.
+half-freedom meant, how a wampum bead was actually made and how long it took, why the first
+paved street in New York was paved, what a mordant is and where you got one. Everything in
+it is true, and entries that rest on legend or disputed figures say so.
 
 ## Running it
 
@@ -44,11 +59,17 @@ npm install && npm run dev
 npm test
 ```
 
-The test suite is mostly a **solvability proof**: it plays Act I start to finish through the
-real engine and the real content, as both protagonists, and fails if any link in the puzzle
-chain breaks. It also checks that every `GOTO` names a real scene, every `GIVE` a real item,
-every walk-to point sits inside its walkbox, and that no path can spend the four stuivers
-you need for the redemption fee — the one way the act could become unwinnable.
+The test suite is mostly a **solvability proof**: it plays each act start to finish through
+the real engine and the real content, as both protagonists, and fails if any link in a
+puzzle chain breaks. Alongside that it checks every `GOTO` names a real scene, every
+`GIVE` a real item, every walk-to point sits inside its walkbox, every Almanac entry is
+reachable, every protagonist token is one the resolver knows, no scene narration hard-codes
+a gendered pronoun, and no scoring line can be picked twice.
+
+It also locks in the specific ways each act could become unwinnable — that nothing can spend
+the four stuivers Act I needs for the redemption fee, and that Act II never consumes the
+shell, the logwood or the mordant, all of which are needed for a second batch you do not
+know about yet.
 
 ## How it's built
 
@@ -58,7 +79,7 @@ you need for the redemption fee — the one way the act could become unwinnable.
 | Rendering | DOM and CSS transforms over an SVG background — no canvas |
 | Art | Procedurally generated painted SVG; drop-in replaceable with painted `.webp` |
 | Audio | Web Audio, synthesised on demand — no binary assets |
-| Deploy | Static prerender on Vercel; ~290 KB total |
+| Deploy | Static prerender on Vercel; ~420 KB total |
 
 **Scenes are data, not code.** A scene is a manifest — background, walkbox polygon, depth
 scale, hotspots, actors — and puzzle logic is authored in a small declarative action
@@ -68,7 +89,7 @@ lets the placeholder art be swapped for painted backgrounds without touching cod
 
 ```
 src/lib/engine/     types · state · interpreter · geometry · save · audio
-src/lib/game/       scenes · dialogue · items · almanac · protagonists · art/
+src/lib/game/       scenes · dialogue · items · almanac · protagonists · act2/ · art/
 src/lib/components/ Stage · VerbCoin · Bubbles · Choices · Inventory · Almanac
 ```
 
