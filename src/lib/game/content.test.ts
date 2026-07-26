@@ -20,11 +20,19 @@ import { ITEMS_ACT2 } from './act2/items';
 import { SCENES_ACT3 } from './act3/scenes';
 import { DIALOGUES_ACT3 } from './act3/dialogue';
 import { ITEMS_ACT3 } from './act3/items';
-import { ACT_ONE_MAX, ACT_THREE_MAX, ACT_TWO_MAX, SCORE_MAX } from './index';
+import { SCENES_ACT4 } from './act4/scenes';
+import { DIALOGUES_ACT4 } from './act4/dialogue';
+import { ITEMS_ACT4 } from './act4/items';
+import { ACT_FOUR_MAX, ACT_ONE_MAX, ACT_THREE_MAX, ACT_TWO_MAX, SCORE_MAX } from './index';
 
-const ALL_SCENES: Scene[] = [...SCENES, ...SCENES_ACT2, ...SCENES_ACT3];
-const ALL_DIALOGUES: DialogueTree[] = [...DIALOGUES, ...DIALOGUES_ACT2, ...DIALOGUES_ACT3];
-const ALL_ITEMS: Item[] = [...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3];
+const ALL_SCENES: Scene[] = [...SCENES, ...SCENES_ACT2, ...SCENES_ACT3, ...SCENES_ACT4];
+const ALL_DIALOGUES: DialogueTree[] = [
+	...DIALOGUES,
+	...DIALOGUES_ACT2,
+	...DIALOGUES_ACT3,
+	...DIALOGUES_ACT4
+];
+const ALL_ITEMS: Item[] = [...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3, ...ITEMS_ACT4];
 
 /** Every authored script in the game, tagged with where it came from. */
 function allScripts(): Array<{ where: string; actions: Action[] }> {
@@ -250,7 +258,17 @@ describe('protagonist tokens', () => {
 		// the same sentence.
 		'secretary-chamber.onFirstEnter',
 		// Quoting Stuyvesant's letter of September 1654 back at the player. The "he" is him.
-		'secretary-chamber/pigeonholes.look'
+		'secretary-chamber/pigeonholes.look',
+		/**
+		 * Act IV's roll-call. Every one of these narrates a named NPC — Griet, Kleyn, van Dyck,
+		 * Aert, Mattaneck — in the same sentence as the pronoun, which is the one case this
+		 * check cannot distinguish from a missing token.
+		 */
+		'town-raid/tavern-door.use',
+		'town-raid/green-door.use',
+		'town-raid/watch-corner.use',
+		'town-raid/@vandyck.talk',
+		'gate-yard/the-bar.use'
 	]);
 
 	it('never hard-codes a gendered pronoun in scene narration', () => {
@@ -295,7 +313,8 @@ describe('scoring', () => {
 		expect(actScore(SCENES, DIALOGUES, ITEMS)).toBe(ACT_ONE_MAX);
 		expect(actScore(SCENES_ACT2, DIALOGUES_ACT2, ITEMS_ACT2)).toBe(ACT_TWO_MAX);
 		expect(actScore(SCENES_ACT3, DIALOGUES_ACT3, ITEMS_ACT3)).toBe(ACT_THREE_MAX);
-		expect(SCORE_MAX).toBe(ACT_ONE_MAX + ACT_TWO_MAX + ACT_THREE_MAX);
+		expect(actScore(SCENES_ACT4, DIALOGUES_ACT4, ITEMS_ACT4)).toBe(ACT_FOUR_MAX);
+		expect(SCORE_MAX).toBe(ACT_ONE_MAX + ACT_TWO_MAX + ACT_THREE_MAX + ACT_FOUR_MAX);
 	});
 
 	/**

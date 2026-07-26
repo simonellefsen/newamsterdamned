@@ -18,8 +18,9 @@ Every legitimate way to raise four hundred guilders is closed to you.
 
 ## What's here
 
-**Acts I, II and III are fully playable** — twelve scenes, three puzzle chains, fifteen
-characters with branching dialogue, inventory, save/load and a running scoreboard out of 825.
+**All four acts are playable, start to finish** — fifteen scenes, seventeen characters with
+branching dialogue, inventory, save/load, sixty-three unlockable historical notes and a running
+scoreboard out of 970.
 
 **Act I — "The Wall and the Wanting."** You wake in the Strand mud with no breeches and a
 summons nailed to your shirt. It ends with a page torn out of a tavern ledger and a name.
@@ -45,7 +46,21 @@ and the amount of capital those shareholders still have in the Company.
 Then you have three people who want it, and the game never tells you which one is right. The
 scoreboard has an opinion. It does not share it until afterwards.
 
-Act IV is written and designed in [DESIGN.md](DESIGN.md) but not yet built.
+**Act IV — "Peach Season."** The fifteenth of September, 1655, at dawn, on the same fifty yards
+of mud where you woke up with no breeches. Every soldier in the province is a hundred miles
+south taking a fort off the Swedes. There is a ship at the wharf that sails on the evening tide
+and her master will take you as clerk, because you can write.
+
+Then you look at the water, and there are sixty-four canoes on it.
+
+The klapperman is asleep in the mud with his rattle beside him, exactly as he was on the first
+morning. In Act I you used it to make one man run away from a fire that did not exist. Now you
+put it in his hand and he raises the town with it.
+
+And then it is the afternoon, and there are five people out in the street, and you have three
+trips. **No rescue in this act is worth a single point.** Three acts of Sierra scoring have
+taught you to read points as approval, and this one will not grade who you went back for. The
+lane down to the wharf is open the entire time, nothing hints against it, and it ends the game.
 
 **Two protagonists**, and not as a reskin. Roman-Dutch law let a woman trade, sue and hold
 property in her own name; English common law ninety miles east did not. Joost Baksteen is a
@@ -54,12 +69,13 @@ he will never have and a different set of doors closed to her. It pays off at th
 Act II, where the same transaction is two different scenes: Trijn signs for herself, and
 Joost — a man whose earnings his creditor may simply take — has to sign as nobody at all.
 
-**The Almanac** — fifty-nine historical notes on everyday life in the colony, unlocked by
+**The Almanac** — sixty-three historical notes on everyday life in the colony, unlocked by
 examining the world: what a guilder bought, why everyone drank beer at breakfast, what
 half-freedom meant, how a wampum bead was actually made and how long it took, why the first
 paved street in New York was paved, what a mordant is and where you got one, what a notary
-actually did, why nobody was ever paid in coin, and what happened to Asser Levy afterwards
-— which is the best answer this game has to anything. Everything in
+actually did, why nobody was ever paid in coin, what happened to Asser Levy afterwards
+— which is the best answer this game has to anything — and, at the end, what the fifteenth of
+September actually cost and why the peaches were the date rather than the reason. Everything in
 it is true, and entries that rest on legend or disputed figures say so.
 
 ## Running it
@@ -80,7 +96,10 @@ reachable, every protagonist token is one the resolver knows, no scene narration
 a gendered pronoun, and no scoring line can be picked twice.
 
 Act III has three endings, so the suite also proves all three are reachable and that only one
-of them scores — otherwise a well-meaning edit could quietly pay the player for selling out.
+of them scores — otherwise a well-meaning edit could quietly pay the player for selling out. For
+Act IV it goes further and asserts that *no* script which resolves a rescue awards any points at
+all, that each rescue spends exactly one of the three trips, and that the gate shuts on the
+third whichever three you took.
 
 It also locks in the specific ways each act could become unwinnable — that nothing can spend
 the four stuivers Act I needs for the redemption fee, and that Act II never consumes the
@@ -105,7 +124,7 @@ lets the placeholder art be swapped for painted backgrounds without touching cod
 
 ```
 src/lib/engine/     types · state · interpreter · geometry · save · audio
-src/lib/game/       scenes · dialogue · items · almanac · protagonists · act2/ · act3/ · art/
+src/lib/game/       scenes · dialogue · items · almanac · protagonists · act2/ · act3/ · act4/ · art/
 src/lib/components/ Stage · VerbCoin · Bubbles · Choices · Inventory · Almanac
 ```
 
@@ -136,10 +155,18 @@ that let them stay — these are the puzzle material.
 Three subjects are handled straight, with the comedy stepping back: the enslaved and
 half-free Africans who built the wall and the roads; the 1654 refugees and the exclusion
 Stuyvesant asked Amsterdam for in writing, which Act III quotes rather than softens; and the
-Peach Tree War of September 1655, which is the clock ticking under all four acts. Asser Levy
-and Jacob Barsimson are real men and they get the clearest arguments in the game — the
-bigotry in Act III belongs to institutions and to named officials' documented positions, and
-it is never played for a laugh. The jokes point up — at the Company,
+Peach Tree War of September 1655, which is the clock ticking under all four acts and which Act
+IV walks straight into. Asser Levy and Jacob Barsimson are real men and they get the clearest
+arguments in the game — the bigotry in Act III belongs to institutions and to named officials'
+documented positions, and it is never played for a laugh.
+
+In Act IV the comedy stops rather than darkens. No death is invented: about a hundred colonists
+were killed over three days and the record names very few of them, so the game does not put a
+named real person in a grave the record did not. The raiders are not weather and not a monster —
+Kieft's massacre at Pavonia twelve years earlier, land bought twice and paid for once, and a
+Dutch fleet that had just gone south to take the Susquehannock's trading outlet are all on the
+page, and nobody gets to call it senseless without being answered. The Almanac says plainly that
+Native motives here are reconstructed from records written by the people who were attacked. The jokes point up — at the Company,
 the Director-General, the customs men and the pious hypocrites — and never down. See
 [DESIGN.md §2](DESIGN.md).
 

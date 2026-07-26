@@ -425,6 +425,38 @@ export const ALMANAC: LoreEntry[] = [
 		category: 'Faith',
 		body: 'Only the Dutch Reformed Church could worship publicly in New Netherland. Everyone else — Jews, Lutherans, Quakers, Catholics — was permitted at most private devotion behind a closed door, and in 1656 an ordinance sharpened the penalties for unauthorised gatherings. This was not the practice at home: Amsterdam by the 1650s had a large public synagogue and a working, if grudging, pluralism, and the Dutch Republic was the most tolerant state in Europe. The tolerance did not fully survive the voyage. New Amsterdam\'s Jewish congregation, which traces itself to 1654, met in private rooms and did not have a purpose-built synagogue until 1730.',
 		caveat: 'It was not one-way traffic: in 1657 the men of Flushing sent the Director-General a written remonstrance refusing to bar Quakers from their town. It is one of the earliest defences of religious liberty written in North America, and it cost several of them dearly.'
+	},
+
+	/* ===================================================================== ACT IV
+	 * The hardest entries in the book to write, and the ones the game most needs
+	 * the player to read, because the act itself deliberately declines to explain
+	 * anything and refuses to award a single point for the choice it asks for.
+	 */
+	{
+		id: 'peach-cause',
+		title: 'Why they came',
+		category: 'People',
+		body: 'The story everyone tells is the peaches: Hendrick van Dyck shot a Native woman he found taking fruit in his orchard, and some weeks later the canoes came. It is in the record and it is probably true, and as an explanation it is far too small. Twelve years earlier, Director Kieft\'s men had massacred sleeping Lenape families at Pavonia and Corlaers Hook — around eighty people — in a war the colonists themselves later called a catastrophe brought on by their own government. Land on this island had been bought in ways the sellers did not understand as sales, and bought again from other people. And in the first week of September 1655 the Dutch took every soldier in the province south to seize New Sweden, which was the Susquehannock\'s trading outlet. The raid fell on the one fortnight in forty years when the colony was empty. That is not a coincidence and the people who planned it were not improvising.',
+		caveat: 'Native motives here are reconstructed from Dutch records written by the people who were attacked, which is the only substantial written source and is not a neutral one. The peach story may well be a real proximate trigger; it is the sufficiency of it that is the invention.'
+	},
+	{
+		id: 'van-dyck',
+		title: 'Hendrick van Dyck',
+		category: 'People',
+		body: 'Schout Fiscal of New Netherland before Cornelis van Tienhoven, removed from the office, and by 1655 a man in reduced circumstances with a house and an orchard on the west side of town. He shot and killed a Native woman he caught taking peaches from his trees. On 15 September, when the raiders came through the town, he was wounded by an arrow at his own house; another prominent burgher was struck with an axe trying to intervene, and it was at roughly that moment that the two hours of negotiation in the street collapsed into three days of killing. Van Dyck survived his wound. He was never charged with anything, by anybody, at any point.'
+	},
+	{
+		id: 'staten-island',
+		title: 'Where it actually happened',
+		category: 'Town',
+		body: 'The walled town came off comparatively lightly, and that has shaped how the story gets told ever since. The killing was on the farms: Pavonia across the North River, the settlements on the Jersey shore, and above all Staten Island, where the plantations were destroyed almost in their entirety. Over three days about a hundred colonists were killed, roughly a hundred and fifty taken captive — overwhelmingly women and children — twenty-eight farms burned, and something like five hundred head of cattle killed or driven off, with the harvest standing in the fields. It was the worst thing that happened to New Netherland in its forty years, and it happened because the province\'s entire garrison was a hundred miles away taking a fort it did not need.'
+	},
+	{
+		id: 'aftermath',
+		title: 'Afterwards',
+		category: 'Town',
+		body: 'Stuyvesant came back from the Delaware to a province in pieces and did the only sensible thing available, which was to negotiate rather than retaliate: the captives were ransomed back over the following months, in cloth, powder, kettles and sewant, and most of them came home. There was pressure for a punitive war and he largely resisted it, having watched what Kieft\'s war did. Not all the violence was one-way, and the aftermath was dangerous for Native people living in and around the town regardless of who they were or which nation they belonged to. Outlying farms were abandoned and settlement pulled back behind defences for years. The colony did not recover its confidence, and nine years later, when English warships arrived in the harbour, the burgomasters talked the Director-General out of firing on them.',
+		caveat: 'The ransom negotiations ran through 1655 and into 1656 and the numbers in the Dutch accounts do not fully agree with each other.'
 	}
 ];
 

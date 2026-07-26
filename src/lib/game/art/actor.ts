@@ -212,7 +212,13 @@ export const PALETTES: Record<string, ActorPalette> = {
 	// Dirck van Schelluyne, notary: black, small collar, and ink to the second knuckle.
 	notary: { coat: '#2a2e2c', trim: '#1d211f', skin: P.skinPale, hat: '#161917', accent: '#d8cbae' },
 	// Petrus Stuyvesant: Company black, Company orange, and one leg of turned oak.
-	stuyvesant: { coat: '#2b2b30', trim: '#1b1b20', skin: P.skinPale, hat: '#141418', accent: '#c2542c' }
+	stuyvesant: { coat: '#2b2b30', trim: '#1b1b20', skin: P.skinPale, hat: '#141418', accent: '#c2542c' },
+	// Claes Jansen, master of the Gelderland: tarred canvas and salt. The only man in the game
+	// who is leaving.
+	skipper: { coat: '#3f4a52', trim: '#2a3238', skin: P.skinMid, hat: '#1f272c', accent: '#d8cbae' },
+	// Hendrick van Dyck: a good coat gone at the cuffs, and a linen bandage. He was Schout
+	// Fiscal before van Tienhoven and he has been drinking since they took it off him.
+	vandyck: { coat: '#6b4a5c', trim: '#4a3340', skin: P.skinPale, hat: '#3a2a33', accent: '#d8cbae' }
 };
 
 /** Per-actor sprite quirks, keyed by actor id. */
@@ -231,5 +237,8 @@ export const SPRITE_TRAITS: Record<string, Partial<SpriteOptions>> = {
 	barsimson: { hat: false, collar: true },
 	tienhoven: { hat: true, collar: true },
 	notary: { hat: true, collar: false },
-	stuyvesant: { hat: true, collar: true, pegLeg: true }
+	stuyvesant: { hat: true, collar: true, pegLeg: true },
+	skipper: { hat: true, collar: false },
+	// No hat: he was shot at his own front door and came out of it the way he was standing.
+	vandyck: { hat: false, collar: true }
 };
