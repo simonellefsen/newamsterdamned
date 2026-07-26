@@ -905,11 +905,6 @@
 		opacity: 0.85;
 	}
 
-	.pref-block-help code {
-		font-size: 0.9em;
-		color: var(--parchment);
-	}
-
 	.keyrow {
 		display: flex;
 		gap: 0.4rem;
