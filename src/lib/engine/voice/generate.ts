@@ -182,7 +182,10 @@ export async function generatePack(opts: GenerateOptions = {}): Promise<Generate
 	const dryRun = opts.dryRun === true || !apiKey;
 
 	if (!apiKey && opts.dryRun !== true) {
-		log('No OPENAI_API_KEY — running dry-run (manifest + estimates only).');
+		log(
+			'No OPENAI_API_KEY — running dry-run (manifest + estimates only). ' +
+				'For live packs set OPENAI_API_KEY in .env.local (loaded by npm run voice:generate:live) or export it in your shell.'
+		);
 	}
 	if (dryRun) {
 		log('Dry-run mode: no MP3s will be written (cache untouched).');

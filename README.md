@@ -196,7 +196,7 @@ npm run voice:generate -- --limit=20 --speakers=narrator
 npm run voice:generate:live -- --act=1 --speakers=narrator,joost,trijn
 ```
 
-Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
+Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. `npm run voice:generate:live` loads `.env` then `.env.local` automatically (Vite’s dev server does the same; a bare `node` process does not). You can also `export OPENAI_API_KEY=…` in the shell. MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
 
 **TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
 
