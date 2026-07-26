@@ -546,11 +546,50 @@
 							<div class="pref-block">
 								<p class="pref-block-title">OpenAI API key (optional)</p>
 								<p class="pref-block-help">
-									Stored only in this browser. Used for live TTS via a same-origin proxy and for
-									hearing a test line. Pack generation still uses
-									<code>OPENAI_API_KEY</code> in <code>.env.local</code>. Do not use a production
-									secret you cannot rotate.
+									Stored only in this browser. Used for live TTS (and the Test sample). Prefer a
+									key you can revoke; do not paste a production secret you cannot rotate.
 								</p>
+								<details class="howto">
+									<summary>How to get an API key</summary>
+									<ol>
+										<li>
+											Create or sign in to an OpenAI account at
+											<a
+												href="https://platform.openai.com/"
+												target="_blank"
+												rel="noopener noreferrer">platform.openai.com</a
+											>.
+										</li>
+										<li>
+											Open
+											<a
+												href="https://platform.openai.com/api-keys"
+												target="_blank"
+												rel="noopener noreferrer">API keys</a
+											>
+											→ <strong>Create new secret key</strong>. Copy it once (it starts with
+											<code>sk-</code>).
+										</li>
+										<li>
+											Add a payment method under
+											<a
+												href="https://platform.openai.com/settings/organization/billing"
+												target="_blank"
+												rel="noopener noreferrer">Billing</a
+											>
+											if prompted — TTS is billed per use (usually cents for testing).
+										</li>
+										<li>
+											Paste the key below → <strong>Save key</strong> → <strong>Test key</strong>.
+											You should hear a short “Ready.”
+										</li>
+									</ol>
+									<p class="howto-note">
+										For offline pack generation on your machine, put the same key in
+										<code>.env.local</code> as <code>OPENAI_API_KEY=sk-…</code> and run
+										<code>npm run voice:generate:live</code>.
+									</p>
+								</details>
 								<div class="keyrow">
 									<input
 										class="keyinput"
@@ -905,6 +944,69 @@
 		font-size: 0.72rem;
 		line-height: 1.4;
 		color: var(--gold);
+	}
+
+	.howto {
+		font-size: 0.72rem;
+		line-height: 1.45;
+		color: var(--parchment-dim);
+	}
+
+	.howto summary {
+		cursor: pointer;
+		font-family: var(--font-display);
+		font-size: 0.62rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--gold);
+		list-style: none;
+	}
+
+	.howto summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.howto summary::before {
+		content: '▸ ';
+		opacity: 0.7;
+	}
+
+	.howto[open] summary::before {
+		content: '▾ ';
+	}
+
+	.howto summary:hover,
+	.howto summary:focus-visible {
+		color: var(--gold-bright);
+		outline: none;
+	}
+
+	.howto ol {
+		margin: 0.45rem 0 0;
+		padding-left: 1.15rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.howto a {
+		color: var(--gold-bright);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.howto a:hover {
+		color: var(--parchment);
+	}
+
+	.howto-note {
+		margin: 0.5rem 0 0;
+		opacity: 0.8;
+	}
+
+	.howto code {
+		font-size: 0.9em;
+		color: var(--parchment);
 	}
 
 	.slots {

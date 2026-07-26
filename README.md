@@ -165,6 +165,7 @@ Spoken voice is **off by default**. In **Esc → Preferences**:
 - **Spoken voice** — On / Off  
 - **Voice source** — Auto (pack → OpenAI → system), pack only, or system only  
 - **OpenAI API key** — optional; Save / Test / Clear. Stored only in this browser (not in save slots). Test speaks a short sample via the same-origin `/api/tts` proxy (Vite dev middleware or Vercel `api/tts.js`). Repeat lines are cached in the browser to limit cost.
+- **How to get an API key** (in-menu foldout): [platform.openai.com](https://platform.openai.com/) → [API keys](https://platform.openai.com/api-keys) → Create secret key (`sk-…`) → add billing if asked → paste → Save → Test.
 
 Captions always stay on.
 
