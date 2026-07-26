@@ -149,7 +149,8 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | | |
 |---|---|
 | Left-click | Walk, or act on a thing |
-| Right-click / long-press | Verb coin — Look, Talk, Take, Use |
+| Right-click / long-press / `V` on a hotspot | Verb coin — Look, Talk, Take, Use |
+| Verb coin: arrows or `1`–`4` | Pick a verb (Esc closes) |
 | Click an item, then a thing | Use it on that |
 | Double-tap / double-click an item | Examine it (touch-friendly) |
 | `Space` / `Enter` / **Continue** | Skip the current line (Continue appears under the bubble after a beat) |

@@ -417,12 +417,15 @@
 			else if (controlsOpen) controlsOpen = false;
 			else if (almanacOpen) almanacOpen = false;
 			else if (titlePrefsOpen) titlePrefsOpen = false;
+			// Act-end card before the ledger — Esc should not open the menu behind it.
+			else if (started && game.actEnd) dismissAct();
 			// Cancel inventory "use X on…" before opening the ledger.
 			else if (started && game.pendingVerb) cancelUse();
 			else if (started) menuOpen = !menuOpen;
 		}
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
-		if (!started || document.activeElement?.tagName === 'BUTTON') return;
+		// Also ignore global shortcuts while an act-end card owns the stage.
+		if (!started || game.actEnd || document.activeElement?.tagName === 'BUTTON') return;
 		if (e.key === 'a' || e.key === 'A') almanacOpen = !almanacOpen;
 		if (e.key === 'h' || e.key === 'H') hintsOpen = !hintsOpen;
 		if (e.key === 'm' || e.key === 'M') mapOpen = !mapOpen;
@@ -509,10 +512,14 @@
 			{/if}
 
 			{#if toastText}
-				<div class="toast">{toastText}</div>
+				<div class="toast" role="status" aria-live="polite">{toastText}</div>
 			{/if}
 			{#if loreToastText}
-				<button class="toast toast--lore" onclick={() => (almanacOpen = true)}>
+				<button
+					class="toast toast--lore"
+					onclick={() => (almanacOpen = true)}
+					aria-live="polite"
+				>
 					<span class="toastkind">Almanac</span>
 					{loreToastText}
 				</button>

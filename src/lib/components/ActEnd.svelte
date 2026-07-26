@@ -2,6 +2,7 @@
 	/** End-of-act card. Act I's real reward is finding out what the ledger says. */
 	import { game } from '$lib/engine/state.svelte';
 	import { SCORE_MAX } from '$lib/game';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Props {
 		onDismiss: () => void;
@@ -10,7 +11,13 @@
 </script>
 
 {#if game.actEnd}
-	<div class="wrap" role="dialog" aria-modal="true" aria-label={game.actEnd.title}>
+	<div
+		class="wrap"
+		role="dialog"
+		aria-modal="true"
+		aria-label={game.actEnd.title}
+		use:focusTrap
+	>
 		<div class="card">
 			<p class="rule"></p>
 			<h2>{game.actEnd.title}</h2>

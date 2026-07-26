@@ -3,7 +3,11 @@
 	 * The verb coin: right-click (or long-press, or `V`) opens four verbs around the
 	 * cursor. Descended from Full Throttle's tattoo wheel, trimmed to the four verbs a
 	 * modern player will actually use (DESIGN.md §5).
+	 *
+	 * Keyboard: arrows / 1–4 pick a verb; Tab cycles; Esc closes. First verb is focused
+	 * on open so the coin is fully usable without a pointer.
 	 */
+	import { onMount } from 'svelte';
 	import { VERBS, VERB_LABEL, type Verb } from '$lib/engine/types';
 
 	interface Props {
@@ -32,14 +36,75 @@
 		use: 'M13.5 2a4.5 4.5 0 0 0-4 6.5L2 16v2h2l7.5-7.5A4.5 4.5 0 1 0 13.5 2z'
 	};
 
+	/** Arrow directions map to the visual layout of the coin. */
+	const ARROW_VERB: Record<string, Verb> = {
+		ArrowUp: 'look',
+		ArrowRight: 'talk',
+		ArrowDown: 'take',
+		ArrowLeft: 'use'
+	};
+
 	// Keep the coin on screen when the click lands near an edge.
-	const clampedX = $derived(Math.max(RADIUS + 30, Math.min(x, (globalThis.innerWidth ?? 1200) - RADIUS - 30)));
-	const clampedY = $derived(Math.max(RADIUS + 44, Math.min(y, (globalThis.innerHeight ?? 800) - RADIUS - 30)));
+	const clampedX = $derived(
+		Math.max(RADIUS + 30, Math.min(x, (globalThis.innerWidth ?? 1200) - RADIUS - 30))
+	);
+	const clampedY = $derived(
+		Math.max(RADIUS + 44, Math.min(y, (globalThis.innerHeight ?? 800) - RADIUS - 30))
+	);
+
+	let coinEl: HTMLDivElement | undefined = $state();
+
+	function focusVerb(verb: Verb) {
+		const btn = coinEl?.querySelector<HTMLButtonElement>(`button[data-verb="${verb}"]`);
+		btn?.focus({ preventScroll: true });
+	}
+
+	function pick(verb: Verb) {
+		onPick(verb);
+	}
+
+	onMount(() => {
+		// Defer so buttons exist in the DOM.
+		const t = window.setTimeout(() => focusVerb('look'), 0);
+		return () => clearTimeout(t);
+	});
 </script>
 
 <svelte:window
 	onkeydown={(e) => {
-		if (e.key === 'Escape') onClose();
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			onClose();
+			return;
+		}
+		const arrow = ARROW_VERB[e.key];
+		if (arrow) {
+			e.preventDefault();
+			pick(arrow);
+			return;
+		}
+		const n = Number(e.key);
+		if (n >= 1 && n <= VERBS.length) {
+			e.preventDefault();
+			pick(VERBS[n - 1]);
+			return;
+		}
+		// Home-row mnemonic: L T K U (Take uses K to avoid Talk clash).
+		const letter: Record<string, Verb> = {
+			l: 'look',
+			L: 'look',
+			t: 'talk',
+			T: 'talk',
+			k: 'take',
+			K: 'take',
+			u: 'use',
+			U: 'use'
+		};
+		const byLetter = letter[e.key];
+		if (byLetter) {
+			e.preventDefault();
+			pick(byLetter);
+		}
 	}}
 />
 
@@ -53,18 +118,26 @@
 	role="presentation"
 ></div>
 
-<div class="coin" style="left:{clampedX}px;top:{clampedY}px" role="menu" aria-label="Choose a verb">
-	<div class="target">{targetName}</div>
-	{#each VERBS as verb (verb)}
+<div
+	class="coin"
+	bind:this={coinEl}
+	style="left:{clampedX}px;top:{clampedY}px"
+	role="menu"
+	aria-label="Choose a verb for {targetName}"
+>
+	<div class="target" id="verb-coin-target">{targetName}</div>
+	{#each VERBS as verb, i (verb)}
 		{@const [dx, dy] = positions[verb]}
 		<button
 			class="verb"
 			style="transform:translate(calc(-50% + {dx}px), calc(-50% + {dy}px))"
 			role="menuitem"
-			title={VERB_LABEL[verb]}
+			data-verb={verb}
+			title="{VERB_LABEL[verb]} ({i + 1})"
+			aria-label="{VERB_LABEL[verb]} — {targetName}"
 			onclick={(e) => {
 				e.stopPropagation();
-				onPick(verb);
+				pick(verb);
 			}}
 		>
 			<svg viewBox="0 0 20 20" aria-hidden="true"><path d={glyphs[verb]} /></svg>
@@ -106,6 +179,8 @@
 		position: absolute;
 		width: 46px;
 		height: 46px;
+		min-width: 44px;
+		min-height: 44px;
 		border-radius: 50%;
 		border: 1.5px solid rgba(230, 199, 107, 0.45);
 		background: radial-gradient(circle at 35% 30%, #3b2f22, #1c1611);

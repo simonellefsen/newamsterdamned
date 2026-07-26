@@ -24,8 +24,12 @@
 					<td>Walk, or use the default verb on a thing</td>
 				</tr>
 				<tr>
-					<th>Right-click / long-press</th>
+					<th>Right-click / long-press / <kbd>V</kbd></th>
 					<td>Verb coin — Look, Talk, Take, Use</td>
+				</tr>
+				<tr>
+					<th>Verb coin keys</th>
+					<td>Arrows or 1–4 pick a verb · Esc closes</td>
 				</tr>
 				<tr>
 					<th>Item, then a thing</th>
