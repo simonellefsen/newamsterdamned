@@ -16,7 +16,25 @@
 
 	const items = $derived(game.inventory.map((id) => getItem(id)).filter((i) => i !== undefined));
 
+	const LONG_PRESS_MS = 500;
+	const MOVE_CANCEL_PX = 10;
+	let pressTimer: ReturnType<typeof setTimeout> | null = null;
+	let pressStart: { x: number; y: number; id: string } | null = null;
+	let suppressClick = false;
+
+	function clearPress() {
+		if (pressTimer) {
+			clearTimeout(pressTimer);
+			pressTimer = null;
+		}
+		pressStart = null;
+	}
+
 	function click(id: string) {
+		if (suppressClick) {
+			suppressClick = false;
+			return;
+		}
 		if (game.busy) return;
 		const pending = game.pendingVerb;
 		if (pending?.item && pending.item !== id) {
@@ -29,6 +47,26 @@
 			return;
 		}
 		game.setPendingVerb({ verb: 'use' as Verb, item: id });
+	}
+
+	function onItemPointerDown(ev: PointerEvent, id: string) {
+		if (ev.button !== 0 || game.busy) return;
+		clearPress();
+		suppressClick = false;
+		pressStart = { x: ev.clientX, y: ev.clientY, id };
+		pressTimer = setTimeout(() => {
+			if (!pressStart || pressStart.id !== id) return;
+			suppressClick = true;
+			onContextVerb(id, pressStart.x, pressStart.y);
+			clearPress();
+		}, LONG_PRESS_MS);
+	}
+
+	function onItemPointerMove(ev: PointerEvent) {
+		if (!pressStart) return;
+		if (Math.hypot(ev.clientX - pressStart.x, ev.clientY - pressStart.y) > MOVE_CANCEL_PX) {
+			clearPress();
+		}
 	}
 </script>
 
@@ -53,6 +91,11 @@
 					e.stopPropagation();
 					onContextVerb(item.id, e.clientX, e.clientY);
 				}}
+				onpointerdown={(e) => onItemPointerDown(e, item.id)}
+				onpointermove={onItemPointerMove}
+				onpointerup={clearPress}
+				onpointercancel={clearPress}
+				onpointerleave={clearPress}
 				onmouseenter={() => onHover(item.name)}
 				onmouseleave={() => onHover(null)}
 				onfocus={() => onHover(item.name)}
@@ -84,6 +127,8 @@
 	.slot {
 		width: 3rem;
 		height: 3rem;
+		min-width: 44px;
+		min-height: 44px;
 		flex: 0 0 auto;
 		display: grid;
 		place-items: center;
@@ -92,6 +137,9 @@
 		background: linear-gradient(160deg, rgba(60, 47, 33, 0.8), rgba(28, 22, 17, 0.9));
 		border: 1px solid rgba(230, 199, 107, 0.22);
 		border-radius: 2px;
+		touch-action: manipulation;
+		-webkit-touch-callout: none;
+		user-select: none;
 		transition:
 			border-color 120ms ease,
 			transform 120ms ease,

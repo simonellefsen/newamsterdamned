@@ -73,7 +73,7 @@
 	}
 
 	.say {
-		font-size: clamp(0.95rem, 1.6vw, 1.18rem);
+		font-size: calc(clamp(0.95rem, 1.6vw, 1.18rem) * var(--text-scale, 1));
 		line-height: 1.42;
 		color: var(--parchment);
 	}
@@ -89,7 +89,7 @@
 
 	.think {
 		font-style: italic;
-		font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+		font-size: calc(clamp(0.9rem, 1.5vw, 1.1rem) * var(--text-scale, 1));
 		line-height: 1.45;
 		color: var(--parchment-dim);
 	}
@@ -102,7 +102,7 @@
 
 	.narrate {
 		font-family: var(--font-display);
-		font-size: clamp(0.76rem, 1.25vw, 0.94rem);
+		font-size: calc(clamp(0.76rem, 1.25vw, 0.94rem) * var(--text-scale, 1));
 		letter-spacing: 0.15em;
 		text-transform: uppercase;
 		color: var(--gold-bright);

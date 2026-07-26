@@ -218,6 +218,61 @@
 		onContextVerb({ kind: 'hotspot', hotspot: h }, ev.clientX, ev.clientY);
 	}
 
+	/* ---------------------------------------------- long-press verb coin */
+
+	const LONG_PRESS_MS = 500;
+	const MOVE_CANCEL_PX = 10;
+
+	let pressTimer: ReturnType<typeof setTimeout> | null = null;
+	let pressStart: { x: number; y: number; h: Hotspot } | null = null;
+	/** When true, the next click on this hotspot is swallowed (coin already opened). */
+	let suppressClick = false;
+
+	function clearPress() {
+		if (pressTimer) {
+			clearTimeout(pressTimer);
+			pressTimer = null;
+		}
+		pressStart = null;
+	}
+
+	function onHotspotPointerDown(ev: PointerEvent, h: Hotspot) {
+		// Only primary button / touch; ignore right-click (contextmenu handles that).
+		if (ev.button !== 0) return;
+		if (game.busy || game.choices || isAwaitingAdvance()) return;
+		clearPress();
+		suppressClick = false;
+		pressStart = { x: ev.clientX, y: ev.clientY, h };
+		pressTimer = setTimeout(() => {
+			if (!pressStart || pressStart.h.id !== h.id) return;
+			suppressClick = true;
+			onContextVerb({ kind: 'hotspot', hotspot: h }, pressStart.x, pressStart.y);
+			clearPress();
+		}, LONG_PRESS_MS);
+	}
+
+	function onHotspotPointerMove(ev: PointerEvent) {
+		if (!pressStart) return;
+		const dx = ev.clientX - pressStart.x;
+		const dy = ev.clientY - pressStart.y;
+		if (Math.hypot(dx, dy) > MOVE_CANCEL_PX) clearPress();
+	}
+
+	function onHotspotPointerUp() {
+		// Timer still running → short tap; click handler will fire next.
+		clearPress();
+	}
+
+	function handleHotspotClickGuarded(ev: MouseEvent, h: Hotspot) {
+		if (suppressClick) {
+			ev.stopPropagation();
+			ev.preventDefault();
+			suppressClick = false;
+			return;
+		}
+		handleHotspotClick(ev, h);
+	}
+
 	/* ------------------------------------------------------------ helpers */
 
 	function pct(n: number, of: number) {
@@ -321,8 +376,13 @@
 					role="button"
 					tabindex="0"
 					aria-label={h.name}
-					onclick={(e) => handleHotspotClick(e, h)}
+					onclick={(e) => handleHotspotClickGuarded(e, h)}
 					oncontextmenu={(e) => handleHotspotContext(e, h)}
+					onpointerdown={(e) => onHotspotPointerDown(e, h)}
+					onpointermove={onHotspotPointerMove}
+					onpointerup={onHotspotPointerUp}
+					onpointercancel={onHotspotPointerUp}
+					onpointerleave={onHotspotPointerUp}
 					onmouseenter={() => onHover(h.name)}
 					onmouseleave={() => onHover(null)}
 					onfocus={() => onHover(h.name)}
@@ -374,6 +434,9 @@
 				3 3,
 			auto;
 		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
+		touch-action: manipulation;
 	}
 
 	.stage--using {

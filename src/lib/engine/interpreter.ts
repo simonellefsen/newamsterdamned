@@ -11,12 +11,20 @@
 
 import { game, test } from './state.svelte';
 import { getDialogue, getScene, resolveText } from './registry';
-import { playSfx } from './audio';
+import { playSfx, setAmbience } from './audio';
+import { getSettings } from './settings';
 import type { Action, DialogueTree, Facing, Point } from './types';
 
-/** Milliseconds a line stays up: a floor, plus time proportional to length. */
-function readingTime(text: string): number {
-	return Math.min(7000, 900 + text.length * 42);
+/**
+ * Milliseconds a line stays up: kind-specific floor, plus time proportional to length,
+ * multiplied by settings.textSpeed (bubble hold only — not voice rate).
+ */
+function readingTime(text: string, kind: 'say' | 'think' | 'narrate' = 'say'): number {
+	const floor = kind === 'narrate' ? 1400 : kind === 'think' ? 750 : 900;
+	const cap = kind === 'narrate' ? 9000 : 7000;
+	const base = Math.min(cap, floor + text.length * (kind === 'narrate' ? 48 : 42));
+	const speed = getSettings().textSpeed;
+	return Math.round(base * speed);
 }
 
 let advanceResolver: (() => void) | null = null;
@@ -62,7 +70,7 @@ class SceneChanged extends Error {
 async function speak(actor: string, raw: string, kind: 'say' | 'think' | 'narrate') {
 	const text = resolveText(raw);
 	const id = game.pushBubble(actor, text, kind);
-	await waitSkippable(readingTime(text));
+	await waitSkippable(readingTime(text, kind));
 	game.popBubble(id);
 }
 
@@ -227,6 +235,8 @@ export async function enterScene(id: string, at?: Point, facing?: Facing): Promi
 	const first = !game.visited.includes(id);
 	game.clearBubbles();
 	game.setScene(id, at ?? scene.entry, facing);
+	// Wire authored ambience — every scene sets it; audio beds live in audio.ts.
+	setAmbience(scene.ambience ?? null);
 	const token = game.sceneToken;
 
 	try {

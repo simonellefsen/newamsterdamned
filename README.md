@@ -125,7 +125,7 @@ know about yet.
 | Framework | SvelteKit 2 + Svelte 5 runes, TypeScript strict |
 | Rendering | DOM and CSS transforms over an SVG background — no canvas |
 | Art | Procedurally generated painted SVG; drop-in replaceable with painted `.webp` |
-| Audio | Web Audio, synthesised on demand — no binary assets |
+| Audio | Web Audio — synthesised SFX plus procedural scene ambience beds |
 | Deploy | Static prerender on Vercel; ~420 KB total |
 
 **Scenes are data, not code.** A scene is a manifest — background, walkbox polygon, depth
@@ -149,15 +149,15 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | | |
 |---|---|
 | Left-click | Walk, or act on a thing |
-| Right-click | Verb coin — Look, Talk, Take, Use |
+| Right-click / long-press | Verb coin — Look, Talk, Take, Use |
 | Click an item, then a thing | Use it on that |
 | Double-click an item | Examine it |
 | `Space` / `Enter` | Skip the current line |
 | `1`–`9` | Pick a dialogue option |
 | `A` | Almanac |
 | `H` | Hint — what am I doing? |
-| hold `Space` | Show what is interactive |
-| `Esc` | Menu |
+| Hold `Space` or the 👁 button | Show what is interactive |
+| `Esc` | Menu (save/load + audio/text preferences) |
 
 ## A note on the history
 

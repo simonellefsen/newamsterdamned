@@ -60,7 +60,7 @@
 		border-left: 2px solid transparent;
 		color: var(--parchment-dim);
 		font: inherit;
-		font-size: clamp(0.88rem, 1.45vw, 1.05rem);
+		font-size: calc(clamp(0.88rem, 1.45vw, 1.05rem) * var(--text-scale, 1));
 		line-height: 1.4;
 		padding: 0.5rem 0.75rem;
 		cursor: pointer;

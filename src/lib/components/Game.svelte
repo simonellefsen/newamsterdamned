@@ -17,7 +17,13 @@
 	import type { ProtagonistId } from '$lib/game/protagonist';
 	import { interactWithHotspot, lookAtItem } from '$lib/engine/interaction';
 	import { run, runEntry, advance, isAwaitingAdvance } from '$lib/engine/interpreter';
-	import { isMuted, setMuted } from '$lib/engine/audio';
+	import { applyVolumes, clearAmbience, initAudioFromSettings, setMuted } from '$lib/engine/audio';
+	import {
+		getSettings,
+		loadSettings,
+		saveSettings,
+		type Settings
+	} from '$lib/engine/settings';
 	import { load, save, SLOTS, type Slot } from '$lib/engine/save';
 	import type { Hotspot, Verb } from '$lib/engine/types';
 
@@ -29,16 +35,31 @@
 	let menuOpen = $state(false);
 	let almanacOpen = $state(false);
 	let hintsOpen = $state(false);
-	/** True only while Space is physically held. See the key handler. */
+	/** True only while Space is physically held, or the HUD reveal button is pressed. */
 	let revealing = $state(false);
 	let muted = $state(false);
 	let toastText = $state<string | null>(null);
 	let loreToastText = $state<string | null>(null);
 	let saveNote = $state<string | null>(null);
+	/** Reactive copy of settings for UI controls. */
+	let prefs = $state<Settings>(loadSettings());
 
 	loadContent();
+	initAudioFromSettings();
 
 	const scene = $derived(getScene(game.scene));
+
+	function applyTextScale(scale: number) {
+		if (typeof document === 'undefined') return;
+		document.documentElement.style.setProperty('--text-scale', String(scale));
+	}
+
+	function refreshPrefs(patch?: Partial<Settings>) {
+		prefs = patch ? saveSettings(patch) : getSettings();
+		muted = prefs.muted;
+		applyVolumes(prefs);
+		applyTextScale(prefs.textScale);
+	}
 
 	/* Score toasts fade themselves out. */
 	let toastTimer: ReturnType<typeof setTimeout>;
@@ -76,6 +97,12 @@
 		newGame(who);
 		started = true;
 		void runEntry('pearl-street');
+	}
+
+	function goTitle() {
+		menuOpen = false;
+		started = false;
+		clearAmbience();
 	}
 
 	/**
@@ -145,12 +172,12 @@
 	}
 
 	function toggleMute() {
-		muted = !muted;
-		setMuted(muted);
+		setMuted(!muted);
+		refreshPrefs();
 	}
 
 	onMount(() => {
-		muted = isMuted();
+		refreshPrefs();
 	});
 
 	const statusLine = $derived.by(() => {
@@ -251,20 +278,82 @@
 						{/each}
 					</div>
 					{#if saveNote}<p class="note">{saveNote}</p>{/if}
+
+					<h3 class="subhead">Preferences</h3>
+					<div class="prefs">
+						<label class="pref">
+							<span>Master volume</span>
+							<input
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								value={prefs.masterVolume}
+								oninput={(e) =>
+									refreshPrefs({ masterVolume: Number((e.currentTarget as HTMLInputElement).value) })}
+							/>
+						</label>
+						<label class="pref">
+							<span>Ambience</span>
+							<input
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								value={prefs.ambienceVolume}
+								oninput={(e) =>
+									refreshPrefs({
+										ambienceVolume: Number((e.currentTarget as HTMLInputElement).value)
+									})}
+							/>
+						</label>
+						<label class="pref">
+							<span>SFX</span>
+							<input
+								type="range"
+								min="0"
+								max="1"
+								step="0.05"
+								value={prefs.sfxVolume}
+								oninput={(e) =>
+									refreshPrefs({ sfxVolume: Number((e.currentTarget as HTMLInputElement).value) })}
+							/>
+						</label>
+						<label class="pref">
+							<span>Text size</span>
+							<select
+								value={String(prefs.textScale)}
+								onchange={(e) =>
+									refreshPrefs({ textScale: Number((e.currentTarget as HTMLSelectElement).value) })}
+							>
+								<option value="1">Normal</option>
+								<option value="1.15">Large</option>
+								<option value="1.3">Larger</option>
+							</select>
+						</label>
+						<label class="pref">
+							<span>Reading speed</span>
+							<select
+								value={String(prefs.textSpeed)}
+								onchange={(e) =>
+									refreshPrefs({ textSpeed: Number((e.currentTarget as HTMLSelectElement).value) })}
+							>
+								<option value="0.75">Faster</option>
+								<option value="1">Normal</option>
+								<option value="1.35">Slower</option>
+								<option value="1.7">Slowest</option>
+							</select>
+						</label>
+					</div>
+
 					<div class="menufoot">
 						<button class="mini" onclick={() => (menuOpen = false)}>Close</button>
-						<button
-							class="mini"
-							onclick={() => {
-								menuOpen = false;
-								started = false;
-							}}>Title</button
-						>
+						<button class="mini" onclick={goTitle}>Title</button>
 					</div>
 					<p class="help">
-						Left-click to walk or act · Right-click for verbs · Click an item, then a thing ·
-						Double-click an item to examine · Hold <kbd>Space</kbd> to show what is
-						interactive · <kbd>H</kbd> for a hint · <kbd>A</kbd> for the Almanac ·
+						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
+						thing · Double-click an item to examine · Hold <kbd>Space</kbd> or the Eye button to
+						show what is interactive · <kbd>H</kbd> for a hint · <kbd>A</kbd> for the Almanac ·
 						<kbd>Esc</kbd> for this menu
 					</p>
 				</div>
@@ -272,6 +361,21 @@
 		</div>
 
 		<div class="hud">
+			<button
+				class="reveal"
+				class:reveal--on={revealing}
+				aria-label="Show interactive things"
+				aria-pressed={revealing}
+				onpointerdown={(e) => {
+					e.preventDefault();
+					revealing = true;
+				}}
+				onpointerup={() => (revealing = false)}
+				onpointerleave={() => (revealing = false)}
+				onpointercancel={() => (revealing = false)}
+			>
+				👁
+			</button>
 			<Inventory
 				onContextVerb={(itemId, x, y) => (coin = { target: { kind: 'item', itemId }, x, y })}
 				onHover={(l) => (hover = l)}
@@ -448,6 +552,47 @@
 		text-align: center;
 	}
 
+	.menu .subhead {
+		margin-top: 1rem;
+	}
+
+	.prefs {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+		max-width: 28rem;
+		width: 100%;
+		margin: 0 auto 0.6rem;
+	}
+
+	.pref {
+		display: grid;
+		grid-template-columns: 7.5rem 1fr;
+		align-items: center;
+		gap: 0.6rem;
+		font-family: var(--font-display);
+		font-size: 0.64rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--parchment-dim);
+	}
+
+	.pref input[type='range'] {
+		width: 100%;
+		accent-color: var(--gold);
+	}
+
+	.pref select {
+		font: inherit;
+		font-size: 0.7rem;
+		letter-spacing: 0.08em;
+		background: rgba(40, 31, 22, 0.9);
+		border: 1px solid rgba(230, 199, 107, 0.28);
+		color: var(--parchment);
+		padding: 0.3rem 0.45rem;
+		border-radius: 2px;
+	}
+
 	.slots {
 		display: flex;
 		flex-direction: column;
@@ -543,11 +688,39 @@
 	.hud {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.75rem;
 		padding: 0.7rem clamp(0.5rem, 2vw, 1rem);
 		background: linear-gradient(to bottom, #1a1410, #100c09);
 		border-top: 1px solid rgba(230, 199, 107, 0.14);
 		flex-wrap: wrap;
+	}
+
+	.reveal {
+		flex: 0 0 auto;
+		width: 2.75rem;
+		height: 2.75rem;
+		min-width: 44px;
+		min-height: 44px;
+		display: grid;
+		place-items: center;
+		background: linear-gradient(160deg, rgba(60, 47, 33, 0.8), rgba(28, 22, 17, 0.9));
+		border: 1px solid rgba(230, 199, 107, 0.22);
+		border-radius: 2px;
+		color: var(--parchment);
+		font-size: 1.1rem;
+		cursor: pointer;
+		touch-action: manipulation;
+		user-select: none;
+		-webkit-touch-callout: none;
+	}
+
+	.reveal:hover,
+	.reveal:focus-visible,
+	.reveal--on {
+		border-color: var(--gold-bright);
+		color: var(--gold-bright);
+		outline: none;
+		box-shadow: 0 0 12px rgba(230, 199, 107, 0.25);
 	}
 
 	.status {
