@@ -101,14 +101,14 @@ export function initAudioFromSettings() {
 
 /**
  * Call from any user gesture (click, key). Resumes a suspended AudioContext and
- * restarts ambience if a bed is desired but nothing is running (common after the
+ * restarts ambience if a bed is desired but nothing is armed (common after the
  * first scene entered before a gesture unlocked audio).
  */
 export function unlockAudio() {
 	const ac = ensureGraph();
 	if (!ac) return;
 	if (ac.state === 'suspended') void ac.resume();
-	if (currentAmbience && ambSources.length === 0 && !getSettings().muted) {
+	if (currentAmbience && !bedIsArmed() && !getSettings().muted) {
 		startAmbienceNow(currentAmbience);
 	}
 }
@@ -234,10 +234,9 @@ export function playSfx(name: SfxName) {
 
 /* --------------------------------------------------------------- ambience
  *
- * Design constraints:
- *  - Audible on laptop speakers → energy between ~180–1200 Hz, not pure sub-bass.
- *  - Distinct rooms without a constant whoosh → soft filtered murmur + mid drone + sparse accents.
- *  - Quiet enough to sit under dialogue and SFX.
+ * No continuous noise beds or multi-sine drones — those read as one muddy
+ * “engine” under every scene. Each room is a vocabulary of short, named
+ * one-shots on timers so harbour / tavern / fort are actually distinguishable.
  */
 
 function clearAmbTimers() {
@@ -275,87 +274,30 @@ function stopAmbienceHard() {
 	ambNodes = [];
 }
 
-/** Pink-ish loop, band-limited — body of outdoor air without a full whoosh. */
-function startFilteredLoop(
-	ac: AudioContext,
-	{
-		gain,
-		lowpass,
-		highpass = 80,
-		seconds = 3.5
-	}: { gain: number; lowpass: number; highpass?: number; seconds?: number }
-) {
-	const frames = Math.floor(ac.sampleRate * seconds);
-	const buf = ac.createBuffer(1, frames, ac.sampleRate);
-	const data = buf.getChannelData(0);
-	// Paul Kellet-ish pink noise approximation — less harsh than white.
-	let b0 = 0,
-		b1 = 0,
-		b2 = 0;
-	const fade = Math.floor(ac.sampleRate * 0.03);
-	for (let i = 0; i < frames; i++) {
-		const white = Math.random() * 2 - 1;
-		b0 = 0.99765 * b0 + white * 0.099046;
-		b1 = 0.963 * b1 + white * 0.2965164;
-		b2 = 0.57 * b2 + white * 1.0526913;
-		let s = b0 + b1 + b2 + white * 0.1848;
-		const edge = Math.min(i, frames - 1 - i, fade) / Math.max(1, fade);
-		data[i] = s * 0.11 * Math.min(1, Math.max(0.25, edge));
-	}
-
-	const src = ac.createBufferSource();
-	src.buffer = buf;
-	src.loop = true;
-
-	const hp = ac.createBiquadFilter();
-	hp.type = 'highpass';
-	hp.frequency.value = highpass;
-	hp.Q.value = 0.5;
-
-	const lp = ac.createBiquadFilter();
-	lp.type = 'lowpass';
-	lp.frequency.value = lowpass;
-	lp.Q.value = 0.6;
-
-	const amp = ac.createGain();
-	const t = ac.currentTime;
-	amp.gain.setValueAtTime(0.0001, t);
-	amp.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.7);
-
-	src.connect(hp).connect(lp).connect(amp).connect(ambOut());
-	src.start();
-	ambSources.push(src);
-	ambNodes.push(hp, lp, amp);
+/** True while a bed is armed (timers count — one-shots leave ambSources empty). */
+function bedIsArmed(): boolean {
+	return currentAmbience !== null && (ambTimers.length > 0 || ambSources.length > 0);
 }
 
-/** Mid-range sine/triangle for “room body” — frequencies laptop speakers can actually play. */
-function startDrone(
-	ac: AudioContext,
-	{ freq, gain, type = 'sine' }: { freq: number; gain: number; type?: OscillatorType }
+function scheduleEvery(
+	minMs: number,
+	maxMs: number,
+	fn: () => void,
+	bed: AmbienceName,
+	/** Fire almost immediately so the room announces itself. */
+	firstMs = 280
 ) {
-	const osc = ac.createOscillator();
-	const amp = ac.createGain();
-	const t = ac.currentTime;
-	osc.type = type;
-	osc.frequency.value = freq;
-	amp.gain.setValueAtTime(0.0001, t);
-	amp.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.8);
-	osc.connect(amp).connect(ambOut());
-	osc.start();
-	ambSources.push(osc);
-	ambNodes.push(amp);
-}
-
-function scheduleEvery(minMs: number, maxMs: number, fn: () => void, bed: AmbienceName) {
 	const tick = () => {
 		if (currentAmbience !== bed || getSettings().muted) return;
-		fn();
-		const next = minMs + Math.random() * (maxMs - minMs);
+		try {
+			fn();
+		} catch {
+			/* never kill the scheduler */
+		}
+		const next = minMs + Math.random() * Math.max(0, maxMs - minMs);
 		ambTimers.push(setTimeout(tick, next));
 	};
-	// First accent arrives sooner so the bed doesn't feel dead for 15s.
-	const first = 1200 + Math.random() * Math.min(4000, maxMs - minMs);
-	ambTimers.push(setTimeout(tick, first));
+	ambTimers.push(setTimeout(tick, firstMs + Math.random() * 400));
 }
 
 function ambTone(
@@ -383,113 +325,232 @@ function ambTone(
 	osc.frequency.setValueAtTime(freq, t0);
 	if (sweepTo) osc.frequency.exponentialRampToValueAtTime(Math.max(1, sweepTo), t0 + dur);
 	amp.gain.setValueAtTime(0.0001, t0);
-	amp.gain.exponentialRampToValueAtTime(gain, t0 + 0.02);
+	amp.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t0 + Math.min(0.03, dur * 0.15));
 	amp.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
 	osc.connect(amp).connect(ambOut());
 	osc.start(t0);
 	osc.stop(t0 + dur + 0.05);
 }
 
-function ambNoiseBurst(
+/** Shaped noise one-shot (not a loop). Envelope is the whole character. */
+function ambShapedNoise(
 	ac: AudioContext,
-	{ dur, gain, bandpass }: { dur: number; gain: number; bandpass: number }
+	{
+		dur,
+		peakGain,
+		bandpass,
+		Q = 1.1,
+		attack = 0.08,
+		/** 0–1 position of the peak in the burst */
+		peakAt = 0.35
+	}: {
+		dur: number;
+		peakGain: number;
+		bandpass: number;
+		Q?: number;
+		attack?: number;
+		peakAt?: number;
+	}
 ) {
 	const t0 = ac.currentTime;
 	const frames = Math.max(1, Math.floor(ac.sampleRate * dur));
 	const buf = ac.createBuffer(1, frames, ac.sampleRate);
 	const data = buf.getChannelData(0);
 	for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+
 	const src = ac.createBufferSource();
 	src.buffer = buf;
 	const filter = ac.createBiquadFilter();
 	filter.type = 'bandpass';
 	filter.frequency.value = bandpass;
-	filter.Q.value = 1.2;
+	filter.Q.value = Q;
 	const amp = ac.createGain();
-	amp.gain.setValueAtTime(gain, t0);
+	const peakT = t0 + dur * peakAt;
+	amp.gain.setValueAtTime(0.0001, t0);
+	amp.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain), t0 + attack);
+	amp.gain.exponentialRampToValueAtTime(Math.max(0.0001, peakGain * 0.7), peakT);
 	amp.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
 	src.connect(filter).connect(amp).connect(ambOut());
 	src.start(t0);
+	src.stop(t0 + dur + 0.02);
+}
+
+/* ----------------------------- scene vocabularies ---------------------- */
+
+function playWaterLap(ac: AudioContext) {
+	// Soft swell, low and short — a wave, not a fan.
+	ambShapedNoise(ac, {
+		dur: 0.55 + Math.random() * 0.35,
+		peakGain: 0.055 + Math.random() * 0.025,
+		bandpass: 280 + Math.random() * 160,
+		Q: 0.7,
+		attack: 0.12,
+		peakAt: 0.4
+	});
+}
+
+function playGull(ac: AudioContext) {
+	// Clear two-cry gull — same family as the SFX sting, ambient level.
+	const base = 820 + Math.random() * 120;
+	ambTone(ac, { freq: base, type: 'sawtooth', dur: 0.13, gain: 0.045, sweepTo: base * 1.55 });
+	ambTone(ac, {
+		freq: base * 1.45,
+		type: 'sawtooth',
+		dur: 0.2,
+		gain: 0.032,
+		sweepTo: base * 0.75,
+		start: 0.14
+	});
+}
+
+function playGlassClink(ac: AudioContext) {
+	const f = 1400 + Math.random() * 900;
+	ambTone(ac, { freq: f, type: 'sine', dur: 0.18, gain: 0.05 });
+	ambTone(ac, { freq: f * 1.5, type: 'sine', dur: 0.22, gain: 0.028, start: 0.02 });
+	ambTone(ac, { freq: f * 2.2, type: 'triangle', dur: 0.12, gain: 0.015, start: 0.03 });
+}
+
+function playWoodCreak(ac: AudioContext) {
+	ambTone(ac, {
+		freq: 140 + Math.random() * 80,
+		type: 'sawtooth',
+		dur: 0.28,
+		gain: 0.03,
+		sweepTo: 90 + Math.random() * 40
+	});
+}
+
+function playFireTick(ac: AudioContext) {
+	// Hearth spit — tiny bright crack.
+	ambShapedNoise(ac, {
+		dur: 0.04 + Math.random() * 0.04,
+		peakGain: 0.04,
+		bandpass: 2200 + Math.random() * 1800,
+		Q: 2.5,
+		attack: 0.005,
+		peakAt: 0.15
+	});
+}
+
+function playWindGust(ac: AudioContext) {
+	// Comes and goes — never a loop.
+	const f = 500 + Math.random() * 350;
+	ambShapedNoise(ac, {
+		dur: 0.9 + Math.random() * 0.5,
+		peakGain: 0.048,
+		bandpass: f,
+		Q: 0.55,
+		attack: 0.2,
+		peakAt: 0.45
+	});
+}
+
+function playCrowdMutter(ac: AudioContext) {
+	// Short “voices at a distance” blob — band-limited mid noise, brief.
+	ambShapedNoise(ac, {
+		dur: 0.22 + Math.random() * 0.2,
+		peakGain: 0.03 + Math.random() * 0.015,
+		bandpass: 600 + Math.random() * 500,
+		Q: 1.4,
+		attack: 0.04,
+		peakAt: 0.3
+	});
+}
+
+function playMarketClatter(ac: AudioContext) {
+	ambTone(ac, {
+		freq: 600 + Math.random() * 900,
+		type: 'triangle',
+		dur: 0.05 + Math.random() * 0.04,
+		gain: 0.035
+	});
+}
+
+function playWoodKnock(ac: AudioContext) {
+	ambTone(ac, { freq: 120 + Math.random() * 40, type: 'sine', dur: 0.1, gain: 0.07, sweepTo: 55 });
+	ambShapedNoise(ac, {
+		dur: 0.05,
+		peakGain: 0.05,
+		bandpass: 280 + Math.random() * 120,
+		Q: 1.8,
+		attack: 0.004,
+		peakAt: 0.1
+	});
+}
+
+function playScrape(ac: AudioContext) {
+	ambShapedNoise(ac, {
+		dur: 0.18,
+		peakGain: 0.035,
+		bandpass: 900 + Math.random() * 600,
+		Q: 2,
+		attack: 0.02,
+		peakAt: 0.25
+	});
+}
+
+function playMetalPing(ac: AudioContext) {
+	const f = 1100 + Math.random() * 700;
+	ambTone(ac, { freq: f, type: 'sine', dur: 0.35, gain: 0.03 });
+	ambTone(ac, { freq: f * 2.01, type: 'sine', dur: 0.2, gain: 0.012, start: 0.01 });
+}
+
+function playPaperRustle(ac: AudioContext) {
+	ambShapedNoise(ac, {
+		dur: 0.12,
+		peakGain: 0.025,
+		bandpass: 2800 + Math.random() * 1200,
+		Q: 1.2,
+		attack: 0.01,
+		peakAt: 0.2
+	});
 }
 
 function buildBed(ac: AudioContext, name: AmbienceName) {
+	// Fire one signature sound immediately so the room is obvious.
 	switch (name) {
 		case 'harbour':
-			// Water + air: mid murmur + gentle body + gulls.
-			startFilteredLoop(ac, { gain: 0.045, lowpass: 700, highpass: 120 });
-			startDrone(ac, { freq: 180, gain: 0.02, type: 'sine' });
-			startDrone(ac, { freq: 270, gain: 0.01, type: 'triangle' });
-			scheduleEvery(7000, 14000, () => {
-				if (!ctx || getSettings().muted) return;
-				ambTone(ctx, { freq: 900, type: 'sawtooth', dur: 0.14, gain: 0.028, sweepTo: 1500 });
-				ambTone(ctx, {
-					freq: 1350,
-					type: 'sawtooth',
-					dur: 0.18,
-					gain: 0.02,
-					sweepTo: 700,
-					start: 0.15
-				});
-			}, 'harbour');
+			playWaterLap(ac);
+			scheduleEvery(1600, 3200, () => playWaterLap(ac), 'harbour', 400);
+			scheduleEvery(5500, 11000, () => playGull(ac), 'harbour', 1800);
 			break;
 
 		case 'tavern':
-			// Warm interior: low-mid hum, soft clinks — no outdoor air.
-			startFilteredLoop(ac, { gain: 0.02, lowpass: 350, highpass: 60 });
-			startDrone(ac, { freq: 196, gain: 0.025, type: 'triangle' });
-			startDrone(ac, { freq: 294, gain: 0.012, type: 'sine' });
-			scheduleEvery(5000, 11000, () => {
-				if (!ctx || getSettings().muted) return;
-				ambTone(ctx, { freq: 880 + Math.random() * 280, type: 'triangle', dur: 0.09, gain: 0.03 });
-				ambTone(ctx, { freq: 1320, type: 'sine', dur: 0.14, gain: 0.015, start: 0.04 });
-			}, 'tavern');
+			playGlassClink(ac);
+			scheduleEvery(2200, 4800, () => playGlassClink(ac), 'tavern', 500);
+			scheduleEvery(3500, 7000, () => playFireTick(ac), 'tavern', 900);
+			scheduleEvery(6000, 12000, () => playWoodCreak(ac), 'tavern', 2500);
 			break;
 
 		case 'fort':
-			startFilteredLoop(ac, { gain: 0.018, lowpass: 280, highpass: 50 });
-			startDrone(ac, { freq: 155, gain: 0.022, type: 'sine' });
-			startDrone(ac, { freq: 233, gain: 0.01, type: 'triangle' });
+			playMetalPing(ac);
+			scheduleEvery(5000, 10000, () => playMetalPing(ac), 'fort', 800);
+			scheduleEvery(8000, 16000, () => playWoodCreak(ac), 'fort', 3000);
 			break;
 
 		case 'wall':
-			startFilteredLoop(ac, { gain: 0.04, lowpass: 550, highpass: 100 });
-			startDrone(ac, { freq: 165, gain: 0.018 });
-			scheduleEvery(8000, 16000, () => {
-				if (!ctx || getSettings().muted) return;
-				ambNoiseBurst(ctx, { dur: 0.45, gain: 0.035, bandpass: 380 + Math.random() * 180 });
-			}, 'wall');
+			playWindGust(ac);
+			scheduleEvery(3500, 7000, () => playWindGust(ac), 'wall', 400);
+			scheduleEvery(7000, 14000, () => playWoodCreak(ac), 'wall', 2000);
 			break;
 
 		case 'market':
-			startFilteredLoop(ac, { gain: 0.03, lowpass: 900, highpass: 150 });
-			startDrone(ac, { freq: 220, gain: 0.018, type: 'triangle' });
-			startDrone(ac, { freq: 330, gain: 0.01 });
-			scheduleEvery(2500, 6000, () => {
-				if (!ctx || getSettings().muted) return;
-				ambTone(ctx, {
-					freq: 450 + Math.random() * 700,
-					type: 'triangle',
-					dur: 0.06 + Math.random() * 0.05,
-					gain: 0.022
-				});
-			}, 'market');
+			playCrowdMutter(ac);
+			scheduleEvery(1400, 2800, () => playCrowdMutter(ac), 'market', 300);
+			scheduleEvery(2500, 5000, () => playMarketClatter(ac), 'market', 700);
 			break;
 
 		case 'workshop':
-			startFilteredLoop(ac, { gain: 0.022, lowpass: 400, highpass: 70 });
-			startDrone(ac, { freq: 175, gain: 0.02 });
-			startDrone(ac, { freq: 262, gain: 0.01, type: 'triangle' });
-			scheduleEvery(4500, 10000, () => {
-				if (!ctx || getSettings().muted) return;
-				ambTone(ctx, { freq: 110, type: 'sine', dur: 0.14, gain: 0.05, sweepTo: 55 });
-				ambNoiseBurst(ctx, { dur: 0.05, gain: 0.04, bandpass: 320 });
-			}, 'workshop');
+			playWoodKnock(ac);
+			scheduleEvery(2800, 5500, () => playWoodKnock(ac), 'workshop', 400);
+			scheduleEvery(4000, 8000, () => playScrape(ac), 'workshop', 1500);
 			break;
 
 		case 'chamber':
-			// Quietest bed — still present.
-			startFilteredLoop(ac, { gain: 0.012, lowpass: 220, highpass: 50 });
-			startDrone(ac, { freq: 175, gain: 0.014 });
+			// Deliberately sparse — quiet room.
+			playPaperRustle(ac);
+			scheduleEvery(7000, 14000, () => playPaperRustle(ac), 'chamber', 1200);
+			scheduleEvery(10000, 18000, () => playMetalPing(ac), 'chamber', 5000);
 			break;
 	}
 }
@@ -500,7 +561,6 @@ function startAmbienceNow(name: AmbienceName | null) {
 	if (!name || getSettings().muted) return;
 	const ac = audio();
 	if (!ac) return;
-	// Ensure bus gains are applied (graph may have been built after settings load).
 	applyVolumes(getSettings());
 	buildBed(ac, name);
 }
@@ -511,18 +571,17 @@ function startAmbienceNow(name: AmbienceName | null) {
 export function setAmbience(name: AmbienceName | null | undefined) {
 	const next = name ?? null;
 
-	// Same bed already running — leave it alone.
-	if (next === currentAmbience && ambSources.length > 0) return;
+	// Same bed already armed (timers running) — leave it alone.
+	if (next === currentAmbience && bedIsArmed()) return;
 
-	// Same desired bed but nothing is playing (e.g. pre-gesture) — (re)start.
-	if (next === currentAmbience && next !== null && ambSources.length === 0) {
+	// Desired bed but nothing scheduled (pre-gesture / after mute) — (re)start.
+	if (next === currentAmbience && next !== null && !bedIsArmed()) {
 		startAmbienceNow(next);
 		return;
 	}
 
 	if (next === currentAmbience && next === null) return;
 
-	// Simple hard cut with short stop; crossfade complexity was dropping beds.
 	startAmbienceNow(next);
 }
 
@@ -532,12 +591,10 @@ export function clearAmbience() {
 	currentAmbience = null;
 }
 
-/** Test / debug: which bed is armed. */
 export function getCurrentAmbience(): AmbienceName | null {
 	return currentAmbience;
 }
 
-/** Test / debug: whether sources are live. */
 export function isAmbiencePlaying(): boolean {
-	return ambSources.length > 0;
+	return bedIsArmed();
 }
