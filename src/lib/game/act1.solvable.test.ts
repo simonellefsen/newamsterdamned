@@ -21,6 +21,8 @@ import { interactWithHotspot } from '$lib/engine/interaction';
 import { loadContent, newGame } from './index';
 import { ITEMS } from './items';
 import type { Hotspot, Verb } from '$lib/engine/types';
+import { OBJECTIVES } from './objectives';
+import { test as testCond } from '$lib/engine/state.svelte';
 
 loadContent();
 
@@ -202,6 +204,15 @@ describe.each(['joost', 'trijn'] as const)('Act I is completable as %s', (who) =
 		expect(game.actEnd?.body).toContain(who === 'trijn' ? 'Trijn' : 'Joost');
 		expect(game.actEnd?.body).not.toContain('{{');
 		expect(game.score).toBeGreaterThan(150);
+		/**
+		 * Hints are content and content rots. Finishing the act must finish every objective the
+		 * hint panel would have offered during it, so a stale `done` condition or a renamed flag
+		 * fails here instead of stranding a player on a hint that never clears.
+		 */
+		expect(
+			OBJECTIVES.filter((o) => o.act === 1 && !testCond(o.done)).map((o) => o.id),
+			'objectives still outstanding after finishing the act'
+		).toEqual([]);
 	});
 });
 

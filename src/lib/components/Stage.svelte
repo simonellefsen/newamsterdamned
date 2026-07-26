@@ -20,8 +20,10 @@
 	interface Props {
 		onContextVerb: (target: { kind: 'hotspot'; hotspot: Hotspot }, x: number, y: number) => void;
 		onHover: (label: string | null) => void;
+		/** Hold-to-reveal: ring every hotspot the scene is currently offering. */
+		reveal?: boolean;
 	}
-	let { onContextVerb, onHover }: Props = $props();
+	let { onContextVerb, onHover, reveal = false }: Props = $props();
 
 	const SCENE_W = 1280;
 	const SCENE_H = 720;
@@ -71,6 +73,33 @@
 	}
 
 	const allTargets = $derived([...liveHotspots, ...liveActors.map(actorHotspot)]);
+
+	/**
+	 * What hold-to-reveal actually rings.
+	 *
+	 * `liveHotspots` is already filtered by `visibleIf`, so this is the set of things the scene
+	 * is offering *right now* rather than everything that could ever exist here — which is the
+	 * distinction that makes the feature a help instead of a wall of boxes. Ambient scenery (the
+	 * floor, the sky, a whole wall) is dropped for the same reason it has no hover outline.
+	 */
+	const revealTargets = $derived(
+		allTargets.filter((h) => !h.ambient).map((h) => ({ h, c: polygonCentroid(h.poly) }))
+	);
+
+	/** Exits get a cursor that points the way they go. */
+	function exitDir(h: Hotspot): string {
+		if (!h.exit) return '';
+		switch (h.facing) {
+			case 'left':
+				return 'hot--w';
+			case 'right':
+				return 'hot--e';
+			case 'back':
+				return 'hot--n';
+			default:
+				return 'hot--s';
+		}
+	}
 
 	/* ------------------------------------------------------------- walking */
 
@@ -283,9 +312,11 @@
 			{#each allTargets as h (h.id)}
 				{@const c = polygonCentroid(h.poly)}
 				<polygon
-					class="hot"
+					class="hot {exitDir(h)}"
 					class:hot--exit={h.exit}
 					class:hot--ambient={h.ambient}
+					class:hot--person={h.id.startsWith('actor:')}
+					class:hot--reveal={reveal && !h.ambient}
 					points={polygonToSvgPoints(h.poly)}
 					role="button"
 					tabindex="0"
@@ -312,6 +343,22 @@
 					}}
 				/>
 			{/each}
+
+			<!-- Hold-to-reveal markers, over the hit overlay so they cannot eat clicks. -->
+			{#if reveal}
+				<g class="marks" aria-hidden="true">
+					{#each revealTargets as { h, c } (h.id)}
+						<circle
+							class="mark"
+							class:mark--exit={h.exit}
+							class:mark--person={h.id.startsWith('actor:')}
+							cx={c[0]}
+							cy={c[1]}
+							r="9"
+						/>
+					{/each}
+				</g>
+			{/if}
 		</svg>
 	{/if}
 </div>
@@ -378,11 +425,53 @@
 		height: 100%;
 	}
 
+	/**
+	 * Cursor affordances. Every interactive polygon says what it is before you click it: a
+	 * magnifier over a thing, a speech bubble over a person, and an arrow pointing the way an
+	 * exit goes. Scenery keeps the plain walk cursor, because "you may walk here" is the truth.
+	 */
 	.hot {
 		fill: transparent;
 		stroke: transparent;
-		cursor: inherit;
 		transition: fill 120ms ease;
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Ccircle cx='12' cy='12' r='7.5' fill='none' stroke='%231b1712' stroke-width='4'/%3E%3Ccircle cx='12' cy='12' r='7.5' fill='none' stroke='%23efdfb8' stroke-width='2.2'/%3E%3Cpath d='M17.5 17.5 24.5 24.5' stroke='%231b1712' stroke-width='4.4' stroke-linecap='round'/%3E%3Cpath d='M17.5 17.5 24.5 24.5' stroke='%23efdfb8' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+				12 12,
+			pointer;
+	}
+
+	.hot--person {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30'%3E%3Cpath d='M3 4h24v15H14l-7 7v-7H3z' fill='%23efdfb8' stroke='%231b1712' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='11.5' r='1.8' fill='%231b1712'/%3E%3Ccircle cx='15' cy='11.5' r='1.8' fill='%231b1712'/%3E%3Ccircle cx='20' cy='11.5' r='1.8' fill='%231b1712'/%3E%3C/svg%3E")
+				5 5,
+			pointer;
+	}
+
+	.hot--w {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M13 3 2 16l11 13v-8h16V11H13z' fill='%2386c4e8' stroke='%231b1712' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E")
+				3 16,
+			pointer;
+	}
+
+	.hot--e {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M19 3l11 13-11 13v-8H3V11h16z' fill='%2386c4e8' stroke='%231b1712' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E")
+				29 16,
+			pointer;
+	}
+
+	.hot--n {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M16 2 3 13h8v16h10V13h8z' fill='%2386c4e8' stroke='%231b1712' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E")
+				16 3,
+			pointer;
+	}
+
+	.hot--s {
+		cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M16 30 3 19h8V3h10v16h8z' fill='%2386c4e8' stroke='%231b1712' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E")
+				16 29,
+			pointer;
+	}
+
+	/* Scenery: the plain walk cursor, because walking there is what it is for. */
+	.hot--ambient {
+		cursor: inherit;
 	}
 
 	.hot:hover,
@@ -406,9 +495,63 @@
 		stroke: transparent;
 	}
 
+	/* ------------------------------------------------------- hold to reveal */
+
+	.hot--reveal {
+		fill: rgba(230, 199, 107, 0.09);
+		stroke: rgba(230, 199, 107, 0.4);
+		stroke-width: 1.5;
+	}
+
+	.hot--reveal.hot--exit {
+		fill: rgba(134, 196, 232, 0.1);
+		stroke: rgba(134, 196, 232, 0.45);
+	}
+
+	.marks {
+		pointer-events: none;
+	}
+
+	.mark {
+		fill: rgba(230, 199, 107, 0.85);
+		stroke: rgba(27, 23, 18, 0.8);
+		stroke-width: 2;
+		animation: pip 900ms ease-out infinite;
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+
+	.mark--exit {
+		fill: rgba(134, 196, 232, 0.9);
+	}
+
+	.mark--person {
+		fill: rgba(239, 223, 184, 0.95);
+	}
+
+	@keyframes pip {
+		0% {
+			transform: scale(0.72);
+			opacity: 0.55;
+		}
+		55% {
+			transform: scale(1.12);
+			opacity: 1;
+		}
+		100% {
+			transform: scale(0.72);
+			opacity: 0.55;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.hot {
 			transition: none;
+		}
+
+		.mark {
+			animation: none;
+			opacity: 1;
 		}
 	}
 </style>

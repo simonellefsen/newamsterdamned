@@ -16,6 +16,8 @@ import { enterScene, advance } from '$lib/engine/interpreter';
 import { interactWithHotspot } from '$lib/engine/interaction';
 import { loadContent, newGame, ACT_THREE_MAX } from './index';
 import type { Hotspot, Verb } from '$lib/engine/types';
+import { OBJECTIVES } from './objectives';
+import { test as testCond } from '$lib/engine/state.svelte';
 
 loadContent();
 
@@ -242,6 +244,15 @@ describe.each(['joost', 'trijn'] as const)('Act III is completable as %s', (who)
 		expect(game.actEnd, 'no act-end card').toBeTruthy();
 		expect(game.actEnd!.title).toBe('End of Act III');
 		expect(game.score, 'the good ending is not the full-marks ending').toBe(ACT_THREE_MAX);
+		/**
+		 * Hints are content and content rots. Finishing the act must finish every objective the
+		 * hint panel would have offered during it, so a stale `done` condition or a renamed flag
+		 * fails here instead of stranding a player on a hint that never clears.
+		 */
+		expect(
+			OBJECTIVES.filter((o) => o.act === 3 && !testCond(o.done)).map((o) => o.id),
+			'objectives still outstanding after finishing the act'
+		).toEqual([]);
 	}, 60000);
 });
 

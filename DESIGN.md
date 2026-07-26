@@ -271,6 +271,31 @@ Left-click is contextual (walk / default verb), so a player can finish the game 
 ever opening the coin — the coin is for the players who want to Look At everything, and
 this game rewards them heavily.
 
+### Getting unstuck
+
+Three affordances, deliberately separate, because "I cannot see what is clickable", "I do not
+know what this thing is" and "I know what I want and not which verb" are three different
+problems and one feature solves none of them well.
+
+- **Cursor by target type.** Magnifier over an object, speech bubble over a person, and a blue
+  arrow over an exit pointing the way it goes — the direction comes from the hotspot's existing
+  `facing`, so exits cost no extra authoring. Ambient scenery keeps the plain walk cursor.
+- **Hold `Space` to reveal.** Rings every live hotspot and drops a pip on its centroid. It reads
+  `visibleIf`-filtered hotspots and skips `ambient` ones, so it shows what the room is offering
+  *now* rather than everything that could ever be there. That filter is the whole feature.
+- **`H` — "What am I doing?"** An ordered list of objectives in `objectives.ts`, each with a
+  `goal`, a `hint` and a `spoiler`, gated by the same `Condition` type the rest of the content
+  uses. The current objective is the first that is not `done`, scoped to the act of the room you
+  are standing in — flags alone are not enough, since a loaded save otherwise gets told it has
+  no breeches on in Act III.
+
+Asking never costs points. `act*.solvable.test.ts` asserts that finishing an act clears every
+objective belonging to it, so a renamed flag fails the build rather than stranding a player on
+a hint that never clears.
+
+**Act IV's three trips have no `spoiler`, and a test enforces that.** It is the one thing in the
+game that is not a puzzle; giving it an answer would tell the player there was a right one.
+
 ### Hotspots & walking
 Scenes are **data, not code**. Each scene is a manifest:
 
