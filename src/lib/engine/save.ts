@@ -71,15 +71,23 @@ export function hasAnySave(): boolean {
  * Used on the title screen for Continue summary.
  */
 export function latestSave(): { slot: Slot; state: SaveState } | null {
-	let best: { slot: Slot; state: SaveState } | null = null;
+	const all = listSaves();
+	return all[0] ?? null;
+}
+
+/** All non-empty slots, newest first. */
+export function listSaves(): Array<{ slot: Slot; state: SaveState }> {
+	const out: Array<{ slot: Slot; state: SaveState }> = [];
 	for (const slot of SLOTS) {
 		const state = peek(slot);
-		if (!state) continue;
-		if (!best || (state.savedAt ?? 0) >= (best.state.savedAt ?? 0)) {
-			best = { slot, state };
-		}
+		if (state) out.push({ slot, state });
 	}
-	return best;
+	out.sort((a, b) => (b.state.savedAt ?? 0) - (a.state.savedAt ?? 0));
+	return out;
+}
+
+export function slotLabel(slot: Slot): string {
+	return slot === 'auto' ? 'Autosave' : `Slot ${slot}`;
 }
 
 /** One-line human summary for Continue UI. */
@@ -96,6 +104,18 @@ export function formatSaveSummary(state: SaveState): string {
 		.join(' ');
 	const pts = typeof state.score === 'number' ? state.score : 0;
 	return `${who} · ${scene} · ${pts} pts`;
+}
+
+export function formatSaveWhen(state: SaveState): string {
+	if (!state.savedAt) return '';
+	try {
+		return new Date(state.savedAt).toLocaleString(undefined, {
+			dateStyle: 'medium',
+			timeStyle: 'short'
+		});
+	} catch {
+		return '';
+	}
 }
 
 /** Serialise a slot (or current game if slot omitted) as downloadable JSON text. */

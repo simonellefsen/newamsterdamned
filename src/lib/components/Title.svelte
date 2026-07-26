@@ -1,42 +1,98 @@
 <script lang="ts">
-	/** Title card. Painted harbour behind, and the joke stated up front. */
+	/**
+	 * Title card. Painted harbour behind, and the joke stated up front.
+	 * Continue opens a slot picker when more than one save exists.
+	 */
 	import { pearlStreet } from '$lib/game/art/scenes';
-	import { formatSaveSummary, hasAnySave, latestSave } from '$lib/engine/save';
+	import {
+		formatSaveSummary,
+		formatSaveWhen,
+		hasAnySave,
+		latestSave,
+		listSaves,
+		slotLabel,
+		type Slot
+	} from '$lib/engine/save';
+	import type { SaveState } from '$lib/engine/types';
 	import { onMount } from 'svelte';
 
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
 	import { sprite } from '$lib/game/art/actor';
 	import { actOf, ACT_ROMAN } from '$lib/game/acts';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Props {
 		onStart: (who: ProtagonistId) => void;
-		onContinue: () => void;
+		/** Load a specific slot, or omit for newest. */
+		onContinue: (slot?: Slot) => void;
 		onSettings?: () => void;
+		/** Import a save file into a slot, then parent may refresh. */
+		onImport?: (slot: Slot, file: File) => void;
 	}
-	let { onStart, onContinue, onSettings }: Props = $props();
+	let { onStart, onContinue, onSettings, onImport }: Props = $props();
 
 	const art = pearlStreet();
 	let canContinue = $state(false);
 	let continueSummary = $state<string | null>(null);
 	let continueAct = $state<string | null>(null);
 	let picking = $state(false);
+	let pickingSave = $state(false);
 	let chosen = $state<ProtagonistId>('joost');
+	let saves = $state<Array<{ slot: Slot; state: SaveState }>>([]);
+	let importNote = $state<string | null>(null);
 
 	const cast = Object.values(PROTAGONISTS);
 
-	onMount(() => {
+	function refreshSaves() {
 		canContinue = hasAnySave();
+		saves = listSaves();
 		const latest = latestSave();
 		if (latest) {
 			continueSummary = formatSaveSummary(latest.state);
 			const act = actOf(latest.state.scene);
 			continueAct = act ? `Act ${ACT_ROMAN[act]}` : null;
+		} else {
+			continueSummary = null;
+			continueAct = null;
 		}
-	});
+	}
+
+	onMount(refreshSaves);
 
 	function portrait(id: ProtagonistId) {
 		const p = PROTAGONISTS[id];
 		return sprite({ palette: p.palette, facing: 'front', ...p.dressed });
+	}
+
+	function openContinue() {
+		refreshSaves();
+		// One save → load it immediately; several → picker.
+		if (saves.length === 1) {
+			onContinue(saves[0].slot);
+			return;
+		}
+		pickingSave = true;
+	}
+
+	function loadSlot(slot: Slot) {
+		pickingSave = false;
+		onContinue(slot);
+	}
+
+	function actBadge(sceneId: string): string | null {
+		const a = actOf(sceneId);
+		return a ? `Act ${ACT_ROMAN[a]}` : null;
+	}
+
+	function onImportFile(slot: Slot, file: File | undefined) {
+		if (!file || !onImport) return;
+		onImport(slot, file);
+		// Parent updates storage; refresh list shortly after.
+		setTimeout(() => {
+			refreshSaves();
+			importNote = `Imported into ${slotLabel(slot)}.`;
+			setTimeout(() => (importNote = null), 2800);
+		}, 50);
 	}
 </script>
 
@@ -44,7 +100,53 @@
 	<div class="art">{@html art}</div>
 	<div class="veil"></div>
 
-	{#if !picking}
+	{#if pickingSave}
+		<div class="plate plate--wide" role="dialog" aria-modal="true" aria-label="Load game" use:focusTrap>
+			<p class="eyebrow">Resume where?</p>
+			<div class="slots">
+				{#each saves as { slot, state } (slot)}
+					<button class="slot" onclick={() => loadSlot(slot)}>
+						<span class="slot-name">
+							{slotLabel(slot)}
+							{#if actBadge(state.scene)}
+								<span class="slot-act">{actBadge(state.scene)}</span>
+							{/if}
+						</span>
+						<span class="slot-sum">{formatSaveSummary(state)}</span>
+						{#if formatSaveWhen(state)}
+							<span class="slot-when">{formatSaveWhen(state)}</span>
+						{/if}
+					</button>
+				{/each}
+			</div>
+			{#if onImport}
+				<div class="import-row">
+					<span class="import-label">Or import a save file into:</span>
+					{#each ['1', '2', '3'] as slot (slot)}
+						<label class="btn btn--file">
+							Slot {slot}
+							<input
+								type="file"
+								accept="application/json,.json"
+								hidden
+								onchange={(e) => {
+									const input = e.currentTarget as HTMLInputElement;
+									onImportFile(slot as Slot, input.files?.[0]);
+									input.value = '';
+								}}
+							/>
+						</label>
+					{/each}
+				</div>
+				{#if importNote}
+					<p class="import-note">{importNote}</p>
+				{/if}
+			{/if}
+			<div class="actions">
+				<button class="btn" onclick={() => (pickingSave = false)}>Back</button>
+			</div>
+		</div>
+	{:else if !picking}
 		<div class="plate">
 			<p class="eyebrow">Manhattan Island · Anno Domini 1655</p>
 			<h1>New<br /><em>Amsterdamned</em></h1>
@@ -53,7 +155,7 @@
 			<div class="actions">
 				<button class="btn btn--primary" onclick={() => (picking = true)}>Begin</button>
 				{#if canContinue}
-					<button class="btn btn--continue" onclick={onContinue}>
+					<button class="btn btn--continue" onclick={openContinue}>
 						<span class="btn-main">Continue</span>
 						{#if continueSummary}
 							<span class="btn-sub">
@@ -70,7 +172,9 @@
 			<p class="credit">
 				All four acts. Point at things. Right-click for verbs.<br />
 				You owe the West India Company four hundred guilders and the tide turns Thursday week.<br />
-				<span class="hint">Settings: dialog text size, voice, and optional OpenAI key — before you play.</span>
+				<span class="hint"
+					>Settings: dialog text size, voice, and optional OpenAI key — before you play.</span
+				>
 			</p>
 		</div>
 	{:else}
@@ -103,8 +207,8 @@
 
 			<p class="credit">
 				Not a reskin. Dutch law let a woman trade, sue and hold property in her own name —
-				the English colonies ninety miles east did not. Act I opens the same door on both;
-				later acts do not.
+				the English colonies ninety miles east did not. Act I opens the same door on both; later
+				acts do not.
 			</p>
 		</div>
 	{/if}
@@ -150,6 +254,95 @@
 
 	.plate--wide {
 		max-width: min(64rem, 94%);
+	}
+
+	.slots {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		margin: 0.8rem auto 1rem;
+		max-width: 28rem;
+		width: 100%;
+		text-align: left;
+	}
+
+	.slot {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.15rem;
+		width: 100%;
+		padding: 0.65rem 0.85rem;
+		background: rgba(20, 16, 12, 0.72);
+		border: 1px solid rgba(230, 199, 107, 0.22);
+		border-radius: 2px;
+		cursor: pointer;
+		font: inherit;
+		color: inherit;
+		text-align: left;
+	}
+
+	.slot:hover,
+	.slot:focus-visible {
+		border-color: var(--gold-bright);
+		outline: none;
+		background: rgba(64, 49, 26, 0.55);
+	}
+
+	.slot-name {
+		font-family: var(--font-display);
+		font-size: 0.68rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--gold);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.slot-act {
+		color: var(--parchment-dim);
+		letter-spacing: 0.1em;
+		font-size: 0.9em;
+	}
+
+	.slot-sum {
+		font-size: 0.86rem;
+		color: var(--parchment);
+	}
+
+	.slot-when {
+		font-size: 0.72rem;
+		color: var(--parchment-dim);
+		opacity: 0.75;
+	}
+
+	.import-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.import-label {
+		font-size: 0.72rem;
+		color: var(--parchment-dim);
+		width: 100%;
+		text-align: center;
+		margin-bottom: 0.15rem;
+	}
+
+	.import-note {
+		text-align: center;
+		font-size: 0.76rem;
+		color: var(--gold);
+		margin: 0 0 0.5rem;
+	}
+
+	.btn--file {
+		cursor: pointer;
 	}
 
 	.cast {
@@ -354,7 +547,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.btn {
+		.btn,
+		.card {
 			transition: none;
 		}
 	}

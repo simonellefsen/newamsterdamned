@@ -162,6 +162,8 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 
+**Continue** on the title screen loads the newest save, or opens a picker when several slots exist (plus import into slot 1–3).
+
 Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):
 
 - **Dialog text** — Normal through Huge (`[` / `]` or A−/A+ while playing)

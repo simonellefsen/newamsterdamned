@@ -157,9 +157,11 @@
 		if (card?.next) void runEntry(card.next.scene, card.next.at);
 	}
 
-	function resume() {
+	function resume(slot?: Slot) {
 		unlockAudio();
-		const s = load('auto') ?? SLOTS.map(load).find((x) => x !== null);
+		const s = slot
+			? load(slot)
+			: load('auto') ?? SLOTS.map(load).find((x) => x !== null) ?? null;
 		if (!s) {
 			begin('joost');
 			return;
@@ -169,6 +171,24 @@
 		// Restoring a save does not go through enterScene — re-arm ambience for the room.
 		const sc = getScene(game.scene);
 		setAmbience(sc?.ambience ?? null);
+	}
+
+	function importOnTitle(slot: Slot, file: File) {
+		const reader = new FileReader();
+		reader.onload = () => {
+			const text = typeof reader.result === 'string' ? reader.result : '';
+			const result = parseImport(text);
+			if (!result.ok) {
+				// Surface via alert — title has no saveNote strip.
+				window.alert(result.error);
+				return;
+			}
+			if (!importIntoSlot(slot, result.state)) {
+				window.alert('Could not write that save — storage is blocked.');
+				return;
+			}
+		};
+		reader.readAsText(file);
 	}
 
 	function pickVerb(verb: Verb) {
@@ -339,6 +359,7 @@
 				unlockAudio();
 				titlePrefsOpen = true;
 			}}
+			onImport={importOnTitle}
 		/>
 		{#if titlePrefsOpen}
 			<div

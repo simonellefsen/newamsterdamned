@@ -51,3 +51,11 @@ describe('save export/import', () => {
 		expect(line).toContain('40 pts');
 	});
 });
+
+describe('slot labels', () => {
+	it('names autosave distinctly', async () => {
+		const { slotLabel } = await import('./save');
+		expect(slotLabel('auto')).toBe('Autosave');
+		expect(slotLabel('1')).toBe('Slot 1');
+	});
+});
