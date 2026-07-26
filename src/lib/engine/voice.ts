@@ -1,18 +1,30 @@
 /**
- * Spoken voice facade. Progressive: default silent; Web Speech is opt-in.
- * Pack backends plug in later without changing the interpreter contract.
+ * Spoken voice facade. Progressive: default silent; Web Speech opt-in; packs when present.
  *
- * Silent path MUST return null (never a resolved no-op handle) so bubble timing
- * stays identical when voice is off.
+ * Per-line hybrid resolution (ROADMAP K5):
+ *   voice off / muted → null
+ *   pack has key → pack
+ *   webspeech allowed → system TTS
+ *   else → null
+ *
+ * Silent path MUST return null (never a resolved no-op handle).
  */
 
 import { game } from './state.svelte';
 import { getVoiceProfile } from './registry';
 import { getSettings } from './settings';
 import type { VoiceProfile } from './types';
+import { audioKey, type SpeechKind } from './voice/keys';
+import {
+	cancelPack,
+	ensurePackLoaded,
+	packHasKey,
+	packLookup,
+	speakPack
+} from './voice/pack';
 import { speakWebSpeech, cancelWebSpeech, isWebSpeechAvailable } from './voice/webspeech';
 
-export type SpeechKind = 'say' | 'think' | 'narrate';
+export type { SpeechKind };
 
 export type VoiceRequest = {
 	/** Resolved speaker id (joost/trijn/narrator/npc — never bare "player"). */
@@ -32,6 +44,7 @@ export type VoiceHandle = {
 
 let currentGen = 0;
 let active: VoiceHandle | null = null;
+let packPrefetchStarted = false;
 
 export function resolveSpeakerId(actor: string): string {
 	if (actor === 'player') return game.protagonist || 'joost';
@@ -45,10 +58,25 @@ function webspeechAllowed(): boolean {
 	// auto: desktop only by default (K18).
 	if (typeof window === 'undefined') return false;
 	const coarse =
-		typeof window.matchMedia === 'function' &&
-		window.matchMedia('(pointer: coarse)').matches;
+		typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
 	if (coarse) return false;
 	return isWebSpeechAvailable();
+}
+
+function packAllowed(): boolean {
+	const s = getSettings();
+	if (s.voiceBackend === 'off' || s.voiceBackend === 'webspeech') return false;
+	// auto | pack
+	return true;
+}
+
+/** Kick off manifest fetch once voice is enabled (non-blocking). */
+export function prefetchVoicePack() {
+	if (packPrefetchStarted) return;
+	if (typeof window === 'undefined') return;
+	if (!getSettings().voiceEnabled) return;
+	packPrefetchStarted = true;
+	void ensurePackLoaded();
 }
 
 /**
@@ -65,7 +93,55 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 	const profile = getVoiceProfile(req.actor);
 	if (!profile) return null;
 
-	// Pack path reserved — none shipped yet. Hybrid falls through to Web Speech.
+	prefetchVoicePack();
+
+	const key = audioKey(req.actor, req.kind, req.text);
+	const volume = Math.min(
+		1,
+		s.voiceVolume * (req.kind === 'think' && s.thinkVoice === 'soft' ? 0.55 : 1)
+	);
+
+	// 1) Pack hit (hybrid)
+	if (packAllowed() && packHasKey(key)) {
+		const hit = packLookup(key);
+		cancelVoice();
+		const gen = ++currentGen;
+		let settled = false;
+		let resolveDone: () => void = () => {};
+		const done = new Promise<void>((r) => {
+			resolveDone = () => {
+				if (settled) return;
+				settled = true;
+				r();
+			};
+		});
+		const handle: VoiceHandle = {
+			gen,
+			done,
+			estimatedMs: hit?.ms,
+			didPlay: true,
+			cancel() {
+				cancelPack();
+				resolveDone();
+			}
+		};
+		const started = speakPack({
+			key,
+			volume,
+			isCurrent: () => gen === currentGen,
+			onEnd: () => {
+				if (gen === currentGen) resolveDone();
+			}
+		});
+		if (!started) {
+			// Fall through to webspeech
+		} else {
+			active = handle;
+			return handle;
+		}
+	}
+
+	// 2) Web Speech
 	if (!webspeechAllowed()) return null;
 
 	cancelVoice();
@@ -73,7 +149,6 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 
 	const rateMul = req.kind === 'narrate' ? 0.92 : req.kind === 'think' ? 0.95 : 1;
 	const pitchMul = req.kind === 'think' ? 0.92 : 1;
-	const volume = Math.min(1, s.voiceVolume * (req.kind === 'think' && s.thinkVoice === 'soft' ? 0.55 : 1));
 
 	let settled = false;
 	let resolveDone: () => void = () => {};
@@ -90,8 +165,8 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 		done,
 		didPlay: true,
 		cancel() {
-			// Always stop OS speech; gen only gates onEnd resolving a newer line.
 			cancelWebSpeech();
+			cancelPack();
 			resolveDone();
 		}
 	};
@@ -109,10 +184,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 		}
 	});
 
-	if (!started) {
-		// Synth refused — silent for this line.
-		return null;
-	}
+	if (!started) return null;
 
 	active = handle;
 	return handle;
@@ -131,6 +203,7 @@ export function cancelVoice() {
 		}
 	} else {
 		cancelWebSpeech();
+		cancelPack();
 	}
 }
 
@@ -143,6 +216,8 @@ export function __resetVoiceForTests() {
 	cancelVoice();
 	currentGen = 0;
 	active = null;
+	packPrefetchStarted = false;
 }
 
 export type { VoiceProfile };
+export { audioKey } from './voice/keys';

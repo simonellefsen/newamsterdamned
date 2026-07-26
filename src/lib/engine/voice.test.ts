@@ -4,15 +4,18 @@ import { getVoiceProfile } from './registry';
 import { saveSettings, DEFAULT_SETTINGS } from './settings';
 import {
 	__resetVoiceForTests,
+	audioKey,
 	resolveSpeakerId,
 	speakLine
 } from './voice';
+import { __resetPackForTests, setPackManifest } from './voice/pack';
 import { game } from './state.svelte';
 
 beforeEach(() => {
 	loadContent();
 	saveSettings({ ...DEFAULT_SETTINGS });
 	__resetVoiceForTests();
+	__resetPackForTests();
 	game.reset('joost');
 });
 
@@ -73,5 +76,29 @@ describe('voice profiles registry', () => {
 	it('falls back to generic for unknown speakers', () => {
 		const p = getVoiceProfile('some-unknown-npc');
 		expect(p?.id).toBe('generic');
+	});
+});
+
+describe('pack hybrid routing', () => {
+	it('still returns null in headless when pack has a key (no Audio)', () => {
+		saveSettings({ voiceEnabled: true, voiceBackend: 'auto' });
+		const key = audioKey('narrator', 'narrate', 'THE STRAND. DAWN.');
+		setPackManifest({
+			version: 'test',
+			bytes: 1,
+			speakers: ['narrator'],
+			format: 'mp3',
+			baseUrl: '/voice/fixtures/',
+			lines: { [key]: { ms: 500 } }
+		});
+		// Headless: packHasKey is true but speakPack fails without Audio → webspeech also
+		// unavailable → null. Must not throw.
+		const handle = speakLine({
+			actor: 'narrator',
+			text: 'THE STRAND. DAWN.',
+			kind: 'narrate',
+			sceneToken: game.sceneToken
+		});
+		expect(handle).toBeNull();
 	});
 });

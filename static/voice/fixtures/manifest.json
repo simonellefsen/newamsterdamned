@@ -1,0 +1,10 @@
+{
+  "version": "fixture",
+  "bytes": 0,
+  "speakers": ["narrator"],
+  "format": "mp3",
+  "baseUrl": "/voice/fixtures/",
+  "lines": {
+    "deadbeef": { "ms": 800, "file": "silent.mp3" }
+  }
+}

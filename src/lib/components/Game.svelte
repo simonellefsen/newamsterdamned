@@ -32,6 +32,7 @@
 		saveSettings,
 		type Settings
 	} from '$lib/engine/settings';
+	import { prefetchVoicePack } from '$lib/engine/voice';
 	import {
 		exportSaveJson,
 		importIntoSlot,
@@ -434,13 +435,14 @@
 							<span>Spoken voice</span>
 							<select
 								value={prefs.voiceEnabled ? 'on' : 'off'}
-								onchange={(e) =>
-									refreshPrefs({
-										voiceEnabled: (e.currentTarget as HTMLSelectElement).value === 'on'
-									})}
+								onchange={(e) => {
+									const on = (e.currentTarget as HTMLSelectElement).value === 'on';
+									refreshPrefs({ voiceEnabled: on });
+									if (on) prefetchVoicePack();
+								}}
 							>
 								<option value="off">Off (default)</option>
-								<option value="on">System voice (beta)</option>
+								<option value="on">System / pack (beta)</option>
 							</select>
 						</label>
 						{#if prefs.voiceEnabled}

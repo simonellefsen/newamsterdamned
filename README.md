@@ -160,7 +160,11 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 
-Spoken voice is **off by default**. Turn on **System voice (beta)** in the Esc menu to hear the OS read lines (narrator, protagonists, NPCs). Quality depends on your platform voices; captions always stay on.
+Spoken voice is **off by default**. Turn on **System / pack (beta)** in the Esc menu to hear lines (narrator, protagonists, NPCs). If a pre-generated pack is present under `/voice/v1/`, those clips play first; otherwise the browser’s system voices are used. Captions always stay on.
+
+```bash
+npm run voice:extract   # corpus size / dual-protag cost estimate for packs
+```
 
 ## A note on the history
 
