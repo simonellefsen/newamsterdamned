@@ -177,7 +177,16 @@ npm run voice:generate:live -- --act=1 --speakers=narrator,joost,trijn
 
 Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
 
-Default cast (OpenAI voices): narrator=`onyx`, Joost=`echo`, Trijn=`nova`. Edit `OPENAI_VOICE_CAST` in `src/lib/engine/voice/generate.ts` after listening.
+**TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
+
+```bash
+npm run voice:generate:live -- --act=1          # first run: pays for new keys
+npm run voice:generate:live -- --act=1          # second run: all cache hits
+npm run voice:generate:live -- --no-cache       # force re-synthesize (still updates cache)
+npm run voice:generate:live -- --cache-dir=/path/to/shared-cache
+```
+
+Default cast (OpenAI voices): narrator=`onyx`, Joost=`echo`, Trijn=`nova`. Edit `OPENAI_VOICE_CAST` in `src/lib/engine/voice/generate.ts` after listening. Changing model or cast voice misses cache for those lines only.
 
 ## A note on the history
 

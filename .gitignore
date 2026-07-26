@@ -30,3 +30,5 @@ build/
 static/voice/v1/lines/
 static/voice/v1/corpus-*.json
 .voice-out/
+# Durable TTS cache — keeps API costs down across regenerate runs
+.voice-cache/
