@@ -23,7 +23,7 @@
 
 <footer>
 	<p>
-		Acts I &amp; II of four · Everything in the Almanac is real ·
+		Acts I&ndash;III of four · Everything in the Almanac is real ·
 		<a href="https://github.com/simonellefsen/newamsterdamned">Source</a>
 	</p>
 </footer>

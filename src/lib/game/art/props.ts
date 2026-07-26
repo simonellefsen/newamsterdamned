@@ -197,6 +197,123 @@ export function deedBoxProp(): string {
 		<path d="M 24 44 q 26 -6 52 0" stroke="${P.leadTinYellow}" stroke-width="1.6" fill="none" opacity="0.5"/>`);
 }
 
+/* ------------------------------------------------------------------ act iii */
+
+/**
+ * The minute-book of the bench, open on the green cloth. Everything that ever happened to
+ * anybody in this colony is real because it is written in a book like this one, and the whole
+ * of Act III is a fight over one page of it.
+ */
+export function minuteBookProp(): string {
+	const leaf = mix(P.cream, P.linen, 0.22);
+	const bind = mix(P.brickRed, P.umberDeep, 0.5);
+	let lines = '';
+	const r = rng(251);
+	for (let i = 0; i < 8; i++) {
+		lines += `<rect x="${(15 + i * 0.5).toFixed(0)}" y="${(48 + i * 5).toFixed(0)}" width="${(30 + r() * 4).toFixed(0)}" height="1.8" fill="${P.umberDeep}" opacity="0.42"/>`;
+		lines += `<rect x="53" y="${(48 + i * 5).toFixed(0)}" width="${(28 + r() * 6).toFixed(0)}" height="1.8" fill="${P.umberDeep}" opacity="0.36"/>`;
+	}
+	return box(`
+		<ellipse cx="50" cy="94" rx="42" ry="6" fill="#000" opacity="0.24"/>
+		<path d="M 6 92 L 50 84 L 94 92 L 94 78 L 50 70 L 6 78 Z" fill="${bind}"/>
+		<path d="M 8 82 L 50 74 L 92 82 L 88 40 L 50 34 L 12 40 Z" fill="${leaf}"/>
+		<path d="M 8 82 L 50 74 L 50 34 L 12 40 Z" fill="${shade(leaf, 0.08)}"/>
+		${lines}
+		<path d="M 50 74 L 50 34" stroke="${P.umberDeep}" stroke-width="1.6" opacity="0.35"/>
+		<path d="M 74 36 L 78 88" stroke="${P.bloodOrange}" stroke-width="3" opacity="0.7"/>`);
+}
+
+/**
+ * A folded letter with a broken wax seal — the Amsterdam Chamber's hand, four months old.
+ * Drawn small and pale on purpose: the most dangerous object in the game is nine inches of
+ * rag paper and the player should be faintly disappointed to find it.
+ */
+export function letterProp(): string {
+	const rag = mix(P.cream, P.ochreLight, 0.2);
+	return box(`
+		<ellipse cx="50" cy="93" rx="30" ry="5" fill="#000" opacity="0.2"/>
+		<path d="M 20 90 L 80 86 L 76 44 L 24 48 Z" fill="${rag}"/>
+		<path d="M 20 90 L 50 88 L 48 46 L 24 48 Z" fill="${tint(rag, 0.3)}" opacity="0.5"/>
+		<path d="M 24 62 L 76 58" stroke="${shade(rag, 0.24)}" stroke-width="2" opacity="0.7"/>
+		<path d="M 22 76 L 78 72" stroke="${shade(rag, 0.24)}" stroke-width="2" opacity="0.6"/>
+		${[54, 60, 66, 72, 78]
+			.map(
+				(y, i) =>
+					`<rect x="${28 + (i % 2) * 3}" y="${y}" width="${34 - i * 3}" height="1.5" fill="${P.umberDeep}" opacity="0.4"/>`
+			)
+			.join('')}
+		<circle cx="50" cy="68" r="8" fill="${P.bloodOrange}" opacity="0.9"/>
+		<path d="M 44 66 L 56 70" stroke="${shade(P.bloodOrange, 0.4)}" stroke-width="2"/>
+		<circle cx="50" cy="68" r="4.5" fill="none" stroke="${shade(P.bloodOrange, 0.35)}" stroke-width="1.4"/>`);
+}
+
+/** A clerk's horn of iron-gall ink with a quill standing in it. Act III's only weapon. */
+export function inkhornProp(): string {
+	return box(`
+		<ellipse cx="50" cy="95" rx="20" ry="5" fill="#000" opacity="0.24"/>
+		<path d="M 38 94 L 62 94 L 58 60 L 42 60 Z" fill="${P.umberDeep}"/>
+		<path d="M 38 94 L 50 94 L 48 60 L 42 60 Z" fill="${tint(P.brownMid, 0.2)}" opacity="0.4"/>
+		<ellipse cx="50" cy="60" rx="8" ry="3.4" fill="${mix(P.black, P.ultramarine, 0.25)}"/>
+		<path d="M 50 58 L 66 10" stroke="${mix(P.cream, P.linen, 0.2)}" stroke-width="3.6" stroke-linecap="round"/>
+		<path d="M 60 28 q 14 -7 17 -21 q -14 2 -21 14 Z" fill="${P.cream}" opacity="0.9"/>
+		<path d="M 62 25 q 10 -5 13 -15" stroke="${shade(P.cream, 0.2)}" stroke-width="1" fill="none" opacity="0.7"/>`);
+}
+
+/**
+ * The Director-General's travelling case, open, half packed for the Delaware — with the
+ * spare leg lying in it and a pawnbroker's brass tag still wired to the socket.
+ */
+export function legCaseProp(): string {
+	// Lit as though the closet door were still ajar behind it. This object carries the whole
+	// leg thread, so it is drawn several stops brighter than the room it stands in — the first
+	// cut used a properly dim seventeenth-century leather and vanished into the floor.
+	const leather = mix(P.brownWarm, P.ochreLight, 0.34);
+	const oak = mix(P.ochreLight, P.cream, 0.35);
+	return box(`
+		<ellipse cx="50" cy="97" rx="46" ry="6" fill="#000" opacity="0.32"/>
+		<!-- the lid, standing up and open -->
+		<path d="M 12 52 L 88 46 L 90 4 L 14 10 Z" fill="${shade(leather, 0.42)}"/>
+		<path d="M 19 49 L 81 44 L 83 13 L 21 18 Z" fill="${shade(leather, 0.24)}"/>
+		<rect x="10" y="46" width="82" height="7" rx="2" fill="${mix(P.silver, P.umber, 0.4)}"/>
+		<!-- the body -->
+		<path d="M 8 94 L 92 94 L 90 52 L 10 52 Z" fill="${leather}"/>
+		<path d="M 8 94 L 50 94 L 50 52 L 10 52 Z" fill="${tint(leather, 0.16)}" opacity="0.45"/>
+		<rect x="6" y="50" width="88" height="8" fill="${mix(P.silver, P.umber, 0.3)}"/>
+		<rect x="6" y="78" width="88" height="6" fill="${mix(P.silver, P.umber, 0.42)}"/>
+		<!-- six shirts, a Bible with the cover off, and a razor -->
+		<path d="M 14 72 L 44 70 L 44 58 L 14 60 Z" fill="${mix(P.linen, P.cream, 0.5)}" opacity="0.9"/>
+		<path d="M 48 70 L 62 70 L 62 58 L 48 58 Z" fill="${mix(P.cream, P.ochre, 0.3)}" opacity="0.85"/>
+		<!-- the spare leg, lying across the top: turned oak, two bands of good silver -->
+		<path d="M 20 92 L 78 84 L 80 74 L 22 82 Z" fill="${oak}"/>
+		<path d="M 20 92 L 34 90 L 36 80 L 22 82 Z" fill="${tint(oak, 0.4)}" opacity="0.6"/>
+		<ellipse cx="78" cy="79" rx="4" ry="6" fill="${shade(oak, 0.22)}"/>
+		<rect x="32" y="78" width="11" height="12" rx="2" fill="${P.silver}"
+			transform="rotate(-8 37 84)"/>
+		<rect x="62" y="74" width="10" height="11" rx="2" fill="${P.silver}"
+			transform="rotate(-8 67 79)"/>
+		<!-- and the pawnbroker's brass tag, still wired to the socket -->
+		<path d="M 24 88 q -4 6 -1 11" stroke="${mix(P.silver, P.cream, 0.4)}" stroke-width="1.8" fill="none"/>
+		<path d="M 19 96 L 30 96 L 30 99 L 24.5 100 Z" fill="${P.leadTinYellow}"/>
+		<circle cx="24" cy="98" r="5.4" fill="${P.leadTinYellow}"/>
+		<circle cx="24" cy="98" r="5.4" fill="none" stroke="${shade(P.copper, 0.3)}" stroke-width="1"/>
+		<path d="M 22 96 L 22 100 M 26 96 L 26 100" stroke="${shade(P.copper, 0.45)}" stroke-width="1.2"/>`);
+}
+
+/** Wolfertsen's pawn book, left in the shuttered stall. Ledgers outlive everybody. */
+export function pawnBookProp(): string {
+	const hide = mix(P.greenDark, P.umberDeep, 0.35);
+	return box(`
+		<ellipse cx="50" cy="94" rx="34" ry="5" fill="#000" opacity="0.26"/>
+		<path d="M 22 92 L 78 92 L 78 40 L 22 40 Z" fill="${hide}"/>
+		<path d="M 22 92 L 34 92 L 34 40 L 22 40 Z" fill="${shade(hide, 0.35)}"/>
+		<path d="M 34 90 L 78 90 L 78 42 L 34 42 Z" fill="${mix(P.cream, P.linen, 0.3)}" opacity="0.35"/>
+		<rect x="34" y="44" width="44" height="3" fill="${mix(P.cream, P.linen, 0.2)}" opacity="0.7"/>
+		<rect x="34" y="86" width="44" height="3" fill="${mix(P.cream, P.linen, 0.2)}" opacity="0.6"/>
+		<rect x="20" y="58" width="60" height="6" rx="2" fill="${mix(P.silver, P.umber, 0.55)}"/>
+		<rect x="20" y="72" width="60" height="6" rx="2" fill="${mix(P.silver, P.umber, 0.6)}"/>
+		<rect x="46" y="36" width="8" height="26" fill="${P.bloodOrange}" opacity="0.7"/>`);
+}
+
 /** A goat's bell and clutter, sitting in the Schout's opened evidence chest. */
 export function openChestProp(): string {
 	const oak = mix(P.brownMid, P.umber, 0.35);

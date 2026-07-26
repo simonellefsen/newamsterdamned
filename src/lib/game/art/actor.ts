@@ -198,7 +198,21 @@ export const PALETTES: Record<string, ActorPalette> = {
 	// Mattaneck: deerskin coat, red trade-duffel trim, silver ornament. Duffel cloth was the
 	// single biggest thing the Dutch had to trade and Munsee people wore a great deal of it,
 	// so this is a working trader's dress, not a costume.
-	mattaneck: { coat: '#96794f', trim: '#8a3324', skin: P.skinMid, hat: '#3a3128', accent: '#c8ccd0' }
+	mattaneck: { coat: '#96794f', trim: '#8a3324', skin: P.skinMid, hat: '#3a3128', accent: '#c8ccd0' },
+	// Asser Levy, butcher: sober dark wool and good linen, and the only accent is the linen.
+	// Amsterdam's Jews dressed as Amsterdam's burghers did, so nothing here marks him out —
+	// which is precisely the argument he is making, and the reason the *absence* of Company
+	// gold on his hatband is the whole costume note.
+	levy: { coat: '#3b3129', trim: '#2a2420', skin: P.skinPale, hat: '#241d18', accent: '#d8cbae' },
+	// Jacob Barsimson: grey undyed wool, worn thin. He came over alone with what he stood in.
+	barsimson: { coat: '#6a6252', trim: '#4c4740', skin: P.skinPale, hat: '#3c382f', accent: '#d8cbae' },
+	// Cornelis van Tienhoven, Schout Fiscal: wine-dark broadcloth and a great deal of white
+	// linen. He is the best-dressed man in the game and he is going to be found in the river.
+	tienhoven: { coat: '#5a2430', trim: '#3a1a22', skin: P.skinPale, hat: '#2b1218', accent: '#efdfb8' },
+	// Dirck van Schelluyne, notary: black, small collar, and ink to the second knuckle.
+	notary: { coat: '#2a2e2c', trim: '#1d211f', skin: P.skinPale, hat: '#161917', accent: '#d8cbae' },
+	// Petrus Stuyvesant: Company black, Company orange, and one leg of turned oak.
+	stuyvesant: { coat: '#2b2b30', trim: '#1b1b20', skin: P.skinPale, hat: '#141418', accent: '#c2542c' }
 };
 
 /** Per-actor sprite quirks, keyed by actor id. */
@@ -210,5 +224,12 @@ export const SPRITE_TRAITS: Record<string, Partial<SpriteOptions>> = {
 	kleyn: { hat: true, collar: true },
 	// No Dutch hat and no falling band: at sprite size that silhouette alone tells you he is
 	// the one person in the market who is not dressed as a Company employee.
-	mattaneck: { hat: false, collar: false }
+	mattaneck: { hat: false, collar: false },
+	levy: { hat: true, collar: true },
+	// Barsimson kept a cap rather than a hat, so he is the shorter silhouette of the pair and
+	// the player can tell which of the two men at the gate is speaking without reading a name.
+	barsimson: { hat: false, collar: true },
+	tienhoven: { hat: true, collar: true },
+	notary: { hat: true, collar: false },
+	stuyvesant: { hat: true, collar: true, pegLeg: true }
 };

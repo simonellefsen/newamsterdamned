@@ -65,7 +65,11 @@ Everything below is true and is used as puzzle material.
 | **Sept 1654** — 23 Jewish refugees arrive from Recife after the Portuguese retake Brazil. Stuyvesant tries to expel them. | Act III |
 | **April 1655** — the WIC directors overrule him *in writing*, because Jewish shareholders hold capital in the Company. Piety loses to the balance sheet. | Act III's central document — and the game's thesis in one letter |
 | **Nov 1655** — **Asser Levy** petitions to stand watch at the Wall rather than pay the exemption tax. Refused. He appeals. He wins in 1657. | Act III climax |
-| **Sept 1655** — Stuyvesant sails for the Delaware with ~300 soldiers to take New Sweden. | Act IV trigger |
+| **Sept 1655** — Stuyvesant sails for the Delaware with ~300 soldiers to take New Sweden. | Act IV trigger; Act III's clock |
+| **The notary** — a Dutch notary kept a *protocol* for life; his certified copy was a public act, admissible without the original, backed by his oath rather than by anyone's authority over him. Dirck van Schelluyne practised in New Amsterdam from 1650. | Act III's solution, and the reason the act can be won at all |
+| **Cornelis van Tienhoven**, Schout Fiscal — prosecutor and sheriff at once, implicated in the Pavonia massacre of 1643, dismissed in 1656 over his accounts. His hat and cane were found floating in the North River. | Act III's antagonist, and the sting in one of its endings |
+| **Burgher-right**, 1657 — great (50 guilders) and small (20 guilders); the small one carried the right to keep a shop and trade. | What Levy is actually arguing for, and why the cheap option is the trap |
+| **Iron-gall ink** bites into the fibre and cannot be scraped out without leaving a hole; pages were dried with sand, not blotting paper. | Act III's forgery, and why it has to be an *addition* rather than an alteration |
 | **Sept 15, 1655 — the Peach Tree War.** ~500 Susquehannock, Lenape and Hackensack warriors canoe into the undefended town. The legend blames Hendrick van Dyck shooting a Native woman over peaches taken from his orchard. | Act IV |
 | **New Netherland never turned a profit for the WIC.** | The final joke |
 
@@ -154,16 +158,53 @@ to avoid — so the character was renamed to the invented **Mattaneck**, and the
 so on the record. Everything he says about how sewant was made, what it was worth and who
 lost when its value fell is drawn from the historical record. He himself is not.
 
-### Act III — *The Company's Conscience* — designed
+### Act III — *The Company's Conscience* — **implemented**
 
 Joost, needing Company favour, is hired to argue against **Asser Levy**'s petition to stand
 watch at the Wall. In the Fort's document room he finds the WIC directors' April letter —
 the one that already overruled Stuyvesant, for reasons of pure shareholder greed.
 
-The puzzle is not *how to get the letter*. The puzzle is that Joost has three buyers for
-it and only one of them is the right answer, and the game never says which.
+**Scenes:** The Stadt Huys bench chamber · The secretary's chamber in Fort Amsterdam · The
+Land Gate at dusk · Dirck van Schelluyne's front room, at night
+
+**Teaches:** paperwork. Act I was a scavenger hunt and Act II was a production line. Act III
+is about the thing this colony actually runs on — a sentence in the right book outranks any
+object in the world — and the same trick that saves Joost's neck is the one that either arms
+Levy or sells him.
+
+**Puzzle chain:**
+1. Van Tienhoven, the Schout Fiscal, retains Joost to write the town's case against the
+   petition, and mentions — pleasantly, as a *reading* — that the pawn returns record one
+   silver-banded leg, number 411, redeemed by ticket
+2. A quill off the secretary's desk, because nobody in the history of the world has been
+   hanged for a quill
+3. Into the fort on the Schout's seal, and in by volunteering to hold the tally-book for the
+   Delaware inventory — the cover story is doing paperwork
+4. The register says the April letter is *with H.H.* Stuyvesant comes out of his closet,
+   reads the commission, and warmly approves of it, which is the worst moment of Joost's week
+5. In the travelling case: the spare leg, back where Act I put it, with the pawnbroker's
+   brass tag **still wired to the socket**. He packs that case himself on Thursday
+6. In the document chest: the letter. Not one word about God — Brazil, and the stock
+7. One forged line in the fourth column of the register, and the letter is not missing, it is
+   *out*, signed to an office that exists on a commission Joost is holding
+8. Levy hands it straight back. A stolen paper is unusable; a **notarial copy** is a public
+   act and does not have to say where it slept on Tuesday — and the original must go back
+9. Van Schelluyne will not copy it until the register cannot contradict the story
+10. Return the tag to Wolfertsen, who closes the pawn entry with the literal truth, and the
+    charge dies of being uninteresting
+
+**Three endings, and the game never says which is right.** Van Tienhoven pays 200 guilders
+and burns the charge — in a bill on Amsterdam that clears in October. Mudge pays 250 in New
+Haven shell at the New Haven rate, which this city's bench has never recognised. Levy pays
+nothing at all and will not be talked up, because a right he has purchased can be sold again
+next year at a better price. Only the third awards a single point, and that is the only place
+in this game where the design states an opinion.
 
 The silver-banded leg from Act I comes back. Badly.
+
+**On the ending that matters:** the correct choice is why Joost is still on the island on the
+15th of September. All three endings leave him broke on the day the *Gelderland* sails — that
+is the joke — but only one of them leaves him broke on purpose.
 
 ### Act IV — *Peach Season* — designed
 

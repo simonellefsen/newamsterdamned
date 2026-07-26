@@ -192,7 +192,7 @@ export interface Scene {
 	/** Runs on every entry, after onFirstEnter. */
 	onEnter?: Action[];
 	/** Ambient loop hint for the audio layer. */
-	ambience?: 'harbour' | 'tavern' | 'fort' | 'wall' | 'market' | 'workshop';
+	ambience?: 'harbour' | 'tavern' | 'fort' | 'wall' | 'market' | 'workshop' | 'chamber';
 }
 
 /* ----------------------------------------------------------------- dialogue */

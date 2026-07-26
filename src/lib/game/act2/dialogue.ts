@@ -274,7 +274,7 @@ const mattaneck: DialogueTree = {
 		},
 		{
 			id: 'debasement',
-			prompt: 'Griet says the rate keeps falling. Six white to the stuiver, then eight, then more.',
+			prompt: 'Griet says the rate keeps falling. Six white beads to the stuiver, then eight, then more.',
 			visibleIf: { flag: 'knowsRecipe' },
 			script: [
 				{ op: 'LINE', actor: 'mattaneck', text: 'It does.' },
@@ -479,7 +479,7 @@ const mattaneckFinal: DialogueTree = {
 			visibleIf: { all: [{ flag: 'finalOpened' }, { has: 'kleyn-contract' }] },
 			exit: true,
 			script: [
-				{ op: 'NARRATE', text: '{{name}} takes the paper out of {{their}} coat and looks at it for a while, in the middle of a market, with eight hundred fathom of shell over {{their}} shoulder.' },
+				{ op: 'NARRATE', text: '{{name}} takes the paper out of {{their}} coat and looks at it for a while, in the middle of a market, with a hundred fathom of shell over {{their}} shoulder.' },
 				{ op: 'SAY', text: 'Take it.' },
 				{ op: 'REMOVE', item: 'kleyn-contract' },
 				{ op: 'SFX', sound: 'lock' },
@@ -512,15 +512,15 @@ const mattaneckFinal: DialogueTree = {
 				},
 				{ op: 'THINK', text: 'And I can never say it aloud to a living soul, because the sentence that describes it is also a confession.' },
 				{ op: 'LINE', actor: 'mattaneck', text: 'One more thing. How were you paid?' },
-				{ op: 'SAY', text: 'White sewant. Eight hundred fathom.' },
+				{ op: 'SAY', text: 'White sewant. A hundred fathom.' },
 				{ op: 'LINE', actor: 'mattaneck', text: 'At what rate.' },
-				{ op: 'SAY', text: 'Eight the stuiver. His rate.' },
+				{ op: 'SAY', text: 'Four the fathom. His rate.' },
 				{ op: 'NARRATE', text: 'Mattaneck looks at the sack on {{their}} shoulder. Then at {{their}} face. He does not smile, because he is not a man who would enjoy this.' },
-				{ op: 'LINE', actor: 'mattaneck', text: 'The rate is six.' },
-				{ op: 'SAY', text: 'It is going to be eight. That is the whole —' },
+				{ op: 'LINE', actor: 'mattaneck', text: 'White fetches two.' },
+				{ op: 'SAY', text: 'It is going to be four. That is the whole —' },
 				{ op: 'SAY', text: '...' },
 				{ op: 'SAY', text: 'Oh.' },
-				{ op: 'LINE', actor: 'mattaneck', text: 'When they read that paper it will not go to eight.' },
+				{ op: 'LINE', actor: 'mattaneck', text: 'When they read that paper it will not go to four.' },
 				{ op: 'THINK', text: 'He paid me in the thing he was about to make valuable. And I have just handed the man in front of me the reason it will not be.' },
 				{ op: 'SAY', text: 'I have halved my own wages. Deliberately. In public. On a Friday.' },
 				{ op: 'LINE', actor: 'mattaneck', text: 'Yes.' },
@@ -529,8 +529,9 @@ const mattaneckFinal: DialogueTree = {
 				{
 					op: 'ACT_END',
 					title: 'End of Act II',
-					body: '{{name}} {{surname}} walks off the Marckvelt with two hundred guilders of shell on {{their}} shoulder, four days to find two hundred more, and the private knowledge that {{they}} is the finest counterfeiter in North America.\n\nBehind {{them}}, a green door. Ahead of {{them}}, a bench of burgomasters about to become extremely interested in a piece of paper — and in the fort, three hundred soldiers loading onto ships for the Delaware. The town will be empty by the fifteenth.\n\nACT III — "The Company\x27s Conscience" — is written but not yet built. See DESIGN.md.',
-					button: 'Keep poking about'
+					body: '{{name}} {{surname}} walks off the Marckvelt with two hundred guilders of shell on {{their}} shoulder, four days to find two hundred more, and the private knowledge that {{they}} is the finest counterfeiter in North America.\n\nBehind {{them}}, a green door. Ahead of {{them}}, a bench of burgomasters about to become extremely interested in a piece of paper — and in the fort, three hundred soldiers loading onto ships for the Delaware. The town will be empty by the fifteenth.',
+					next: { scene: 'stadt-huys' },
+					button: 'Act III — The Company\x27s Conscience'
 				}
 			]
 		}
@@ -1102,8 +1103,8 @@ const kleynInside: DialogueTree = {
 				},
 				{ op: 'LINE', actor: 'kleyn', text: 'I will pay you in sewant, at my rate, like everybody else in New Netherland.' },
 				{ op: 'SAY', text: 'White sewant.' },
-				{ op: 'LINE', actor: 'kleyn', text: 'White sewant. Eight the stuiver.' },
-				{ op: 'THINK', text: 'Eight the stuiver. The rate is six. He is paying me a third more than the market for the shell, out of his own warehouse, and looking pleased about it.' },
+				{ op: 'LINE', actor: 'kleyn', text: 'White sewant. Four the fathom.' },
+				{ op: 'THINK', text: 'Four the fathom. White fetches two. He is paying me exactly twice the market for the shell, out of his own warehouse, and looking pleased about it.' },
 				{ op: 'SAY', text: 'That is very generous.' },
 				{ op: 'LINE', actor: 'kleyn', text: 'It is.' },
 				{ op: 'NARRATE', text: 'He goes out through the back of the room, still talking, in the manner of a man who has never once had to check whether he was alone.' },
