@@ -18,15 +18,18 @@ import { ITEMS_ACT2 } from './act2/items';
 import { SCENES_ACT3 } from './act3/scenes';
 import { DIALOGUES_ACT3 } from './act3/dialogue';
 import { ITEMS_ACT3 } from './act3/items';
+import { SCENES_ACT4 } from './act4/scenes';
+import { DIALOGUES_ACT4 } from './act4/dialogue';
+import { ITEMS_ACT4 } from './act4/items';
 import { PROTAGONISTS, resolveTokens, type ProtagonistId } from './protagonist';
 
 let registered = false;
 
 export function loadContent() {
 	if (registered) return;
-	registerScenes([...SCENES, ...SCENES_ACT2, ...SCENES_ACT3]);
-	registerDialogues([...DIALOGUES, ...DIALOGUES_ACT2, ...DIALOGUES_ACT3]);
-	registerItems([...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3]);
+	registerScenes([...SCENES, ...SCENES_ACT2, ...SCENES_ACT3, ...SCENES_ACT4]);
+	registerDialogues([...DIALOGUES, ...DIALOGUES_ACT2, ...DIALOGUES_ACT3, ...DIALOGUES_ACT4]);
+	registerItems([...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3, ...ITEMS_ACT4]);
 	// Every displayed string passes through here so `{{name}}` / `{{their}}` resolve to
 	// whichever Baksteen the player picked.
 	setTextResolver((text) =>
@@ -60,4 +63,11 @@ export function newGame(who: ProtagonistId) {
 export const ACT_ONE_MAX = 225;
 export const ACT_TWO_MAX = 275;
 export const ACT_THREE_MAX = 325;
-export const SCORE_MAX = ACT_ONE_MAX + ACT_TWO_MAX + ACT_THREE_MAX;
+/**
+ * Act IV is short and its points are all in the first scene and at the gate. Every rescue in
+ * `town-raid` awards **zero**, deliberately: three acts of Sierra scoring have taught the
+ * player to read points as approval, and the one thing this act will not do is grade who they
+ * went back for. Leaving on the tide scores nothing either.
+ */
+export const ACT_FOUR_MAX = 145;
+export const SCORE_MAX = ACT_ONE_MAX + ACT_TWO_MAX + ACT_THREE_MAX + ACT_FOUR_MAX;

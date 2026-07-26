@@ -48,7 +48,7 @@
 			</div>
 
 			<p class="credit">
-				Acts I to III of four. Point at things. Right-click for verbs.<br />
+				All four acts. Point at things. Right-click for verbs.<br />
 				You owe the West India Company four hundred guilders and the tide turns Thursday week.
 			</p>
 		</div>

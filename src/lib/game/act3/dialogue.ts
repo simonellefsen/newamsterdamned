@@ -216,8 +216,9 @@ const tienhoven: DialogueTree = {
 				{
 					op: 'ACT_END',
 					title: 'End of Act III',
-					body: 'The resolution went into the minute-book on Saturday in {{name}} {{surname}}\'s own fair hand, all seven reasons of it, and the bench was satisfied, and the two men at the gate were told to pay their guilder and a half a month and be grateful.\n\nCornelis van Tienhoven was dismissed from the office of Schout Fiscal within the year for helping himself to the Company\'s money. His hat and his cane were found floating in the North River. Nobody was ever paid the two hundred guilders, because nobody was ever able to find him to ask.\n\nThe bill is in {{their}} coat. The Gelderland sails on the fifteenth. ACT IV — "Peach Season" — is designed but not yet built. See DESIGN.md.',
-					button: 'Keep poking about'
+					body: 'The resolution went into the minute-book on Saturday in {{name}} {{surname}}\'s own fair hand, all seven reasons of it, and the bench was satisfied, and the two men at the gate were told to pay their guilder and a half a month and be grateful.\n\nCornelis van Tienhoven was dismissed from the office of Schout Fiscal within the year for helping himself to the Company\'s money. His hat and his cane were found floating in the North River. Nobody was ever paid the two hundred guilders, because nobody was ever able to find him to ask.\n\nThe bill is in {{their}} coat. The Gelderland sails on the fifteenth.',
+					next: { scene: 'strand-dawn' },
+					button: 'Act IV — Peach Season'
 				}
 			]
 		}
@@ -614,8 +615,9 @@ const levy: DialogueTree = {
 				{
 					op: 'ACT_END',
 					title: 'End of Act III',
-					body: 'Nobody paid {{name}} {{surname}} anything. The twenty guilders were never earned, the two hundred were never offered, and the eleven guilders of shell that bought the notary\'s seal are gone. {{They}} is poorer at the end of this week than {{they}} was at the start of it, by {{their}} own free choice, for the first time in {{their}} life.\n\nAsser Levy was refused on the fifth of November, and again after that. In 1657 he was admitted a burgher of this city. He was licensed as a butcher, he held land, he sat on a jury, and he lent money towards the building of a Lutheran church — for people who had themselves been denied the right to worship in public in this town. He outlived van Tienhoven, and Stuyvesant, and the colony.\n\nThe Gelderland sails on the fifteenth of September and {{name}} cannot pay for the berth. Which is why {{they}} will still be standing on this island on the afternoon the canoes come. ACT IV — "Peach Season" — is designed but not yet built. See DESIGN.md.',
-					button: 'Keep poking about'
+					body: 'Nobody paid {{name}} {{surname}} anything. The twenty guilders were never earned, the two hundred were never offered, and the eleven guilders of shell that bought the notary\'s seal are gone. {{They}} is poorer at the end of this week than {{they}} was at the start of it, by {{their}} own free choice, for the first time in {{their}} life.\n\nAsser Levy was refused on the fifth of November, and again after that. In 1657 he was admitted a burgher of this city. He was licensed as a butcher, he held land, he sat on a jury, and he lent money towards the building of a Lutheran church — for people who had themselves been denied the right to worship in public in this town. He outlived van Tienhoven, and Stuyvesant, and the colony.\n\nThe Gelderland sails on the fifteenth of September and {{name}} cannot pay for the berth — but a ship still needs somebody to keep its books, and that is the one thing {{they}} has never tried to sell honestly.',
+					next: { scene: 'strand-dawn' },
+					button: 'Act IV — Peach Season'
 				}
 			]
 		}
@@ -992,8 +994,9 @@ const mudge3: DialogueTree = {
 				{
 					op: 'ACT_END',
 					title: 'End of Act III',
-					body: 'The letter went east to New Haven inside a Puritan\'s coat, and from there — eventually, by way of several hands and one commission of inquiry — to London, where men who had never seen a beaver read it with great attention.\n\nIn August 1664 an English squadron came into the harbour and New Amsterdam surrendered without a shot, on terms, after Stuyvesant was talked out of firing by his own burgomasters and his own son. The town changed its name and kept its habits.\n\n{{name}} {{surname}} is holding two hundred and fifty guilders of New Haven shell, at the New Haven rate, in a city whose bench has never once recognised it. The Gelderland sails on the fifteenth. ACT IV — "Peach Season" — is designed but not yet built. See DESIGN.md.',
-					button: 'Keep poking about'
+					body: 'The letter went east to New Haven inside a Puritan\'s coat, and from there — eventually, by way of several hands and one commission of inquiry — to London, where men who had never seen a beaver read it with great attention.\n\nIn August 1664 an English squadron came into the harbour and New Amsterdam surrendered without a shot, on terms, after Stuyvesant was talked out of firing by his own burgomasters and his own son. The town changed its name and kept its habits.\n\n{{name}} {{surname}} is holding two hundred and fifty guilders of New Haven shell, at the New Haven rate, in a city whose bench has never once recognised it. The Gelderland sails on the fifteenth.',
+					next: { scene: 'strand-dawn' },
+					button: 'Act IV — Peach Season'
 				}
 			]
 		},

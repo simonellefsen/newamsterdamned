@@ -206,16 +206,53 @@ The silver-banded leg from Act I comes back. Badly.
 15th of September. All three endings leave him broke on the day the *Gelderland* sails — that
 is the joke — but only one of them leaves him broke on purpose.
 
-### Act IV — *Peach Season* — designed
+### Act IV — *Peach Season* — **implemented**
 
-Stuyvesant sails. The soldiers go with him. Joost has his 400 guilders and a berth on the
-*Gelderland*, and the tide is right, and the town is empty.
+Stuyvesant sails. The soldiers go with him. The tide is right, and the town is empty.
 
 Then he hears canoes.
 
-Short. Mostly not funny. The last puzzle has no clever solution — no combination, no verb,
-no item. Only a choice about who you can reach before the gate closes, and the knowledge
-that the man whose peaches started this is already safely aboard a ship.
+**Scenes:** The Strand before dawn on 15 September · Pearl Street that afternoon · Inside the
+Land Gate at dusk
+
+**Teaches:** nothing. That is the point. Act I taught the verbs, Act II manufacture, Act III
+the record — and Act IV withdraws the whole apparatus. There is one puzzle in the first scene
+and after that there is no combination, no verb and no item that helps.
+
+**Puzzle chain:**
+1. Dawn on the Strand, at the exact spot and hour the game opened. The *Gelderland* sails on
+   the evening tide and her master will take Joost as **ship's clerk** — no fare, no wage —
+   because he can write, which is the one honest skill he has never tried to sell
+2. Look at the water. Sixty-four canoes, coming down on the ebb
+3. The klapperman is asleep in the mud with his rattle beside him, exactly as he was on the
+   first morning of the game. In Act I you used it to make one man run. Now you hand it to
+   him and he raises the town with it
+4. And then it is the afternoon, and there are five people out in the street, and you have
+   **three trips**
+
+**The five doors:** Griet, who will not leave her cellar until you remind her she is holding
+the key you brought her back in Act I. Mattaneck, in a doorway, in more danger from four
+hundred frightened Dutchmen behind a wall than from anybody on the river — he needs someone
+to walk in front of him and keep talking. Aert, sixty-one, who has run the Broad Way eleven
+times and is sitting against a wall. Reynier Kleyn, behind two feet of Holland brick, who does
+not need saving and pays you forty guilders in silver anyway. And Hendrick van Dyck, whose
+orchard is the date on all of this, bleeding on his own step, who will never be charged with
+anything and does not know what the question is.
+
+The lane to the wharf is open the whole time. It costs nothing, nothing hints against it, and
+it ends the game.
+
+**The scoreboard does not move for any of it.** Every rescue is worth zero. Three acts of
+Sierra scoring have taught the player to read points as approval, and the one thing this act
+refuses to do is grade who they went back for. The act's points are all in the first scene and
+at the gate, and `act4.solvable.test.ts` fails if anybody ever "fixes" that.
+
+**On van Dyck.** The design brief had him already safely aboard a ship, so that the man who
+caused it escapes while others pay. The record has him wounded by an arrow at his own front
+door, surviving, and never being charged with anything by anybody — which delivers the same
+point and is true, so the game uses that instead. Nobody's death is invented in this act: the
+Almanac carries the real figures and the game does not put a named real person in a grave the
+record did not put them in.
 
 ---
 
