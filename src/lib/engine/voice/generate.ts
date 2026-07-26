@@ -35,29 +35,9 @@ import {
 	saveCacheIndex,
 	type CacheIndex
 } from './ttsCache';
+import { OPENAI_VOICE_CAST } from './cast';
 
-/** OpenAI TTS voice names → cast roles. Adjust after listening. */
-export const OPENAI_VOICE_CAST: Record<string, string> = {
-	narrator: 'onyx',
-	joost: 'echo',
-	trijn: 'nova',
-	griet: 'shimmer',
-	klapperman: 'fable',
-	yankee: 'alloy',
-	sergeant: 'onyx',
-	pawnbroker: 'echo',
-	domingo: 'onyx',
-	mattaneck: 'fable',
-	kleyn: 'onyx',
-	tienhoven: 'onyx',
-	stuyvesant: 'onyx',
-	levy: 'echo',
-	barsimson: 'fable',
-	notary: 'echo',
-	skipper: 'alloy',
-	vandyck: 'echo',
-	generic: 'alloy'
-};
+export { OPENAI_VOICE_CAST };
 
 export type GenerateOptions = {
 	/** Limit to one act (default 1 for first pack). */

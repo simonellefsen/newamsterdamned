@@ -160,7 +160,13 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 
-Spoken voice is **off by default**. Turn on **System / pack (beta)** in the Esc menu to hear lines (narrator, protagonists, NPCs). If a pre-generated pack is present under `/voice/v1/`, those clips play first; otherwise the browser’s system voices are used. Captions always stay on.
+Spoken voice is **off by default**. In **Esc → Preferences**:
+
+- **Spoken voice** — On / Off  
+- **Voice source** — Auto (pack → OpenAI → system), pack only, or system only  
+- **OpenAI API key** — optional; Save / Test / Clear. Stored only in this browser (not in save slots). Test speaks a short sample via the same-origin `/api/tts` proxy (Vite dev middleware or Vercel `api/tts.js`). Repeat lines are cached in the browser to limit cost.
+
+Captions always stay on.
 
 ```bash
 npm run voice:extract              # corpus size / dual-protag cost estimate

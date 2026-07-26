@@ -30,9 +30,17 @@
 		getSettings,
 		loadSettings,
 		saveSettings,
-		type Settings
+		type Settings,
+		type VoiceBackendPref
 	} from '$lib/engine/settings';
-	import { prefetchVoicePack } from '$lib/engine/voice';
+	import {
+		clearOpenAiKey,
+		getSecrets,
+		loadSecrets,
+		looksLikeOpenAiKey,
+		saveSecrets
+	} from '$lib/engine/secrets';
+	import { prefetchVoicePack, testOpenAiKey } from '$lib/engine/voice';
 	import {
 		exportSaveJson,
 		importIntoSlot,
@@ -61,6 +69,11 @@
 	let saveNote = $state<string | null>(null);
 	/** Reactive copy of settings for UI controls. */
 	let prefs = $state<Settings>(loadSettings());
+	/** OpenAI key is stored separately from general prefs. */
+	let apiKeyDraft = $state(loadSecrets().openaiApiKey);
+	let apiKeyVisible = $state(false);
+	let keyTestBusy = $state(false);
+	let keyTestNote = $state<string | null>(null);
 
 	loadContent();
 	initAudioFromSettings();
@@ -77,6 +90,44 @@
 		muted = prefs.muted;
 		applyVolumes(prefs);
 		applyTextScale(prefs.textScale);
+	}
+
+	function persistApiKey() {
+		const key = apiKeyDraft.trim();
+		saveSecrets({ openaiApiKey: key });
+		apiKeyDraft = getSecrets().openaiApiKey;
+		keyTestNote = key
+			? looksLikeOpenAiKey(key)
+				? 'Key saved on this device only.'
+				: 'Saved — format looks unusual; Test to verify.'
+			: 'Key cleared.';
+		setTimeout(() => {
+			if (keyTestNote?.startsWith('Key') || keyTestNote?.startsWith('Saved')) keyTestNote = null;
+		}, 2800);
+	}
+
+	function clearApiKey() {
+		clearOpenAiKey();
+		apiKeyDraft = '';
+		keyTestNote = 'Key cleared.';
+		setTimeout(() => (keyTestNote = null), 2400);
+	}
+
+	async function testApiKey() {
+		const key = apiKeyDraft.trim();
+		if (key) saveSecrets({ openaiApiKey: key });
+		keyTestBusy = true;
+		keyTestNote = 'Testing…';
+		try {
+			const result = await testOpenAiKey(key || getSecrets().openaiApiKey);
+			keyTestNote = result.message;
+			if (result.ok && !prefs.voiceEnabled) {
+				refreshPrefs({ voiceEnabled: true });
+				prefetchVoicePack();
+			}
+		} finally {
+			keyTestBusy = false;
+		}
 	}
 
 	/* Score toasts fade themselves out. */
@@ -442,10 +493,26 @@
 								}}
 							>
 								<option value="off">Off (default)</option>
-								<option value="on">System / pack (beta)</option>
+								<option value="on">On</option>
 							</select>
 						</label>
 						{#if prefs.voiceEnabled}
+							<label class="pref">
+								<span>Voice source</span>
+								<select
+									value={prefs.voiceBackend}
+									onchange={(e) =>
+										refreshPrefs({
+											voiceBackend: (e.currentTarget as HTMLSelectElement)
+												.value as VoiceBackendPref
+										})}
+								>
+									<option value="auto">Auto (pack → OpenAI → system)</option>
+									<option value="pack">Pack only</option>
+									<option value="webspeech">System voice only</option>
+									<option value="off">Force silent</option>
+								</select>
+							</label>
 							<label class="pref">
 								<span>Voice volume</span>
 								<input
@@ -466,7 +533,8 @@
 									value={prefs.thinkVoice}
 									onchange={(e) =>
 										refreshPrefs({
-											thinkVoice: (e.currentTarget as HTMLSelectElement).value as Settings['thinkVoice']
+											thinkVoice: (e.currentTarget as HTMLSelectElement)
+												.value as Settings['thinkVoice']
 										})}
 								>
 									<option value="soft">Soft</option>
@@ -474,6 +542,50 @@
 									<option value="off">Silent</option>
 								</select>
 							</label>
+
+							<div class="pref-block">
+								<p class="pref-block-title">OpenAI API key (optional)</p>
+								<p class="pref-block-help">
+									Stored only in this browser. Used for live TTS via a same-origin proxy and for
+									hearing a test line. Pack generation still uses
+									<code>OPENAI_API_KEY</code> in <code>.env.local</code>. Do not use a production
+									secret you cannot rotate.
+								</p>
+								<div class="keyrow">
+									<input
+										class="keyinput"
+										type={apiKeyVisible ? 'text' : 'password'}
+										autocomplete="off"
+										spellcheck="false"
+										placeholder="sk-…"
+										value={apiKeyDraft}
+										oninput={(e) =>
+											(apiKeyDraft = (e.currentTarget as HTMLInputElement).value)}
+									/>
+									<button
+										type="button"
+										class="mini"
+										onclick={() => (apiKeyVisible = !apiKeyVisible)}
+									>
+										{apiKeyVisible ? 'Hide' : 'Show'}
+									</button>
+								</div>
+								<div class="keyactions">
+									<button type="button" class="mini" onclick={persistApiKey}>Save key</button>
+									<button
+										type="button"
+										class="mini"
+										disabled={keyTestBusy}
+										onclick={() => void testApiKey()}
+									>
+										{keyTestBusy ? 'Testing…' : 'Test key'}
+									</button>
+									<button type="button" class="mini" onclick={clearApiKey}>Clear</button>
+								</div>
+								{#if keyTestNote}
+									<p class="keynote">{keyTestNote}</p>
+								{/if}
+							</div>
 						{/if}
 					</div>
 
@@ -722,6 +834,77 @@
 		color: var(--parchment);
 		padding: 0.3rem 0.45rem;
 		border-radius: 2px;
+	}
+
+	.pref-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		max-width: 28rem;
+		width: 100%;
+		margin: 0.35rem auto 0;
+		padding: 0.55rem 0.65rem;
+		border: 1px solid rgba(230, 199, 107, 0.14);
+		border-radius: 2px;
+		background: rgba(0, 0, 0, 0.2);
+	}
+
+	.pref-block-title {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 0.64rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--gold);
+	}
+
+	.pref-block-help {
+		margin: 0;
+		font-size: 0.72rem;
+		line-height: 1.45;
+		color: var(--parchment-dim);
+		opacity: 0.85;
+	}
+
+	.pref-block-help code {
+		font-size: 0.9em;
+		color: var(--parchment);
+	}
+
+	.keyrow {
+		display: flex;
+		gap: 0.4rem;
+		align-items: center;
+	}
+
+	.keyinput {
+		flex: 1;
+		min-width: 0;
+		font: inherit;
+		font-size: 0.78rem;
+		padding: 0.35rem 0.5rem;
+		background: rgba(20, 16, 12, 0.95);
+		border: 1px solid rgba(230, 199, 107, 0.28);
+		color: var(--parchment);
+		border-radius: 2px;
+	}
+
+	.keyinput:focus {
+		outline: none;
+		border-color: var(--gold-bright);
+	}
+
+	.keyactions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.keynote {
+		margin: 0;
+		font-size: 0.72rem;
+		line-height: 1.4;
+		color: var(--gold);
 	}
 
 	.slots {

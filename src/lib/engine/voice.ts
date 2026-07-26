@@ -1,9 +1,10 @@
 /**
- * Spoken voice facade. Progressive: default silent; Web Speech opt-in; packs when present.
+ * Spoken voice facade. Progressive: default silent.
  *
- * Per-line hybrid resolution (ROADMAP K5):
+ * Per-line hybrid resolution:
  *   voice off / muted → null
- *   pack has key → pack
+ *   pack has key → pack MP3
+ *   OpenAI key set (and backend allows) → /api/tts proxy (+ browser cache)
  *   webspeech allowed → system TTS
  *   else → null
  *
@@ -13,6 +14,7 @@
 import { game } from './state.svelte';
 import { getVoiceProfile } from './registry';
 import { getSettings } from './settings';
+import { getSecrets } from './secrets';
 import type { VoiceProfile } from './types';
 import { audioKey, type SpeechKind } from './voice/keys';
 import {
@@ -23,6 +25,7 @@ import {
 	speakPack
 } from './voice/pack';
 import { speakWebSpeech, cancelWebSpeech, isWebSpeechAvailable } from './voice/webspeech';
+import { cancelOpenAiSpeech, speakOpenAi } from './voice/openai';
 
 export type { SpeechKind };
 
@@ -66,8 +69,17 @@ function webspeechAllowed(): boolean {
 function packAllowed(): boolean {
 	const s = getSettings();
 	if (s.voiceBackend === 'off' || s.voiceBackend === 'webspeech') return false;
-	// auto | pack
 	return true;
+}
+
+function openAiAllowed(): boolean {
+	const s = getSettings();
+	if (s.voiceBackend === 'off' || s.voiceBackend === 'webspeech' || s.voiceBackend === 'pack') {
+		return false;
+	}
+	// auto: use OpenAI when a key is stored
+	const key = getSecrets().openaiApiKey;
+	return key.length > 0;
 }
 
 /** Kick off manifest fetch once voice is enabled (non-blocking). */
@@ -79,9 +91,35 @@ export function prefetchVoicePack() {
 	void ensurePackLoaded();
 }
 
+function makeHandle(
+	gen: number,
+	cancel: () => void,
+	estimatedMs?: number
+): { handle: VoiceHandle; resolveDone: () => void } {
+	let settled = false;
+	let resolveDone: () => void = () => {};
+	const done = new Promise<void>((r) => {
+		resolveDone = () => {
+			if (settled) return;
+			settled = true;
+			r();
+		};
+	});
+	const handle: VoiceHandle = {
+		gen,
+		done,
+		estimatedMs,
+		didPlay: true,
+		cancel() {
+			cancel();
+			resolveDone();
+		}
+	};
+	return { handle, resolveDone };
+}
+
 /**
  * Start speech for a line, or return null when silent.
- * Caller must only early-release when a non-null handle is returned.
  */
 export function speakLine(req: VoiceRequest): VoiceHandle | null {
 	const s = getSettings();
@@ -101,30 +139,16 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 		s.voiceVolume * (req.kind === 'think' && s.thinkVoice === 'soft' ? 0.55 : 1)
 	);
 
-	// 1) Pack hit (hybrid)
+	// 1) Pack hit
 	if (packAllowed() && packHasKey(key)) {
 		const hit = packLookup(key);
 		cancelVoice();
 		const gen = ++currentGen;
-		let settled = false;
-		let resolveDone: () => void = () => {};
-		const done = new Promise<void>((r) => {
-			resolveDone = () => {
-				if (settled) return;
-				settled = true;
-				r();
-			};
-		});
-		const handle: VoiceHandle = {
-			gen,
-			done,
-			estimatedMs: hit?.ms,
-			didPlay: true,
-			cancel() {
-				cancelPack();
-				resolveDone();
-			}
-		};
+		const { handle, resolveDone } = makeHandle(gen, () => {
+			cancelPack();
+			cancelOpenAiSpeech();
+			cancelWebSpeech();
+		}, hit?.ms);
 		const started = speakPack({
 			key,
 			volume,
@@ -133,43 +157,51 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 				if (gen === currentGen) resolveDone();
 			}
 		});
-		if (!started) {
-			// Fall through to webspeech
-		} else {
+		if (started) {
 			active = handle;
 			return handle;
 		}
 	}
 
-	// 2) Web Speech
+	// 2) OpenAI live TTS (user key via /api/tts)
+	if (openAiAllowed()) {
+		const apiKey = getSecrets().openaiApiKey;
+		cancelVoice();
+		const gen = ++currentGen;
+		const { handle, resolveDone } = makeHandle(gen, () => {
+			cancelOpenAiSpeech();
+			cancelPack();
+			cancelWebSpeech();
+		});
+		const started = speakOpenAi({
+			text: req.text,
+			profile,
+			cacheKey: key,
+			apiKey,
+			volume,
+			isCurrent: () => gen === currentGen,
+			onEnd: () => {
+				if (gen === currentGen) resolveDone();
+			}
+		});
+		if (started) {
+			active = handle;
+			return handle;
+		}
+	}
+
+	// 3) Web Speech
 	if (!webspeechAllowed()) return null;
 
 	cancelVoice();
 	const gen = ++currentGen;
-
 	const rateMul = req.kind === 'narrate' ? 0.92 : req.kind === 'think' ? 0.95 : 1;
 	const pitchMul = req.kind === 'think' ? 0.92 : 1;
-
-	let settled = false;
-	let resolveDone: () => void = () => {};
-	const done = new Promise<void>((r) => {
-		resolveDone = () => {
-			if (settled) return;
-			settled = true;
-			r();
-		};
+	const { handle, resolveDone } = makeHandle(gen, () => {
+		cancelWebSpeech();
+		cancelPack();
+		cancelOpenAiSpeech();
 	});
-
-	const handle: VoiceHandle = {
-		gen,
-		done,
-		didPlay: true,
-		cancel() {
-			cancelWebSpeech();
-			cancelPack();
-			resolveDone();
-		}
-	};
 
 	const started = speakWebSpeech({
 		text: req.text,
@@ -190,7 +222,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 	return handle;
 }
 
-/** Cancel any in-flight utterance. Safe to call when nothing is playing. */
+/** Cancel any in-flight utterance. */
 export function cancelVoice() {
 	currentGen++;
 	if (active) {
@@ -204,6 +236,7 @@ export function cancelVoice() {
 	} else {
 		cancelWebSpeech();
 		cancelPack();
+		cancelOpenAiSpeech();
 	}
 }
 
@@ -211,7 +244,6 @@ export function currentVoiceGen() {
 	return currentGen;
 }
 
-/** Test helper: force silent without touching settings. */
 export function __resetVoiceForTests() {
 	cancelVoice();
 	currentGen = 0;
@@ -221,3 +253,4 @@ export function __resetVoiceForTests() {
 
 export type { VoiceProfile };
 export { audioKey } from './voice/keys';
+export { testOpenAiKey } from './voice/openai';
