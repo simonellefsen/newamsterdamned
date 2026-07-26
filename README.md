@@ -161,12 +161,14 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 
-Spoken voice is **off by default**. In **Esc → Preferences**:
+Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):
 
+- **Dialog text** — Normal through Huge (`[` / `]` or A−/A+ while playing)
 - **Spoken voice** — On / Off  
 - **Voice source** — Auto (pack → OpenAI → system), pack only, or system only  
-- **OpenAI API key** — optional; Save / Test / Clear. Stored only in this browser (not in save slots). Test speaks a short sample via the same-origin `/api/tts` proxy (Vite dev middleware or Vercel `api/tts.js`). Repeat lines are cached in the browser to limit cost.
-- **How to get an API key** (in-menu foldout): [platform.openai.com](https://platform.openai.com/) → [API keys](https://platform.openai.com/api-keys) → Create secret key (`sk-…`) → add billing if asked → paste → Save → Test.
+- **Test system voice** — free OS sample, no API key  
+- **OpenAI API key** — optional; Save / Test / Clear (this browser only). Test uses same-origin `/api/tts`.  
+- **How to get an API key** — foldout with links to platform signup, keys, and billing  
 
 Captions always stay on.
 

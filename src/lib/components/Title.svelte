@@ -10,8 +10,9 @@
 	interface Props {
 		onStart: (who: ProtagonistId) => void;
 		onContinue: () => void;
+		onSettings?: () => void;
 	}
-	let { onStart, onContinue }: Props = $props();
+	let { onStart, onContinue, onSettings }: Props = $props();
 
 	const art = pearlStreet();
 	let canContinue = $state(false);
@@ -45,11 +46,15 @@
 				{#if canContinue}
 					<button class="btn" onclick={onContinue}>Continue</button>
 				{/if}
+				{#if onSettings}
+					<button class="btn" onclick={onSettings}>Settings</button>
+				{/if}
 			</div>
 
 			<p class="credit">
 				All four acts. Point at things. Right-click for verbs.<br />
-				You owe the West India Company four hundred guilders and the tide turns Thursday week.
+				You owe the West India Company four hundred guilders and the tide turns Thursday week.<br />
+				<span class="hint">Settings: dialog text size, voice, and optional OpenAI key — before you play.</span>
 			</p>
 		</div>
 	{:else}
@@ -295,6 +300,15 @@
 		line-height: 1.7;
 		color: var(--parchment-dim);
 		opacity: 0.6;
+	}
+
+	.hint {
+		display: inline-block;
+		margin-top: 0.35rem;
+		opacity: 0.9;
+		color: var(--gold);
+		font-style: normal;
+		letter-spacing: 0.02em;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
