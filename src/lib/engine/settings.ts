@@ -67,13 +67,42 @@ function clamp01(n: unknown, fallback: number): number {
 	return Math.min(1, Math.max(0, v));
 }
 
+/** Dialog text scale steps (bubbles + dialogue choices). */
+export const TEXT_SCALE_STEPS = [1, 1.15, 1.3, 1.5, 1.75, 2] as const;
+export type TextScaleStep = (typeof TEXT_SCALE_STEPS)[number];
+
+export const TEXT_SCALE_LABEL: Record<string, string> = {
+	'1': 'Normal',
+	'1.15': 'Large',
+	'1.3': 'Larger',
+	'1.5': 'XL',
+	'1.75': 'XXL',
+	'2': 'Huge'
+};
+
 function clampTextScale(n: unknown): number {
 	const v = typeof n === 'number' ? n : Number(n);
 	if (!Number.isFinite(v)) return 1;
-	// Snap to the three UI steps so CSS stays predictable.
-	if (v >= 1.25) return 1.3;
-	if (v >= 1.08) return 1.15;
-	return 1;
+	// Snap to nearest UI step.
+	let best: number = TEXT_SCALE_STEPS[0];
+	let bestDist = Math.abs(v - best);
+	for (const step of TEXT_SCALE_STEPS) {
+		const d = Math.abs(v - step);
+		if (d < bestDist) {
+			best = step;
+			bestDist = d;
+		}
+	}
+	return best;
+}
+
+/** Next/previous step for quick A+/A− controls. */
+export function stepTextScale(current: number, dir: 1 | -1): number {
+	const c = clampTextScale(current);
+	const i = TEXT_SCALE_STEPS.indexOf(c as TextScaleStep);
+	const idx = i < 0 ? 0 : i;
+	const next = Math.min(TEXT_SCALE_STEPS.length - 1, Math.max(0, idx + dir));
+	return TEXT_SCALE_STEPS[next];
 }
 
 function clampTextSpeed(n: unknown): number {

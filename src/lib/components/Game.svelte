@@ -30,6 +30,9 @@
 		getSettings,
 		loadSettings,
 		saveSettings,
+		stepTextScale,
+		TEXT_SCALE_LABEL,
+		TEXT_SCALE_STEPS,
 		type Settings,
 		type VoiceBackendPref
 	} from '$lib/engine/settings';
@@ -252,6 +255,11 @@
 		refreshPrefs();
 	}
 
+	function bumpDialogText(dir: 1 | -1) {
+		const next = stepTextScale(prefs.textScale, dir);
+		refreshPrefs({ textScale: next });
+	}
+
 	function downloadSave(slot: Slot) {
 		const json = exportSaveJson(slot);
 		if (!json) {
@@ -322,6 +330,15 @@
 		if (e.key === 'a' || e.key === 'A') almanacOpen = !almanacOpen;
 		if (e.key === 'h' || e.key === 'H') hintsOpen = !hintsOpen;
 		if (e.key === 'm' || e.key === 'M') mapOpen = !mapOpen;
+		// [ and ] enlarge/shrink dialog text without opening the menu.
+		if (e.key === ']' || e.key === '}') {
+			e.preventDefault();
+			bumpDialogText(1);
+		}
+		if (e.key === '[' || e.key === '{') {
+			e.preventDefault();
+			bumpDialogText(-1);
+		}
 		if (e.key === ' ' || e.key === 'Enter') {
 			e.preventDefault();
 			/**
@@ -381,6 +398,27 @@
 					Almanac <span class="tally">{game.lore.length}/{ALMANAC.length}</span>
 				</button>
 				<span class="score">{game.score} / {SCORE_MAX}</span>
+				<span class="text-size" title="Dialog text size ([ and ])">
+					<button
+						type="button"
+						class="icon icon--text"
+						onclick={() => bumpDialogText(-1)}
+						aria-label="Smaller dialog text"
+						disabled={prefs.textScale <= TEXT_SCALE_STEPS[0]}
+					>
+						A−
+					</button>
+					<span class="text-size-label">{TEXT_SCALE_LABEL[String(prefs.textScale)] ?? 'Normal'}</span>
+					<button
+						type="button"
+						class="icon icon--text"
+						onclick={() => bumpDialogText(1)}
+						aria-label="Larger dialog text"
+						disabled={prefs.textScale >= TEXT_SCALE_STEPS[TEXT_SCALE_STEPS.length - 1]}
+					>
+						A+
+					</button>
+				</span>
 				<button class="icon" onclick={toggleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
 					{muted ? '🔇' : '🔊'}
 				</button>
@@ -458,15 +496,15 @@
 							/>
 						</label>
 						<label class="pref">
-							<span>Text size</span>
+							<span>Dialog text</span>
 							<select
 								value={String(prefs.textScale)}
 								onchange={(e) =>
 									refreshPrefs({ textScale: Number((e.currentTarget as HTMLSelectElement).value) })}
 							>
-								<option value="1">Normal</option>
-								<option value="1.15">Large</option>
-								<option value="1.3">Larger</option>
+								{#each TEXT_SCALE_STEPS as step (step)}
+									<option value={String(step)}>{TEXT_SCALE_LABEL[String(step)]}</option>
+								{/each}
 							</select>
 						</label>
 						<label class="pref">
@@ -636,7 +674,8 @@
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
 						thing · Double-click an item to examine · Hold <kbd>Space</kbd> or the Eye button to
 						show what is interactive · <kbd>H</kbd> for a hint · <kbd>M</kbd> for the map ·
-						<kbd>A</kbd> for the Almanac · <kbd>Esc</kbd> for this menu
+						<kbd>A</kbd> for the Almanac · <kbd>[</kbd>/<kbd>]</kbd> dialog text size ·
+						<kbd>Esc</kbd> for this menu
 					</p>
 				</div>
 			{/if}
@@ -734,6 +773,29 @@
 
 	.score {
 		color: var(--gold-bright);
+	}
+
+	.text-size {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.15rem;
+		pointer-events: auto;
+	}
+
+	.text-size-label {
+		font-family: var(--font-display);
+		font-size: 0.58rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--parchment-dim);
+		min-width: 2.6rem;
+		text-align: center;
+		text-shadow: 0 1px 2px #000;
+	}
+
+	.text-size .icon:disabled {
+		opacity: 0.35;
+		cursor: default;
 	}
 
 	.icon {

@@ -48,32 +48,37 @@
 
 <style>
 	.bubbles {
+		/* --text-scale grows both type and the caption well so XL/Huge stay readable. */
+		--dialog-scale: var(--text-scale, 1);
 		position: absolute;
 		left: 0;
 		right: 0;
 		bottom: 0;
-		padding: 1.1rem clamp(1rem, 5vw, 4.5rem) 1.4rem;
+		padding: calc(1.1rem * var(--dialog-scale)) clamp(1rem, 5vw, 4.5rem)
+			calc(1.4rem * min(var(--dialog-scale), 1.4));
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: calc(0.5rem * var(--dialog-scale));
 		pointer-events: none;
 		background: linear-gradient(to top, rgba(12, 9, 7, 0.95) 42%, rgba(12, 9, 7, 0));
 		z-index: 12;
-		min-height: 5.5rem;
+		min-height: calc(5.5rem * var(--dialog-scale));
+		max-height: min(48vh, 22rem);
 		justify-content: flex-end;
+		overflow: hidden;
 	}
 
 	p {
 		margin: 0;
 		text-wrap: balance;
-		max-width: 62ch;
+		max-width: min(62ch, 92vw);
 		margin-inline: auto;
 		text-align: center;
 		animation: rise 180ms ease-out;
 	}
 
 	.say {
-		font-size: calc(clamp(0.95rem, 1.6vw, 1.18rem) * var(--text-scale, 1));
+		font-size: calc(clamp(0.95rem, 1.6vw, 1.18rem) * var(--dialog-scale));
 		line-height: 1.42;
 		color: var(--parchment);
 	}
@@ -89,7 +94,7 @@
 
 	.think {
 		font-style: italic;
-		font-size: calc(clamp(0.9rem, 1.5vw, 1.1rem) * var(--text-scale, 1));
+		font-size: calc(clamp(0.9rem, 1.5vw, 1.1rem) * var(--dialog-scale));
 		line-height: 1.45;
 		color: var(--parchment-dim);
 	}
@@ -102,12 +107,12 @@
 
 	.narrate {
 		font-family: var(--font-display);
-		font-size: calc(clamp(0.76rem, 1.25vw, 0.94rem) * var(--text-scale, 1));
+		font-size: calc(clamp(0.76rem, 1.25vw, 0.94rem) * var(--dialog-scale));
 		letter-spacing: 0.15em;
 		text-transform: uppercase;
 		color: var(--gold-bright);
 		line-height: 1.6;
-		max-width: 54ch;
+		max-width: min(54ch, 92vw);
 		text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
 	}
 

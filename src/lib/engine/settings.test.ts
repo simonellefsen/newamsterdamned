@@ -44,6 +44,12 @@ describe('settings', () => {
 		expect(s.textSpeed).toBe(2);
 	});
 
+	it('snaps dialog text to XL–Huge steps', () => {
+		expect(saveSettings({ textScale: 1.48 }).textScale).toBe(1.5);
+		expect(saveSettings({ textScale: 1.9 }).textScale).toBe(2);
+		expect(saveSettings({ textScale: 0.5 }).textScale).toBe(1);
+	});
+
 	it('forces captionsAlways true even if patched false', () => {
 		const s = saveSettings({ captionsAlways: false as unknown as true });
 		expect(s.captionsAlways).toBe(true);

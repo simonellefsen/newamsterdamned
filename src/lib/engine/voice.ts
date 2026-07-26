@@ -15,6 +15,7 @@ import { game } from './state.svelte';
 import { getVoiceProfile } from './registry';
 import { getSettings } from './settings';
 import { getSecrets } from './secrets';
+import { setVoiceDuck } from './audio';
 import type { VoiceProfile } from './types';
 import { audioKey, type SpeechKind } from './voice/keys';
 import {
@@ -102,6 +103,8 @@ function makeHandle(
 		resolveDone = () => {
 			if (settled) return;
 			settled = true;
+			// Only release duck if this generation is still current.
+			if (gen === currentGen) setVoiceDuck(false);
 			r();
 		};
 	});
@@ -158,6 +161,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 			}
 		});
 		if (started) {
+			setVoiceDuck(true);
 			active = handle;
 			return handle;
 		}
@@ -185,6 +189,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 			}
 		});
 		if (started) {
+			setVoiceDuck(true);
 			active = handle;
 			return handle;
 		}
@@ -218,6 +223,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 
 	if (!started) return null;
 
+	setVoiceDuck(true);
 	active = handle;
 	return handle;
 }
@@ -225,6 +231,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 /** Cancel any in-flight utterance. */
 export function cancelVoice() {
 	currentGen++;
+	setVoiceDuck(false);
 	if (active) {
 		const h = active;
 		active = null;

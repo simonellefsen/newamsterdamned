@@ -62,6 +62,16 @@ function ambOut(): AudioNode {
 	return ambBus ?? (ctx as AudioContext).destination;
 }
 
+/** When true, ambience is ducked under spoken voice. */
+let voiceDuck = false;
+
+/** Duck ambience while a speech line is playing (pack / OpenAI / system). */
+export function setVoiceDuck(on: boolean) {
+	if (voiceDuck === on) return;
+	voiceDuck = on;
+	applyVolumes();
+}
+
 /** Push current settings into the gain graph. */
 export function applyVolumes(s: Settings = getSettings()) {
 	if (!master || !sfxBus || !ambBus || !ctx) return;
@@ -71,8 +81,11 @@ export function applyVolumes(s: Settings = getSettings()) {
 	master.gain.setValueAtTime(master.gain.value, t);
 	master.gain.linearRampToValueAtTime(masterGain, t + 0.05);
 	sfxBus.gain.setValueAtTime(s.sfxVolume, t);
-	// Floor ambience bus slightly so a user slider at 0.7 still has body.
-	ambBus.gain.setValueAtTime(s.ambienceVolume, t);
+	// Duck ambient bed under dialogue so speech stays readable.
+	const ambTarget = s.ambienceVolume * (voiceDuck ? 0.22 : 1);
+	ambBus.gain.cancelScheduledValues(t);
+	ambBus.gain.setValueAtTime(ambBus.gain.value, t);
+	ambBus.gain.linearRampToValueAtTime(ambTarget, t + (voiceDuck ? 0.08 : 0.22));
 }
 
 /** Mute (persisted). When unmuting, rebuild the remembered bed. */
