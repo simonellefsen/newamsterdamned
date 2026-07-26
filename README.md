@@ -69,6 +69,18 @@ he will never have and a different set of doors closed to her. It pays off at th
 Act II, where the same transaction is two different scenes: Trijn signs for herself, and
 Joost — a man whose earnings his creditor may simply take — has to sign as nobody at all.
 
+**Getting unstuck.** Three separate affordances, because being lost in an adventure game is
+three different problems. The cursor tells you what a thing *is* before you click it — a
+magnifier over an object, a speech bubble over a person, a blue arrow pointing the way an exit
+goes. **Holding <kbd>Space</kbd>** rings everything the scene is currently offering; not every
+polygon that will ever exist in the room, only what is live right now, which is what makes it
+help rather than a wall of boxes. And <kbd>H</kbd> opens **"What am I doing?"** — the current
+objective, then a nudge if you ask, then the plain answer if you ask again. Asking costs
+nothing; a hint system that charges you is one people refuse to use and quit instead.
+
+One objective has no answer and says so. The three trips in Act IV are not a puzzle, so the
+panel declines to advise and tells you that whatever you decide is what happened.
+
 **The Almanac** — sixty-three historical notes on everyday life in the colony, unlocked by
 examining the world: what a guilder bought, why everyone drank beer at breakfast, what
 half-freedom meant, how a wampum bead was actually made and how long it took, why the first
@@ -143,6 +155,8 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | `Space` / `Enter` | Skip the current line |
 | `1`–`9` | Pick a dialogue option |
 | `A` | Almanac |
+| `H` | Hint — what am I doing? |
+| hold `Space` | Show what is interactive |
 | `Esc` | Menu |
 
 ## A note on the history

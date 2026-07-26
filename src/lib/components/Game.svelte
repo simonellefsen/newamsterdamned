@@ -9,13 +9,14 @@
 	import Title from './Title.svelte';
 	import ActEnd from './ActEnd.svelte';
 	import Almanac from './Almanac.svelte';
+	import Hints from './Hints.svelte';
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem, getScene } from '$lib/engine/registry';
 	import { loadContent, newGame, SCORE_MAX } from '$lib/game';
 	import { ALMANAC, ALMANAC_BY_ID } from '$lib/game/almanac';
 	import type { ProtagonistId } from '$lib/game/protagonist';
 	import { interactWithHotspot, lookAtItem } from '$lib/engine/interaction';
-	import { run, runEntry, advance } from '$lib/engine/interpreter';
+	import { run, runEntry, advance, isAwaitingAdvance } from '$lib/engine/interpreter';
 	import { isMuted, setMuted } from '$lib/engine/audio';
 	import { load, save, SLOTS, type Slot } from '$lib/engine/save';
 	import type { Hotspot, Verb } from '$lib/engine/types';
@@ -27,6 +28,9 @@
 	let coin = $state<{ target: CoinTarget; x: number; y: number } | null>(null);
 	let menuOpen = $state(false);
 	let almanacOpen = $state(false);
+	let hintsOpen = $state(false);
+	/** True only while Space is physically held. See the key handler. */
+	let revealing = $state(false);
 	let muted = $state(false);
 	let toastText = $state<string | null>(null);
 	let loreToastText = $state<string | null>(null);
@@ -163,21 +167,29 @@
 	onkeydown={(e) => {
 		if (e.key === 'Escape') {
 			if (coin) coin = null;
+			else if (hintsOpen) hintsOpen = false;
 			else if (almanacOpen) almanacOpen = false;
 			else if (started) menuOpen = !menuOpen;
 		}
-		if (started && (e.key === 'a' || e.key === 'A') && document.activeElement?.tagName !== 'BUTTON') {
-			almanacOpen = !almanacOpen;
-		}
-		if (!started) return;
+		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
+		if (!started || document.activeElement?.tagName === 'BUTTON') return;
+		if (e.key === 'a' || e.key === 'A') almanacOpen = !almanacOpen;
+		if (e.key === 'h' || e.key === 'H') hintsOpen = !hintsOpen;
 		if (e.key === ' ' || e.key === 'Enter') {
-			// Space advances dialogue without stealing focus from buttons.
-			if (document.activeElement?.tagName !== 'BUTTON') {
-				e.preventDefault();
-				advance();
-			}
+			e.preventDefault();
+			/**
+			 * Space does double duty and the split is by state, not by key: while a line is on
+			 * screen it skips, and the rest of the time it holds up what is interactive. A player
+			 * never wants both at once, so this never needs explaining. Enter only ever skips.
+			 */
+			if (isAwaitingAdvance() || e.key === 'Enter') advance();
+			else revealing = true;
 		}
 	}}
+	onkeyup={(e) => {
+		if (e.key === ' ') revealing = false;
+	}}
+	onblur={() => (revealing = false)}
 />
 
 <div class="frame">
@@ -188,12 +200,16 @@
 			<Stage
 				onContextVerb={(t, x, y) => (coin = { target: t, x, y })}
 				onHover={(l) => (hover = l)}
+				reveal={revealing}
 			/>
 			<Bubbles />
 			<Choices />
 			<ActEnd onDismiss={dismissAct} />
 			{#if almanacOpen}
 				<Almanac onClose={() => (almanacOpen = false)} />
+			{/if}
+			{#if hintsOpen}
+				<Hints onClose={() => (hintsOpen = false)} />
 			{/if}
 
 			{#if toastText}
@@ -209,6 +225,7 @@
 			<div class="topbar">
 				<span class="room">{scene?.name ?? ''}</span>
 				<span class="spacer"></span>
+				<button class="icon icon--text" onclick={() => (hintsOpen = true)}>Hint</button>
 				<button class="icon icon--text" onclick={() => (almanacOpen = true)}>
 					Almanac <span class="tally">{game.lore.length}/{ALMANAC.length}</span>
 				</button>
@@ -246,7 +263,9 @@
 					</div>
 					<p class="help">
 						Left-click to walk or act · Right-click for verbs · Click an item, then a thing ·
-						Double-click an item to examine · <kbd>Esc</kbd> for this menu
+						Double-click an item to examine · Hold <kbd>Space</kbd> to show what is
+						interactive · <kbd>H</kbd> for a hint · <kbd>A</kbd> for the Almanac ·
+						<kbd>Esc</kbd> for this menu
 					</p>
 				</div>
 			{/if}

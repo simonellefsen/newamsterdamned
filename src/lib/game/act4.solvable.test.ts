@@ -20,6 +20,8 @@ import { loadContent, newGame, ACT_FOUR_MAX } from './index';
 import { SCENES_ACT4 } from './act4/scenes';
 import { DIALOGUES_ACT4 } from './act4/dialogue';
 import type { Action, Hotspot, Verb } from '$lib/engine/types';
+import { OBJECTIVES } from './objectives';
+import { test as testCond } from '$lib/engine/state.svelte';
 
 loadContent();
 
@@ -202,6 +204,15 @@ describe.each(['joost', 'trijn'] as const)('Act IV is completable as %s', (who) 
 		expect(game.actEnd, 'no ending card').toBeTruthy();
 		expect(game.actEnd!.title).toBe('Peach Season');
 		expect(game.score, 'the staying ending is not the full-marks ending').toBe(ACT_FOUR_MAX);
+		/**
+		 * Hints are content and content rots. Finishing the act must finish every objective the
+		 * hint panel would have offered during it, so a stale `done` condition or a renamed flag
+		 * fails here instead of stranding a player on a hint that never clears.
+		 */
+		expect(
+			OBJECTIVES.filter((o) => o.act === 4 && !testCond(o.done)).map((o) => o.id),
+			'objectives still outstanding after finishing the act'
+		).toEqual([]);
 	}, 60000);
 });
 

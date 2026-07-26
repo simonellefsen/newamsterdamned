@@ -9,6 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { pointInPolygon } from '$lib/engine/geometry';
+import { game } from '$lib/engine/state.svelte';
 import type { Action, DialogueTree, Item, Scene } from '$lib/engine/types';
 import { ALMANAC } from './almanac';
 import { SCENES } from './scenes';
@@ -24,6 +25,7 @@ import { SCENES_ACT4 } from './act4/scenes';
 import { DIALOGUES_ACT4 } from './act4/dialogue';
 import { ITEMS_ACT4 } from './act4/items';
 import { ACT_FOUR_MAX, ACT_ONE_MAX, ACT_THREE_MAX, ACT_TWO_MAX, SCORE_MAX } from './index';
+import { OBJECTIVES, currentObjective } from './objectives';
 
 const ALL_SCENES: Scene[] = [...SCENES, ...SCENES_ACT2, ...SCENES_ACT3, ...SCENES_ACT4];
 const ALL_DIALOGUES: DialogueTree[] = [
@@ -357,5 +359,74 @@ describe('scoring', () => {
 			forEachAction(actions, (a) => {
 				if (a.op === 'SCORE') expect(a.points, where).toBeGreaterThan(0);
 			});
+	});
+});
+
+describe('objectives', () => {
+	/** Every item id named anywhere inside a condition tree. */
+	function itemsIn(c: unknown, out: Set<string>): Set<string> {
+		if (!c || typeof c !== 'object') return out;
+		const o = c as Record<string, unknown>;
+		for (const k of ['has', 'lacks']) if (typeof o[k] === 'string') out.add(o[k] as string);
+		for (const k of ['all', 'any']) if (Array.isArray(o[k])) for (const sub of o[k] as unknown[]) itemsIn(sub, out);
+		if (o.not) itemsIn(o.not, out);
+		return out;
+	}
+
+	it('has no duplicate ids and stays in act order', () => {
+		const ids = OBJECTIVES.map((o) => o.id);
+		expect(ids.filter((id, i) => ids.indexOf(id) !== i)).toEqual([]);
+		const acts = OBJECTIVES.map((o) => o.act);
+		expect(acts, 'objectives must be listed in act order').toEqual([...acts].sort());
+	});
+
+	it('never names an item that does not exist', () => {
+		const known = new Set(ALL_ITEMS.map((i) => i.id));
+		for (const o of OBJECTIVES) {
+			const named = itemsIn(o.done, itemsIn(o.when, new Set<string>()));
+			for (const id of named) expect(known, `${o.id} names item '${id}'`).toContain(id);
+		}
+	});
+
+	it('gives every objective a goal and a nudge', () => {
+		for (const o of OBJECTIVES) {
+			expect(o.goal.length, `${o.id} goal`).toBeGreaterThan(10);
+			expect(o.hint.length, `${o.id} hint`).toBeGreaterThan(10);
+		}
+	});
+
+	/**
+	 * Act IV's three trips are the one thing in this game that is not a puzzle, so that
+	 * objective deliberately has no answer to give. Everything else must have one — a hint
+	 * system that runs out of road on a real puzzle is worse than not having one.
+	 */
+	it('answers every objective except the choice that has no answer', () => {
+		const withoutSpoiler = OBJECTIVES.filter((o) => !o.spoiler).map((o) => o.id);
+		expect(withoutSpoiler).toEqual(['a4-three']);
+	});
+
+	/**
+	 * Caught in the browser: a save dropped straight into Act II with no Act I flags set had the
+	 * hint panel cheerfully explaining that the player had no breeches on. The room the player
+	 * is standing in is the signal, not the flags.
+	 */
+	it('never offers an earlier act’s objective in a later act’s room', () => {
+		const byAct: Array<[string, number]> = [
+			['marckvelt', 2],
+			['turner-shop', 2],
+			['stadt-huys', 3],
+			['secretary-chamber', 3],
+			['watch-house', 3],
+			['strand-dawn', 4],
+			['town-raid', 4],
+			['gate-yard', 4]
+		];
+		for (const [scene, act] of byAct) {
+			game.reset('joost');
+			game.setScene(scene, [0, 0]);
+			const o = currentObjective();
+			expect(o, `${scene} offered nothing`).toBeTruthy();
+			expect(o!.act, `${scene} offered ${o!.id}, which is act ${o!.act}`).toBeGreaterThanOrEqual(act);
+		}
 	});
 });
