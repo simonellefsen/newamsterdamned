@@ -31,8 +31,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	muted: false,
 	masterVolume: 1,
 	sfxVolume: 1,
-	/** Slightly under SFX so room tone stays background. */
-	ambienceVolume: 0.7,
+	/** Under SFX but high enough for laptop speakers. */
+	ambienceVolume: 0.85,
 	voiceEnabled: false,
 	voiceVolume: 0.8,
 	thinkVoice: 'soft',

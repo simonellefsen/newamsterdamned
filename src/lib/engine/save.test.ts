@@ -1,0 +1,42 @@
+import { describe, expect, it, beforeEach } from 'vitest';
+import { game, SAVE_VERSION } from './state.svelte';
+import { exportSaveJson, parseImport } from './save';
+
+beforeEach(() => {
+	game.reset('joost');
+});
+
+describe('save export/import', () => {
+	it('exports current game as versioned JSON', () => {
+		game.setFlag('dressed', true);
+		const json = exportSaveJson();
+		expect(json).toBeTruthy();
+		const parsed = JSON.parse(json!);
+		expect(parsed.version).toBe(SAVE_VERSION);
+		expect(parsed.flags.dressed).toBe(true);
+		expect(parsed.protagonist).toBe('joost');
+	});
+
+	it('rejects wrong version', () => {
+		const result = parseImport(
+			JSON.stringify({ version: 1, scene: 'pearl-street', protagonist: 'joost' })
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) expect(result.error).toMatch(/version/i);
+	});
+
+	it('rejects garbage', () => {
+		const result = parseImport('not json at all');
+		expect(result.ok).toBe(false);
+	});
+
+	it('round-trips export through parseImport', () => {
+		game.setFlag('trijn', true);
+		const json = exportSaveJson();
+		const result = parseImport(json!);
+		expect(result.ok).toBe(true);
+		if (!result.ok) return;
+		expect(result.state.version).toBe(SAVE_VERSION);
+		expect(result.state.flags.trijn).toBe(true);
+	});
+});

@@ -66,6 +66,46 @@ export function hasAnySave(): boolean {
 	return SLOTS.some((s) => peek(s) !== null);
 }
 
+/** Serialise a slot (or current game if slot omitted) as downloadable JSON text. */
+export function exportSaveJson(slot?: Slot): string | null {
+	if (slot) {
+		const s = load(slot);
+		return s ? JSON.stringify(s, null, 2) : null;
+	}
+	return JSON.stringify(game.snapshot(defaultLabel()), null, 2);
+}
+
+/**
+ * Parse and validate an imported save. Returns the state or a human-readable error.
+ */
+export function parseImport(raw: string): { ok: true; state: SaveState } | { ok: false; error: string } {
+	try {
+		const parsed = JSON.parse(raw) as SaveState;
+		if (!parsed || typeof parsed !== 'object') return { ok: false, error: 'Not a save file.' };
+		if (parsed.version !== SAVE_VERSION) {
+			return { ok: false, error: `Wrong save version (got ${String(parsed.version)}, need ${SAVE_VERSION}).` };
+		}
+		if (typeof parsed.scene !== 'string' || typeof parsed.protagonist !== 'string') {
+			return { ok: false, error: 'Save is missing required fields.' };
+		}
+		return { ok: true, state: parsed };
+	} catch {
+		return { ok: false, error: 'Could not read that file as JSON.' };
+	}
+}
+
+/** Write an imported state into a slot. Does not restore into the live game. */
+export function importIntoSlot(slot: Slot, state: SaveState): boolean {
+	const store = storage();
+	if (!store) return false;
+	try {
+		store.setItem(key(slot), JSON.stringify({ ...state, savedAt: Date.now() }));
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 function defaultLabel(): string {
 	return `${sceneLabel()} — ${game.score} pts`;
 }

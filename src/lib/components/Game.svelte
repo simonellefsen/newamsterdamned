@@ -17,14 +17,29 @@
 	import type { ProtagonistId } from '$lib/game/protagonist';
 	import { interactWithHotspot, lookAtItem } from '$lib/engine/interaction';
 	import { run, runEntry, advance, isAwaitingAdvance } from '$lib/engine/interpreter';
-	import { applyVolumes, clearAmbience, initAudioFromSettings, setMuted } from '$lib/engine/audio';
+	import {
+		applyVolumes,
+		clearAmbience,
+		initAudioFromSettings,
+		setAmbience,
+		setMuted,
+		unlockAudio
+	} from '$lib/engine/audio';
 	import {
 		getSettings,
 		loadSettings,
 		saveSettings,
 		type Settings
 	} from '$lib/engine/settings';
-	import { load, save, SLOTS, type Slot } from '$lib/engine/save';
+	import {
+		exportSaveJson,
+		importIntoSlot,
+		load,
+		parseImport,
+		save,
+		SLOTS,
+		type Slot
+	} from '$lib/engine/save';
 	import type { Hotspot, Verb } from '$lib/engine/types';
 
 	type CoinTarget = { kind: 'hotspot'; hotspot: Hotspot } | { kind: 'item'; itemId: string };
@@ -94,6 +109,8 @@
 	});
 
 	function begin(who: ProtagonistId) {
+		// Title click is a user gesture — unlock Web Audio so the first room's bed starts.
+		unlockAudio();
 		newGame(who);
 		started = true;
 		void runEntry('pearl-street');
@@ -117,6 +134,7 @@
 	}
 
 	function resume() {
+		unlockAudio();
 		const s = load('auto') ?? SLOTS.map(load).find((x) => x !== null);
 		if (!s) {
 			begin('joost');
@@ -124,6 +142,9 @@
 		}
 		game.restore(s);
 		started = true;
+		// Restoring a save does not go through enterScene — re-arm ambience for the room.
+		const sc = getScene(game.scene);
+		setAmbience(sc?.ambience ?? null);
 	}
 
 	function pickVerb(verb: Verb) {
@@ -168,12 +189,53 @@
 			return;
 		}
 		game.restore(s);
+		setAmbience(getScene(game.scene)?.ambience ?? null);
 		menuOpen = false;
 	}
 
 	function toggleMute() {
 		setMuted(!muted);
 		refreshPrefs();
+	}
+
+	function downloadSave(slot: Slot) {
+		const json = exportSaveJson(slot);
+		if (!json) {
+			saveNote = 'Nothing in that slot to export.';
+			setTimeout(() => (saveNote = null), 2400);
+			return;
+		}
+		const blob = new Blob([json], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `newamsterdamned-slot${slot}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		saveNote = `Exported slot ${slot}.`;
+		setTimeout(() => (saveNote = null), 2400);
+	}
+
+	function onImportFile(slot: Slot, file: File | undefined) {
+		if (!file) return;
+		const reader = new FileReader();
+		reader.onload = () => {
+			const text = typeof reader.result === 'string' ? reader.result : '';
+			const result = parseImport(text);
+			if (!result.ok) {
+				saveNote = result.error;
+				setTimeout(() => (saveNote = null), 3200);
+				return;
+			}
+			if (!importIntoSlot(slot, result.state)) {
+				saveNote = 'Could not write that save — storage is blocked.';
+				setTimeout(() => (saveNote = null), 3200);
+				return;
+			}
+			saveNote = `Imported into slot ${slot}. Load it when ready.`;
+			setTimeout(() => (saveNote = null), 3200);
+		};
+		reader.readAsText(file);
 	}
 
 	onMount(() => {
@@ -191,7 +253,9 @@
 </script>
 
 <svelte:window
+	onpointerdown={() => unlockAudio()}
 	onkeydown={(e) => {
+		unlockAudio();
 		if (e.key === 'Escape') {
 			if (coin) coin = null;
 			else if (hintsOpen) hintsOpen = false;
@@ -274,6 +338,20 @@
 								<span class="slotdesc">{existing ? existing.label : '— empty —'}</span>
 								<button class="mini" onclick={() => doSave(slot)}>Save</button>
 								<button class="mini" disabled={!existing} onclick={() => doLoad(slot)}>Load</button>
+								<button class="mini" disabled={!existing} onclick={() => downloadSave(slot)}>Export</button>
+								<label class="mini mini--file">
+									Import
+									<input
+										type="file"
+										accept="application/json,.json"
+										hidden
+										onchange={(e) => {
+											const input = e.currentTarget as HTMLInputElement;
+											onImportFile(slot, input.files?.[0]);
+											input.value = '';
+										}}
+									/>
+								</label>
 							</div>
 						{/each}
 					</div>
@@ -696,6 +774,16 @@
 	.mini:disabled {
 		opacity: 0.35;
 		cursor: default;
+	}
+
+	.mini--file {
+		display: inline-flex;
+		align-items: center;
+		cursor: pointer;
+	}
+
+	.mini--file input {
+		display: none;
 	}
 
 	.menufoot {
