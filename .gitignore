@@ -25,7 +25,6 @@ vite.config.ts.timestamp-*
 # build output
 build/
 .vercel/
-.env*
 
 # Generated voice packs (MP3s + local corpus dumps). Keep a tiny empty manifest in git.
 static/voice/v1/lines/
