@@ -23,6 +23,9 @@ export interface DialogueChoice {
 export interface ActEndCard {
 	title: string;
 	body: string;
+	/** Scene to enter once the card is dismissed. Absent means "nothing built past here". */
+	next?: { scene: string; at?: Point };
+	button?: string;
 }
 
 export const SAVE_VERSION = 3;

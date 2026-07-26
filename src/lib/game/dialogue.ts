@@ -174,7 +174,9 @@ const griet: DialogueTree = {
 				{
 					op: 'ACT_END',
 					title: 'End of Act I',
-					body: '{{name}} {{surname}} has breeches that are not {{theirs}}, a tankard {{they}} did not pay for, a page torn from a tavern ledger, and — for the first time since {{they}} stepped off the boat — an idea.\n\n{{They}} also has the Director-General\'s spare leg on {{their}} conscience, a watchman hunting a fire that never was, and seven days.\n\nACT II — "Sewant Standard" — is written but not yet built. See DESIGN.md.'
+					body: '{{name}} {{surname}} has breeches that are not {{theirs}}, a tankard {{they}} did not pay for, a page torn from a tavern ledger, and — for the first time since {{they}} stepped off the boat — an idea.\n\n{{They}} also has the Director-General\'s spare leg on {{their}} conscience, a watchman hunting a fire that never was, and seven days.\n\nAnd a name. Somebody on this island is paying double for the worthless bead, and tomorrow is market day.',
+					next: { scene: 'marckvelt' },
+					button: 'Act II — Sewant Standard'
 				}
 			]
 		}
@@ -627,6 +629,7 @@ const domingo: DialogueTree = {
 		{
 			id: 'advice',
 			prompt: 'I owe the Company four hundred guilders and I have eight days.',
+			once: true,
 			script: [
 				{ op: 'LINE', actor: 'domingo', text: 'Then you are its property in eight days.' },
 				{ op: 'SAY', text: 'For seven years. Not — forever.' },

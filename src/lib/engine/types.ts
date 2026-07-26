@@ -63,8 +63,19 @@ export type Action =
 	| { op: 'SCORE'; points: number; reason: string }
 	/** Unlock an almanac entry — a real historical note about life in the colony. */
 	| { op: 'LORE'; id: string }
-	/** End of the implemented content. */
-	| { op: 'ACT_END'; title: string; body: string };
+	/** Curtain between acts. */
+	| {
+			op: 'ACT_END';
+			title: string;
+			body: string;
+			/**
+			 * Where dismissing the card drops the player. Omit when this is the end of the
+			 * built content and there is nowhere to go — the card then just closes.
+			 */
+			next?: { scene: string; at?: Point };
+			/** Label for the dismiss button. */
+			button?: string;
+	  };
 
 export type Facing = 'left' | 'right' | 'front' | 'back';
 
@@ -181,7 +192,7 @@ export interface Scene {
 	/** Runs on every entry, after onFirstEnter. */
 	onEnter?: Action[];
 	/** Ambient loop hint for the audio layer. */
-	ambience?: 'harbour' | 'tavern' | 'fort' | 'wall';
+	ambience?: 'harbour' | 'tavern' | 'fort' | 'wall' | 'market' | 'workshop';
 }
 
 /* ----------------------------------------------------------------- dialogue */
@@ -194,7 +205,12 @@ export interface DialogueLine {
 	script: Action[];
 	/** Hidden until this condition holds. */
 	visibleIf?: Condition;
-	/** Removed after being chosen once. */
+	/**
+	 * `true` — gone for good once chosen, across conversations. Use it on any line that
+	 * awards points or hands over an item, or the player can walk away and pick it again.
+	 * `false` — always re-offered (hint lines).
+	 * Omitted — spent for the rest of this conversation only.
+	 */
 	once?: boolean;
 	/** Ends the conversation after the script runs. */
 	exit?: boolean;

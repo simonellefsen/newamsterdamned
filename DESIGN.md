@@ -55,8 +55,11 @@ Everything below is true and is used as puzzle material.
 |---|---|
 | **Petrus Stuyvesant**, Director-General. Lost his right leg at St. Martin, 1644; the wooden replacement was banded in silver. Autocratic, Reformed, furious about Sunday drinking. | Act I antagonist; the leg is an Act III puzzle item |
 | **The Wall**, 1653 — a palisade thrown across the island against an English attack that never came. Now Wall Street. | Act I geography; Act III (Asser Levy's guard duty) |
-| **Sewant / wampum** — shell beads, legal tender, chronically debased. White beads worth half of purple. | The entire Act II economy |
+| **Sewant / wampum** — shell beads, legal tender, chronically debased. White beads worth half of purple. Made from whelk pillar and quahog lip, drilled from both ends with a reed and sand. | The entire Act II economy — and the hourglass bore is the tell that breaks the forgery |
 | **Taverns** — roughly a quarter of the buildings in town sold drink. | Act I hub |
+| **The bench proclaims the sewant rate**, and sets it from what the market is seen to pay. Rates were reissued repeatedly and never held. | Act II's racket: forging the price rather than the money |
+| **Logwood** — Campeche dyewood, banned in England 1581–1662 as a "false and deceitful" dye because it fades. | Act II's purple, and its criminal provenance |
+| **Tanning** — bark pits, lime and stale urine as a mordant; legislated to the far side of the wall everywhere in Europe. | Act II's dye-house, and the only private acre in the colony |
 | **Municipal government since 1653** — a *schout* (sheriff-prosecutor), two burgomasters, five schepenen, in permanent friction with the Company. | Bureaucracy puzzles throughout |
 | **Slavery** — the WIC held enslaved Africans who built the Wall and the roads. In 1644, eleven men won *half-freedom* and land along what became the Bowery: Paulo Angola, Big Manuel, Simon Congo, Anthony Portuguese among them. | Act I and III characters; the half-freedom contract is a key document |
 | **Sept 1654** — 23 Jewish refugees arrive from Recife after the Portuguese retake Brazil. Stuyvesant tries to expel them. | Act III |
@@ -105,15 +108,51 @@ Act I ends with the tap-key returned, Griet's ledger opened, and Joost learning 
 is a man in this town buying **white** wampum at the **purple** price — which makes no
 sense to anyone who isn't running a counterfeiting operation.
 
-### Act II — *Sewant Standard* — designed
+### Act II — *Sewant Standard* — **implemented**
 
-The counterfeit-wampum racket. Joost decides the smart move is to get in on it. Involves a
-foot-powered lathe, a barrel of Rockaway mussel shells, purple dye of criminal provenance,
-and **Sewackenamo**, a Lenape trader who has been reading Dutch merchants for thirty years
-and is not going to be the mark in a story about a Dutchman with a good idea.
+The counterfeit-wampum racket. Joost decides the smart move is to get in on it.
 
-The joke: Joost's counterfeits are *technically superior* to the real currency. He has
-accidentally solved New Netherland's monetary crisis and cannot tell anyone.
+**Scenes:** The Marckvelt on market day · Claes Bording's turner's shop, Brouwer Street ·
+The tan-pits outside the Water Gate · Reynier Kleyn's counting-house
+
+**Teaches:** manufacture. Act I was a scavenger hunt; Act II is a production line you have
+to run twice, and the second run is the point.
+
+**Puzzle chain:**
+1. The name in Griet's ledger is **Reynier Kleyn**, merchant. Blackmail bounces off him —
+   he is delighted, and sets a trade test instead: one fathom of purple sewant his own
+   buyer cannot tell from Sound-made
+2. A condemned cask of Rockaway shell is rotting by the weigh-house. Tip it: the shell is
+   the raw material, and the **empty cask** carries a customs mark — which is the part
+   Mudge wants, because a cask a customs man has already passed is honest for ever
+3. Cask → Mudge → **logwood**: Campeche blockwood, smuggled, and banned outright in
+   England as a "false and deceitful" dye because it fades
+4. Kleyn holds the gaoled turner's debt, so he holds his shop key. The **pole lathe** and a
+   steel bit put a clean hole through shell
+5. Logwood without a mordant rinses out. Every tanyard in Europe keeps a tub of the fixative,
+   and this one is twenty feet from the fire
+6. The first fathom is the best work Joost has ever done — and **Mattaneck rejects it for
+   being too good.** A reed drill cannot bore a bead end to end; real beads are drilled from
+   both ends and the two bores never meet true. Joost's have no fault in them at all
+7. So: do it again, *worse*. Deliberately degrade the work. The second fathom passes
+8. Inside the counting-house, the racket turns out not to be counterfeiting. Kleyn has been
+   overpaying for white sewant in public, in a tavern, in a book, because the bench sets the
+   official rate from what people are *seen* to pay. He is not forging money, he is forging
+   the price, and he holds a warehouse of white
+9. He pays Joost four hundred guilders — in white sewant, at his own rate. Mattaneck is
+   waiting on the field, and wants the contract that proves the rig
+
+The joke, made mechanical: Joost's counterfeits are *technically superior* to the real
+currency. He has accidentally solved New Netherland's monetary crisis and cannot tell a
+living soul, because the sentence describing it is also a confession. And the paper he
+gives away is the same paper that would have made his wages worth double.
+
+**On the Lenape trader.** This document originally named him Sewackenamo. That is a
+documented Esopus sachem, and putting invented dialogue, an invented scheme and an invented
+change of heart into a real person's mouth is exactly the failure this project is supposed
+to avoid — so the character was renamed to the invented **Mattaneck**, and the Almanac says
+so on the record. Everything he says about how sewant was made, what it was worth and who
+lost when its value fell is drawn from the historical record. He himself is not.
 
 ### Act III — *The Company's Conscience* — designed
 
@@ -194,7 +233,7 @@ serialisable object by construction — inventory ids, flag map, scene id, actor
 | Rendering | DOM + CSS transforms over an SVG/raster background. No canvas — hotspots stay inspectable and accessible |
 | Art | Procedural SVG placeholders now, drop-in painted `.webp` later. The manifest never changes |
 | Audio | Web Audio, procedural stings; no binary assets in v1 |
-| Deploy | Vercel, `adapter-vercel`, static-ish prerender |
+| Deploy | Vercel, `adapter-static`, fully prerendered |
 
 **Why not canvas:** the entire game is hotspots and text. DOM gives keyboard navigation,
 screen-reader labels and free scaling for nothing. A 2D adventure has no frame-rate

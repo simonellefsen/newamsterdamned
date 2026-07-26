@@ -161,7 +161,12 @@ async function runAction(action: Action, token: number): Promise<void> {
 			break;
 
 		case 'ACT_END':
-			game.setActEnd({ title: resolveText(action.title), body: resolveText(action.body) });
+			game.setActEnd({
+				title: resolveText(action.title),
+				body: resolveText(action.body),
+				next: action.next,
+				button: action.button ? resolveText(action.button) : undefined
+			});
 			break;
 	}
 }
@@ -181,12 +186,19 @@ async function runDialogue(treeId: string, token: number): Promise<void> {
 
 	const spent = new Set<string>();
 
+	/**
+	 * `once: true` means gone for good, not just for this conversation — otherwise walking
+	 * away and talking again re-offers a line whose script has already fired, which replays
+	 * exposition and re-awards its points.
+	 */
+	const saidFlag = (lineId: string) => `__said:${tree.id}:${lineId}`;
+
 	// Loop until the player picks an exit line, or one of the scripts sends us elsewhere.
 	for (;;) {
 		if (game.sceneToken !== token) throw new SceneChanged();
 
 		const available = tree.lines.filter(
-			(l) => !spent.has(l.id) && test(l.visibleIf)
+			(l) => !spent.has(l.id) && !(l.once === true && game.flag(saidFlag(l.id))) && test(l.visibleIf)
 		);
 		const choices = available.map((l) => ({ id: l.id, prompt: resolveText(l.prompt) }));
 		choices.push({ id: '__exit', prompt: resolveText(tree.exitLabel ?? 'Right. I should go.') });
@@ -197,6 +209,7 @@ async function runDialogue(treeId: string, token: number): Promise<void> {
 		const line = tree.lines.find((l) => l.id === picked);
 		if (!line) return;
 		if (line.once !== false) spent.add(line.id);
+		if (line.once === true) game.setFlag(saidFlag(line.id));
 
 		await runActions(line.script, token);
 		if (line.exit) return;

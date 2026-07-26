@@ -11,7 +11,7 @@
 	import Almanac from './Almanac.svelte';
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem, getScene } from '$lib/engine/registry';
-	import { loadContent, newGame, ACT_ONE_MAX } from '$lib/game';
+	import { loadContent, newGame, SCORE_MAX } from '$lib/game';
 	import { ALMANAC, ALMANAC_BY_ID } from '$lib/game/almanac';
 	import type { ProtagonistId } from '$lib/game/protagonist';
 	import { interactWithHotspot, lookAtItem } from '$lib/engine/interaction';
@@ -72,6 +72,17 @@
 		newGame(who);
 		started = true;
 		void runEntry('pearl-street');
+	}
+
+	/**
+	 * An act-end card may carry the next act's opening scene. Entering it here — on dismiss,
+	 * rather than from the script — keeps the new room's opening lines from playing behind
+	 * the card while the player is still reading it.
+	 */
+	function dismissAct() {
+		const card = game.actEnd;
+		game.setActEnd(null);
+		if (card?.next) void runEntry(card.next.scene, card.next.at);
 	}
 
 	function resume() {
@@ -180,7 +191,7 @@
 			/>
 			<Bubbles />
 			<Choices />
-			<ActEnd onDismiss={() => game.setActEnd(null)} />
+			<ActEnd onDismiss={dismissAct} />
 			{#if almanacOpen}
 				<Almanac onClose={() => (almanacOpen = false)} />
 			{/if}
@@ -201,7 +212,7 @@
 				<button class="icon icon--text" onclick={() => (almanacOpen = true)}>
 					Almanac <span class="tally">{game.lore.length}/{ALMANAC.length}</span>
 				</button>
-				<span class="score">{game.score} / {ACT_ONE_MAX}</span>
+				<span class="score">{game.score} / {SCORE_MAX}</span>
 				<button class="icon" onclick={toggleMute} aria-label={muted ? 'Unmute' : 'Mute'}>
 					{muted ? '🔇' : '🔊'}
 				</button>

@@ -41,14 +41,14 @@
 			<p class="tag">A comedy of manners, mud and manifest larceny.</p>
 
 			<div class="actions">
-				<button class="btn btn--primary" onclick={() => (picking = true)}>Begin Act I</button>
+				<button class="btn btn--primary" onclick={() => (picking = true)}>Begin</button>
 				{#if canContinue}
 					<button class="btn" onclick={onContinue}>Continue</button>
 				{/if}
 			</div>
 
 			<p class="credit">
-				Act I of four. Point at things. Right-click for verbs.<br />
+				Acts I and II of four. Point at things. Right-click for verbs.<br />
 				You owe the West India Company four hundred guilders and the tide turns Thursday week.
 			</p>
 		</div>
