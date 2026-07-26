@@ -344,6 +344,49 @@
 								<option value="1.7">Slowest</option>
 							</select>
 						</label>
+						<label class="pref">
+							<span>Spoken voice</span>
+							<select
+								value={prefs.voiceEnabled ? 'on' : 'off'}
+								onchange={(e) =>
+									refreshPrefs({
+										voiceEnabled: (e.currentTarget as HTMLSelectElement).value === 'on'
+									})}
+							>
+								<option value="off">Off (default)</option>
+								<option value="on">System voice (beta)</option>
+							</select>
+						</label>
+						{#if prefs.voiceEnabled}
+							<label class="pref">
+								<span>Voice volume</span>
+								<input
+									type="range"
+									min="0"
+									max="1"
+									step="0.05"
+									value={prefs.voiceVolume}
+									oninput={(e) =>
+										refreshPrefs({
+											voiceVolume: Number((e.currentTarget as HTMLInputElement).value)
+										})}
+								/>
+							</label>
+							<label class="pref">
+								<span>Thoughts</span>
+								<select
+									value={prefs.thinkVoice}
+									onchange={(e) =>
+										refreshPrefs({
+											thinkVoice: (e.currentTarget as HTMLSelectElement).value as Settings['thinkVoice']
+										})}
+								>
+									<option value="soft">Soft</option>
+									<option value="full">Full</option>
+									<option value="off">Silent</option>
+								</select>
+							</label>
+						{/if}
 					</div>
 
 					<div class="menufoot">

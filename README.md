@@ -157,7 +157,9 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | `A` | Almanac |
 | `H` | Hint — what am I doing? |
 | Hold `Space` or the 👁 button | Show what is interactive |
-| `Esc` | Menu (save/load + audio/text preferences) |
+| `Esc` | Menu (save/load + audio/text/voice preferences) |
+
+Spoken voice is **off by default**. Turn on **System voice (beta)** in the Esc menu to hear the OS read lines (narrator, protagonists, NPCs). Quality depends on your platform voices; captions always stay on.
 
 ## A note on the history
 

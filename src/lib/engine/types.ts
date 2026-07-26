@@ -90,6 +90,31 @@ export type SfxName =
 	| 'gull'
 	| 'lock';
 
+/* ------------------------------------------------------------------- voice */
+
+/**
+ * Content-authored speaker profile. Engine resolves by id via the registry;
+ * Web Speech uses rate/pitch/lang hints; packs will use `id` as the speaker key.
+ */
+export interface VoiceProfile {
+	id: string;
+	/** Human label for settings / debug. */
+	label: string;
+	/** SpeechSynthesis rate 0.1–10 (1 = normal). */
+	rate?: number;
+	/** SpeechSynthesis pitch 0–2 (1 = normal). */
+	pitch?: number;
+	/** BCP-47 language tag preference for system voices. */
+	lang?: string;
+	/**
+	 * Soft keywords to pick an OS voice (matched case-insensitively against voice.name).
+	 * First match wins; fall back to any voice for `lang`.
+	 */
+	voiceHints?: string[];
+	/** If true, never collapse this speaker onto `generic` for packs (ethics). */
+	protected?: boolean;
+}
+
 /* --------------------------------------------------------------- conditions */
 
 export type Condition =

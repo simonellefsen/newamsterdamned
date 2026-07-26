@@ -6,6 +6,7 @@ import {
 	registerDialogues,
 	registerItems,
 	registerScenes,
+	registerVoiceProfiles,
 	setTextResolver
 } from '$lib/engine/registry';
 import { game } from '$lib/engine/state.svelte';
@@ -21,6 +22,7 @@ import { ITEMS_ACT3 } from './act3/items';
 import { SCENES_ACT4 } from './act4/scenes';
 import { DIALOGUES_ACT4 } from './act4/dialogue';
 import { ITEMS_ACT4 } from './act4/items';
+import { VOICE_PROFILES } from './voiceProfiles';
 import { PROTAGONISTS, resolveTokens, type ProtagonistId } from './protagonist';
 
 let registered = false;
@@ -30,6 +32,7 @@ export function loadContent() {
 	registerScenes([...SCENES, ...SCENES_ACT2, ...SCENES_ACT3, ...SCENES_ACT4]);
 	registerDialogues([...DIALOGUES, ...DIALOGUES_ACT2, ...DIALOGUES_ACT3, ...DIALOGUES_ACT4]);
 	registerItems([...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3, ...ITEMS_ACT4]);
+	registerVoiceProfiles(VOICE_PROFILES);
 	// Every displayed string passes through here so `{{name}}` / `{{their}}` resolve to
 	// whichever Baksteen the player picked.
 	setTextResolver((text) =>

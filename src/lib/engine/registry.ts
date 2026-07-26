@@ -7,11 +7,12 @@
  * startup instead.
  */
 
-import type { DialogueTree, Item, Scene } from './types';
+import type { DialogueTree, Item, Scene, VoiceProfile } from './types';
 
 const scenes = new Map<string, Scene>();
 const dialogues = new Map<string, DialogueTree>();
 const items = new Map<string, Item>();
+const voiceProfiles = new Map<string, VoiceProfile>();
 
 export function registerScenes(list: Scene[]) {
 	for (const s of list) scenes.set(s.id, s);
@@ -25,6 +26,11 @@ export function registerItems(list: Item[]) {
 	for (const i of list) items.set(i.id, i);
 }
 
+/** Content registers speaker voice data at boot — engine never imports game/. */
+export function registerVoiceProfiles(list: VoiceProfile[]) {
+	for (const p of list) voiceProfiles.set(p.id, p);
+}
+
 export function getScene(id: string): Scene | undefined {
 	return scenes.get(id);
 }
@@ -35,6 +41,10 @@ export function getDialogue(id: string): DialogueTree | undefined {
 
 export function getItem(id: string): Item | undefined {
 	return items.get(id);
+}
+
+export function getVoiceProfile(id: string): VoiceProfile | undefined {
+	return voiceProfiles.get(id) ?? voiceProfiles.get('generic');
 }
 
 export function allScenes(): Scene[] {

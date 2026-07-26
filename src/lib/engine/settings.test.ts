@@ -26,6 +26,7 @@ describe('settings', () => {
 		expect(s.textScale).toBe(1);
 		expect(s.textSpeed).toBe(1);
 		expect(s.masterVolume).toBe(1);
+		expect(s.ambienceVolume).toBe(0.7);
 	});
 
 	it('clamps volumes to 0–1 and snaps text scale', () => {

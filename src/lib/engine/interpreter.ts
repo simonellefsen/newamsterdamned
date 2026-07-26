@@ -13,6 +13,12 @@ import { game, test } from './state.svelte';
 import { getDialogue, getScene, resolveText } from './registry';
 import { playSfx, setAmbience } from './audio';
 import { getSettings } from './settings';
+import {
+	cancelVoice,
+	resolveSpeakerId,
+	speakLine,
+	type VoiceHandle
+} from './voice';
 import type { Action, DialogueTree, Facing, Point } from './types';
 
 /**
@@ -27,10 +33,15 @@ function readingTime(text: string, kind: 'say' | 'think' | 'narrate' = 'say'): n
 	return Math.round(base * speed);
 }
 
+/** Floor for voiced early-release only — never replaces readMs when silent. */
+const MIN_HOLD_MS = 600;
+
 let advanceResolver: (() => void) | null = null;
 
 /** Called by the UI on click/keypress to skip the current line. */
 export function advance() {
+	// Cancel speech first so the next line cannot overlap a tail.
+	cancelVoice();
 	const r = advanceResolver;
 	advanceResolver = null;
 	r?.();
@@ -60,6 +71,23 @@ function wait(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Voiced wait: user skip always wins; otherwise hold until holdTarget OR
+ * (audio ended AND at least MIN_HOLD_MS has elapsed).
+ */
+async function waitSkippableWhileVoice(holdTarget: number, handle: VoiceHandle): Promise<void> {
+	const start = performance.now();
+	await Promise.race([
+		waitSkippable(holdTarget),
+		(async () => {
+			await handle.done;
+			const elapsed = performance.now() - start;
+			const remainingFloor = Math.max(0, MIN_HOLD_MS - elapsed);
+			if (remainingFloor > 0) await wait(remainingFloor);
+		})()
+	]);
+}
+
 class SceneChanged extends Error {
 	constructor() {
 		super('scene changed');
@@ -70,8 +98,26 @@ class SceneChanged extends Error {
 async function speak(actor: string, raw: string, kind: 'say' | 'think' | 'narrate') {
 	const text = resolveText(raw);
 	const id = game.pushBubble(actor, text, kind);
-	await waitSkippable(readingTime(text, kind));
-	game.popBubble(id);
+	const readMs = readingTime(text, kind);
+	const handle = speakLine({
+		actor: resolveSpeakerId(actor),
+		text,
+		kind,
+		sceneToken: game.sceneToken
+	});
+
+	try {
+		if (!handle) {
+			// Silent path — identical to pre-voice behaviour (modulo textSpeed).
+			await waitSkippable(readMs);
+		} else {
+			const holdTarget = Math.min(Math.max(readMs, handle.estimatedMs ?? readMs), 12_000);
+			await waitSkippableWhileVoice(holdTarget, handle);
+		}
+	} finally {
+		handle?.cancel();
+		game.popBubble(id);
+	}
 }
 
 async function runActions(actions: Action[], token: number): Promise<void> {
@@ -233,6 +279,7 @@ export async function enterScene(id: string, at?: Point, facing?: Facing): Promi
 	}
 
 	const first = !game.visited.includes(id);
+	cancelVoice();
 	game.clearBubbles();
 	game.setScene(id, at ?? scene.entry, facing);
 	// Wire authored ambience — every scene sets it; audio beds live in audio.ts.
