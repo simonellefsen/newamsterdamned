@@ -1,7 +1,8 @@
 <script lang="ts">
 	/**
-	 * Inventory strip. Click selects an item for `use on`; clicking a second item combines
-	 * them; right-click opens the verb coin on the item itself.
+	 * Inventory strip. Tap selects an item for `use on`; a second item combines them;
+	 * double-tap (or desktop double-click) examines; right-click / long-press opens the
+	 * verb coin. Double-tap is the touch path — native dblclick is unreliable on phones.
 	 */
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem } from '$lib/engine/registry';
@@ -18,9 +19,14 @@
 
 	const LONG_PRESS_MS = 500;
 	const MOVE_CANCEL_PX = 10;
+	/** Second tap within this window examines (works for mouse and touch). */
+	const DOUBLE_TAP_MS = 420;
 	let pressTimer: ReturnType<typeof setTimeout> | null = null;
 	let pressStart: { x: number; y: number; id: string } | null = null;
 	let suppressClick = false;
+	let lastTap: { id: string; at: number } | null = null;
+	/** True after a double-tap examine so a following native dblclick does not re-fire Look. */
+	let ateDoubleClick = false;
 
 	function clearPress() {
 		if (pressTimer) {
@@ -30,12 +36,27 @@
 		pressStart = null;
 	}
 
+	function examine(id: string) {
+		game.setPendingVerb(null);
+		lookAtItem(id);
+	}
+
 	function click(id: string) {
 		if (suppressClick) {
 			suppressClick = false;
 			return;
 		}
 		if (game.busy) return;
+
+		const now = performance.now();
+		if (lastTap && lastTap.id === id && now - lastTap.at <= DOUBLE_TAP_MS) {
+			lastTap = null;
+			ateDoubleClick = true;
+			examine(id);
+			return;
+		}
+		lastTap = { id, at: now };
+
 		const pending = game.pendingVerb;
 		if (pending?.item && pending.item !== id) {
 			game.setPendingVerb(null);
@@ -43,10 +64,21 @@
 			return;
 		}
 		if (pending?.item === id) {
+			// Slow second tap (outside double-tap window) cancels use mode.
 			game.setPendingVerb(null);
 			return;
 		}
 		game.setPendingVerb({ verb: 'use' as Verb, item: id });
+	}
+
+	function onDoubleClick(id: string) {
+		// Prefer the timed double-tap path; swallow the synthetic browser event after it.
+		if (ateDoubleClick) {
+			ateDoubleClick = false;
+			return;
+		}
+		lastTap = null;
+		examine(id);
 	}
 
 	function onItemPointerDown(ev: PointerEvent, id: string) {
@@ -78,14 +110,11 @@
 			<button
 				class="slot"
 				class:slot--active={game.pendingVerb?.item === item.id}
-				title={item.name}
-				aria-label={item.name}
+				title={`${item.name} — tap to use, double-tap to examine`}
+				aria-label={`${item.name}. Tap to use, double-tap to examine`}
 				aria-pressed={game.pendingVerb?.item === item.id}
 				onclick={() => click(item.id)}
-				ondblclick={() => {
-					game.setPendingVerb(null);
-					lookAtItem(item.id);
-				}}
+				ondblclick={() => onDoubleClick(item.id)}
 				oncontextmenu={(e) => {
 					e.preventDefault();
 					e.stopPropagation();

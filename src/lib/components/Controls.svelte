@@ -32,8 +32,8 @@
 					<td>Use that inventory item on it</td>
 				</tr>
 				<tr>
-					<th>Double-click item</th>
-					<td>Examine it</td>
+					<th>Double-tap / double-click item</th>
+					<td>Examine it (touch-friendly; long-press → Look also works)</td>
 				</tr>
 				<tr>
 					<th><kbd>Space</kbd> / <kbd>Enter</kbd></th>

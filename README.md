@@ -151,7 +151,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Left-click | Walk, or act on a thing |
 | Right-click / long-press | Verb coin — Look, Talk, Take, Use |
 | Click an item, then a thing | Use it on that |
-| Double-click an item | Examine it |
+| Double-tap / double-click an item | Examine it (touch-friendly) |
 | `Space` / `Enter` / **Continue** | Skip the current line (Continue appears under the bubble after a beat) |
 | `1`–`9` | Pick a dialogue option |
 | `A` | Almanac |
@@ -162,7 +162,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Cancel “use item”, close panels, or open the menu |
 
-Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc, empty stage click, or re-click the item). Loading a slot from the Ledger autosaves current progress first so a mistaken load is recoverable.
+Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc, empty stage click, or re-click the item after a pause). Double-tap an item to examine it. Loading a slot from the Ledger asks for confirmation, then autosaves current progress so a mistaken load is recoverable.
 
 **Continue** on the title screen loads the newest save, or opens a picker when several slots exist — load, export, or delete each slot, and import JSON into slots 1–3. Esc → Ledger can also delete slots (including Autosave).
 
