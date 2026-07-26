@@ -164,7 +164,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 
 Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc, empty stage click, or re-click the item after a pause). Double-tap an item to examine it. Loading a slot from the Ledger asks for confirmation, then autosaves current progress so a mistaken load is recoverable.
 
-Switching away from the tab freezes dialogue hold times, pauses spoken voice, and suspends ambience so lines do not auto-advance in the background.
+Switching away from the tab freezes dialogue hold times, pauses spoken voice, and suspends ambience so lines do not auto-advance in the background. The browser tab title shows **Paused · New Amsterdamned** while you are away; on return mid-line, Continue appears immediately as **Resume**.
 
 The first time you enter play on a device, a short **How to play** card appears after a few seconds (dismiss with Got it, Esc, or open the full list). Reopen any time with **?**.
 

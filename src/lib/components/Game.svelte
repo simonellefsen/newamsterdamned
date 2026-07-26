@@ -71,6 +71,15 @@
 	/** One-shot "how to play" card — delayed so the opening lines get the first beat. */
 	let howTipOpen = $state(false);
 	let howTipTimer: ReturnType<typeof setTimeout> | undefined;
+
+	const PAGE_TITLE = 'New Amsterdamned — a comedy of manners, mud and manifest larceny';
+	const PAUSED_TITLE = 'Paused · New Amsterdamned';
+
+	function applyPageTitle() {
+		if (typeof document === 'undefined') return;
+		const hidden = document.visibilityState === 'hidden';
+		document.title = started && hidden ? PAUSED_TITLE : PAGE_TITLE;
+	}
 	/** True only while Space is physically held, or the HUD reveal button is pressed. */
 	let revealing = $state(false);
 	let muted = $state(false);
@@ -169,6 +178,7 @@
 		unlockAudio();
 		newGame(who);
 		started = true;
+		applyPageTitle();
 		scheduleHowTip();
 		void runEntry('pearl-street');
 	}
@@ -182,6 +192,7 @@
 			howTipTimer = undefined;
 		}
 		clearAmbience();
+		applyPageTitle();
 	}
 
 	/**
@@ -206,6 +217,7 @@
 		}
 		game.restore(s);
 		started = true;
+		applyPageTitle();
 		scheduleHowTip();
 		// Restoring a save does not go through enterScene — re-arm ambience for the room.
 		const sc = getScene(game.scene);
@@ -355,14 +367,27 @@
 		refreshPrefs();
 		watchMotionPreference();
 		// Freeze dialogue timers, ambience, and spoken voice while the tab is away.
+		// Also mark the browser tab so a backgrounded game is obvious in the tab strip.
 		const onVisibility = () => {
 			const hidden = document.visibilityState === 'hidden';
 			setAudioPageHidden(hidden);
 			setVoicePageHidden(hidden);
+			applyPageTitle();
+			// Soft cue when returning mid-line (Continue becomes Resume in Bubbles).
+			if (!hidden && started && game.bubbles.length > 0 && !game.choices) {
+				toastText = 'Still on this line';
+				clearTimeout(toastTimer);
+				toastTimer = setTimeout(() => {
+					if (toastText === 'Still on this line') toastText = null;
+				}, 2400);
+			}
 		};
 		onVisibility();
 		document.addEventListener('visibilitychange', onVisibility);
-		return () => document.removeEventListener('visibilitychange', onVisibility);
+		return () => {
+			document.removeEventListener('visibilitychange', onVisibility);
+			document.title = PAGE_TITLE;
+		};
 	});
 
 	const usingItemName = $derived.by(() => {

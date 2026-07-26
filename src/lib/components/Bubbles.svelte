@@ -7,8 +7,10 @@
 	 * narrator gets the full width in small caps.
 	 *
 	 * A delayed Continue control appears while a line is up so touch players (and anyone
-	 * who never finds Space) can skip without hunting for the stage click path.
+	 * who never finds Space) can skip without hunting for the stage click path. Returning
+	 * to the tab mid-line shows Continue immediately (the hold was frozen while away).
 	 */
+	import { onMount } from 'svelte';
 	import { game } from '$lib/engine/state.svelte';
 	import { advance } from '$lib/engine/interpreter';
 	import { getScene } from '$lib/engine/registry';
@@ -24,19 +26,43 @@
 	const CUE_DELAY_MS = 700;
 	let showCue = $state(false);
 	let cueTimer: ReturnType<typeof setTimeout> | undefined;
+	/** After a tab return mid-line, label Continue as Resume for one beat. */
+	let resumeLabel = $state(false);
+
+	function clearCueTimer() {
+		if (cueTimer !== undefined) {
+			clearTimeout(cueTimer);
+			cueTimer = undefined;
+		}
+	}
+
+	function revealCue(fromResume = false) {
+		clearCueTimer();
+		showCue = true;
+		resumeLabel = fromResume;
+	}
 
 	$effect(() => {
 		const lineId = game.bubbles[0]?.id ?? null;
 		const blocked = !!game.choices;
 		showCue = false;
-		if (cueTimer !== undefined) clearTimeout(cueTimer);
+		resumeLabel = false;
+		clearCueTimer();
 		if (!lineId || blocked) return;
 		cueTimer = setTimeout(() => {
 			showCue = true;
+			resumeLabel = false;
 		}, CUE_DELAY_MS);
-		return () => {
-			if (cueTimer !== undefined) clearTimeout(cueTimer);
+		return () => clearCueTimer();
+	});
+
+	onMount(() => {
+		const onVis = () => {
+			if (document.visibilityState !== 'visible') return;
+			if (game.bubbles.length > 0 && !game.choices) revealCue(true);
 		};
+		document.addEventListener('visibilitychange', onVis);
+		return () => document.removeEventListener('visibilitychange', onVis);
 	});
 
 	function speakerName(actorId: string): string {
@@ -74,8 +100,14 @@
 	{/each}
 
 	{#if showCue && game.bubbles.length > 0 && !game.choices}
-		<button type="button" class="continue" onclick={onContinue} aria-label="Continue">
-			<span class="continue-label">Continue</span>
+		<button
+			type="button"
+			class="continue"
+			class:continue--resume={resumeLabel}
+			onclick={onContinue}
+			aria-label={resumeLabel ? 'Resume' : 'Continue'}
+		>
+			<span class="continue-label">{resumeLabel ? 'Resume' : 'Continue'}</span>
 			<span class="continue-glyph" aria-hidden="true">▸</span>
 		</button>
 	{/if}
@@ -179,6 +211,11 @@
 		background: rgba(36, 28, 18, 0.95);
 		outline: none;
 		box-shadow: 0 0 12px rgba(230, 199, 107, 0.22);
+	}
+
+	.continue--resume {
+		border-color: rgba(230, 199, 107, 0.7);
+		box-shadow: 0 0 14px rgba(230, 199, 107, 0.28);
 	}
 
 	.continue-glyph {
