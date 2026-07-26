@@ -234,9 +234,15 @@
 			setTimeout(() => (saveNote = null), 2400);
 			return;
 		}
+		// Snapshot current progress first so a mistaken Load is recoverable via Autosave.
+		save('auto');
 		game.restore(s);
 		setAmbience(getScene(game.scene)?.ambience ?? null);
 		menuOpen = false;
+	}
+
+	function cancelUse() {
+		game.setPendingVerb(null);
 	}
 
 	function toggleMute() {
@@ -306,18 +312,19 @@
 		watchMotionPreference();
 	});
 
+	const usingItemName = $derived.by(() => {
+		const id = game.pendingVerb?.item;
+		return id ? (getItem(id)?.name ?? id) : null;
+	});
+
 	const statusLine = $derived.by(() => {
-		const p = game.pendingVerb;
-		if (p?.item) {
-			const name = getItem(p.item)?.name ?? p.item;
-			return hover
-				? `Use ${name} on ${hover}  ·  Esc to cancel`
-				: `Use ${name} on…  ·  Esc to cancel`;
+		if (usingItemName) {
+			return hover ? `Use ${usingItemName} on ${hover}` : `Use ${usingItemName} on…`;
 		}
 		return hover ?? '';
 	});
 
-	const usingItem = $derived(!!game.pendingVerb?.item);
+	const usingItem = $derived(!!usingItemName);
 </script>
 
 <svelte:window
@@ -332,7 +339,7 @@
 			else if (almanacOpen) almanacOpen = false;
 			else if (titlePrefsOpen) titlePrefsOpen = false;
 			// Cancel inventory "use X on…" before opening the ledger.
-			else if (started && game.pendingVerb) game.setPendingVerb(null);
+			else if (started && game.pendingVerb) cancelUse();
 			else if (started) menuOpen = !menuOpen;
 		}
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
@@ -430,6 +437,16 @@
 					<span class="toastkind">Almanac</span>
 					{loreToastText}
 				</button>
+			{/if}
+
+			{#if usingItem && usingItemName}
+				<div class="use-banner" role="status" aria-live="polite">
+					<span class="use-banner-text">
+						Use <strong>{usingItemName}</strong> on something
+						{#if hover}<span class="use-banner-target"> · {hover}</span>{/if}
+					</span>
+					<button type="button" class="use-banner-cancel" onclick={cancelUse}>Cancel</button>
+				</div>
 			{/if}
 
 			<div class="topbar">
@@ -709,6 +726,71 @@
 		max-width: 20rem;
 	}
 
+	/* Inventory "use X on…" mode — sits under the top bar, above the stage art. */
+	.use-banner {
+		position: absolute;
+		top: 2.55rem;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 17;
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		max-width: min(92%, 28rem);
+		padding: 0.4rem 0.55rem 0.4rem 0.85rem;
+		background: rgba(18, 14, 10, 0.94);
+		border: 1px solid rgba(230, 199, 107, 0.55);
+		border-radius: 2px;
+		box-shadow:
+			0 6px 24px rgba(0, 0, 0, 0.55),
+			0 0 18px rgba(230, 199, 107, 0.12);
+		pointer-events: auto;
+		animation: slidein 220ms ease-out;
+	}
+
+	.use-banner-text {
+		font-family: var(--font-display);
+		font-size: 0.72rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--parchment);
+		line-height: 1.35;
+		min-width: 0;
+	}
+
+	.use-banner-text strong {
+		color: var(--gold-bright);
+		font-weight: 600;
+	}
+
+	.use-banner-target {
+		color: var(--gold);
+		opacity: 0.95;
+	}
+
+	.use-banner-cancel {
+		flex: 0 0 auto;
+		font-family: var(--font-display);
+		font-size: 0.62rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		padding: 0.4rem 0.75rem;
+		min-height: 44px;
+		background: rgba(60, 42, 28, 0.95);
+		border: 1px solid rgba(230, 199, 107, 0.45);
+		color: var(--gold-bright);
+		border-radius: 2px;
+		cursor: pointer;
+	}
+
+	.use-banner-cancel:hover,
+	.use-banner-cancel:focus-visible {
+		border-color: var(--gold-bright);
+		background: rgba(80, 55, 32, 0.98);
+		outline: none;
+		box-shadow: 0 0 10px rgba(230, 199, 107, 0.28);
+	}
+
 	.toast--lore {
 		top: auto;
 		bottom: 0.9rem;
@@ -950,7 +1032,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.toast {
+		.toast,
+		.use-banner {
 			animation: none;
 		}
 	}

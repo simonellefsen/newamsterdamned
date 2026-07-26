@@ -68,8 +68,8 @@
 					<td>Cancel “use item”, close panels, or open the menu</td>
 				</tr>
 				<tr>
-					<th>Click item again</th>
-					<td>Also cancels use mode</td>
+					<th>Use banner · Cancel</th>
+					<td>Ends use mode (also Esc, empty click, or re-click item)</td>
 				</tr>
 			</tbody>
 		</table>
