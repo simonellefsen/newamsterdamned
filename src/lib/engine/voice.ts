@@ -23,10 +23,12 @@ import {
 	ensurePackLoaded,
 	packHasKey,
 	packLookup,
+	preloadPackKey,
 	speakPack
 } from './voice/pack';
 import { speakWebSpeech, cancelWebSpeech, isWebSpeechAvailable } from './voice/webspeech';
-import { cancelOpenAiSpeech, speakOpenAi } from './voice/openai';
+import { cancelOpenAiSpeech, preloadOpenAiLine, speakOpenAi } from './voice/openai';
+import { resolveText } from './registry';
 
 export type { SpeechKind };
 
@@ -137,10 +139,8 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 	prefetchVoicePack();
 
 	const key = audioKey(req.actor, req.kind, req.text);
-	const volume = Math.min(
-		1,
-		s.voiceVolume * (req.kind === 'think' && s.thinkVoice === 'soft' ? 0.55 : 1)
-	);
+	const softThink = req.kind === 'think' && s.thinkVoice === 'soft';
+	const volume = Math.min(1, s.voiceVolume * (softThink ? 0.55 : 1));
 
 	// 1) Pack hit
 	if (packAllowed() && packHasKey(key)) {
@@ -155,6 +155,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 		const started = speakPack({
 			key,
 			volume,
+			soft: softThink,
 			isCurrent: () => gen === currentGen,
 			onEnd: () => {
 				if (gen === currentGen) resolveDone();
@@ -183,6 +184,7 @@ export function speakLine(req: VoiceRequest): VoiceHandle | null {
 			cacheKey: key,
 			apiKey,
 			volume,
+			soft: softThink,
 			isCurrent: () => gen === currentGen,
 			onEnd: () => {
 				if (gen === currentGen) resolveDone();
@@ -256,6 +258,38 @@ export function __resetVoiceForTests() {
 	currentGen = 0;
 	active = null;
 	packPrefetchStarted = false;
+}
+
+/**
+ * Warm the next unconditional speech line (pack URL or OpenAI browser cache).
+ * Safe no-op when voice is off or the line will be silent.
+ */
+export function preloadVoiceLine(req: {
+	actor: string;
+	text: string;
+	kind: SpeechKind;
+}): void {
+	const s = getSettings();
+	if (!s.voiceEnabled || s.muted || s.voiceBackend === 'off') return;
+	if (typeof window === 'undefined') return;
+	if (req.kind === 'think' && s.thinkVoice === 'off') return;
+
+	const speaker = resolveSpeakerId(req.actor);
+	const text = resolveText(req.text);
+	const key = audioKey(speaker, req.kind, text);
+
+	if (packAllowed() && packHasKey(key)) {
+		preloadPackKey(key);
+		return;
+	}
+	if (openAiAllowed()) {
+		preloadOpenAiLine({
+			text,
+			profileId: speaker,
+			cacheKey: key,
+			apiKey: getSecrets().openaiApiKey
+		});
+	}
 }
 
 export type { VoiceProfile };

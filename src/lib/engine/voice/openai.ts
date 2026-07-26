@@ -9,6 +9,7 @@
 
 import { OPENAI_VOICE_CAST } from './cast';
 import type { VoiceProfile } from '../types';
+import { playHtmlAudio } from './playback';
 
 const CACHE_NAME = 'newamsterdamned-tts-v1';
 const PROXY = '/api/tts';
@@ -69,6 +70,8 @@ export type OpenAiSpeakOpts = {
 	cacheKey: string;
 	apiKey: string;
 	volume: number;
+	/** THINK soft low-pass */
+	soft?: boolean;
 	model?: string;
 	isCurrent: () => boolean;
 	onEnd: () => void;
@@ -131,7 +134,6 @@ export function speakOpenAi(opts: OpenAiSpeakOpts): boolean {
 			const url = URL.createObjectURL(blob);
 			activeUrl = url;
 			const audio = new Audio(url);
-			audio.volume = Math.min(1, Math.max(0, opts.volume));
 			activeAudio = audio;
 			audio.addEventListener('ended', () => {
 				if (activeAudio === audio) activeAudio = null;
@@ -144,13 +146,47 @@ export function speakOpenAi(opts: OpenAiSpeakOpts): boolean {
 			audio.addEventListener('error', () => {
 				finish();
 			});
-			await audio.play();
+			playHtmlAudio(audio, { volume: opts.volume, soft: opts.soft });
 		} catch {
 			finish();
 		}
 	})();
 
 	return true;
+}
+
+/** Fetch + cache a line without playing (next-line preload). */
+export function preloadOpenAiLine(opts: {
+	text: string;
+	profileId: string;
+	cacheKey: string;
+	apiKey: string;
+	model?: string;
+}): void {
+	if (!opts.apiKey.trim() || !opts.text.trim()) return;
+	if (typeof fetch === 'undefined') return;
+	void (async () => {
+		try {
+			const existing = await cacheGet(opts.cacheKey);
+			if (existing) return;
+			const voice = OPENAI_VOICE_CAST[opts.profileId] ?? OPENAI_VOICE_CAST.generic ?? 'alloy';
+			const res = await fetch(PROXY, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					text: opts.text.slice(0, 4096),
+					voice,
+					model: opts.model ?? 'tts-1',
+					apiKey: opts.apiKey
+				})
+			});
+			if (!res.ok) return;
+			const blob = await res.blob();
+			if (blob.size >= 32) void cachePut(opts.cacheKey, blob);
+		} catch {
+			/* ignore preload failures */
+		}
+	})();
 }
 
 export type KeyTestResult = {

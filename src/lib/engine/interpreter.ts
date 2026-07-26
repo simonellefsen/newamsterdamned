@@ -15,8 +15,10 @@ import { playSfx, setAmbience } from './audio';
 import { getSettings } from './settings';
 import {
 	cancelVoice,
+	preloadVoiceLine,
 	resolveSpeakerId,
 	speakLine,
+	type SpeechKind,
 	type VoiceHandle
 } from './voice';
 import type { Action, DialogueTree, Facing, Point } from './types';
@@ -120,9 +122,44 @@ async function speak(actor: string, raw: string, kind: 'say' | 'think' | 'narrat
 	}
 }
 
+/** Next speech op with no intervening control flow — safe to preload. */
+function nextUnconditionalSpeech(
+	actions: Action[],
+	from: number
+): { actor: string; text: string; kind: SpeechKind } | null {
+	for (let i = from; i < actions.length; i++) {
+		const a = actions[i];
+		switch (a.op) {
+			case 'SAY':
+				return { actor: a.actor ?? 'player', text: a.text, kind: 'say' };
+			case 'THINK':
+				return { actor: 'player', text: a.text, kind: 'think' };
+			case 'LINE':
+				return { actor: a.actor, text: a.text, kind: 'say' };
+			case 'NARRATE':
+				return { actor: 'narrator', text: a.text, kind: 'narrate' };
+			// Anything else means the next spoken line is conditional or delayed.
+			default:
+				return null;
+		}
+	}
+	return null;
+}
+
+function isSpeechOp(op: Action['op']): boolean {
+	return op === 'SAY' || op === 'THINK' || op === 'LINE' || op === 'NARRATE';
+}
+
 async function runActions(actions: Action[], token: number): Promise<void> {
-	for (const action of actions) {
+	for (let i = 0; i < actions.length; i++) {
 		if (game.sceneToken !== token) throw new SceneChanged();
+		const action = actions[i];
+		// After starting (or while showing) a speech line, warm the next one only if
+		// it is the immediate next action — never across IF / DIALOGUE / GOTO.
+		if (isSpeechOp(action.op)) {
+			const next = nextUnconditionalSpeech(actions, i + 1);
+			if (next) preloadVoiceLine(next);
+		}
 		await runAction(action, token);
 	}
 }

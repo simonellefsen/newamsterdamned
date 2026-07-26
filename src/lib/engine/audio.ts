@@ -18,6 +18,8 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let sfxBus: GainNode | null = null;
 let ambBus: GainNode | null = null;
+/** Voice bus — pack / OpenAI HTML audio can route here for THINK soft filter. */
+let voiceBus: GainNode | null = null;
 
 /** Active ambience bed nodes — disposed on scene change. */
 let ambNodes: AudioNode[] = [];
@@ -39,8 +41,10 @@ function ensureGraph(): AudioContext | null {
 		master = ctx.createGain();
 		sfxBus = ctx.createGain();
 		ambBus = ctx.createGain();
+		voiceBus = ctx.createGain();
 		sfxBus.connect(master);
 		ambBus.connect(master);
+		voiceBus.connect(master);
 		master.connect(ctx.destination);
 		applyVolumes(loadSettings());
 	}
@@ -50,6 +54,17 @@ function ensureGraph(): AudioContext | null {
 
 function audio(): AudioContext | null {
 	return ensureGraph();
+}
+
+/** Shared AudioContext for SFX, ambience, and voice routing. */
+export function ensureAudioGraph(): AudioContext | null {
+	return ensureGraph();
+}
+
+/** Gain node for voiced HTML audio (THINK soft filter path). */
+export function getVoiceBus(): GainNode | null {
+	ensureGraph();
+	return voiceBus;
 }
 
 function sfxOut(): AudioNode {

@@ -5,6 +5,7 @@
  */
 
 import { packFileName } from './keys';
+import { playHtmlAudio } from './playback';
 
 export type PackLineEntry = {
 	/** Relative file under baseUrl, or omitted to use `{key}.mp3`. */
@@ -115,10 +116,12 @@ export function cancelPack() {
 
 /**
  * Play a pack line. Returns false if key missing or playback cannot start.
+ * `soft` applies THINK low-pass filtering.
  */
 export function speakPack(opts: {
 	key: string;
 	volume: number;
+	soft?: boolean;
 	isCurrent: () => boolean;
 	onEnd: () => void;
 }): boolean {
@@ -128,7 +131,6 @@ export function speakPack(opts: {
 
 	cancelPack();
 	const audio = new Audio(hit.url);
-	audio.volume = Math.min(1, Math.max(0, opts.volume));
 	activeAudio = audio;
 
 	const finish = () => {
@@ -139,15 +141,28 @@ export function speakPack(opts: {
 	audio.addEventListener('ended', finish);
 	audio.addEventListener('error', finish);
 
-	void audio.play().then(
+	playHtmlAudio(audio, { volume: opts.volume, soft: opts.soft });
+	// playHtmlAudio swallows play() rejection; also watch for stalled decode
+	audio.addEventListener(
+		'error',
 		() => {
-			/* playing */
-		},
-		() => {
-			// Autoplay / decode failure — treat as no play.
 			finish();
-		}
+		},
+		{ once: true }
 	);
 
 	return true;
+}
+
+/** Warm the browser cache for a pack clip (no playback). */
+export function preloadPackKey(key: string): void {
+	const hit = packLookup(key);
+	if (!hit || typeof Audio === 'undefined') return;
+	try {
+		const a = new Audio();
+		a.preload = 'auto';
+		a.src = hit.url;
+	} catch {
+		/* */
+	}
 }
