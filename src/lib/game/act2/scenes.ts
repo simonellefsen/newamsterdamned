@@ -1293,13 +1293,13 @@ const countingHouse: Scene = {
 								then: [
 									/* ---------------- the payoff, played on the way out */
 									{ op: 'NARRATE', text: 'The back door opens. {{name}} is looking at a map on the wall with tremendous interest.' },
-									{ op: 'LINE', actor: 'kleyn', text: 'Eight hundred fathom. Counted twice, by two men who do not like each other.' },
+									{ op: 'LINE', actor: 'kleyn', text: 'A hundred fathom. Counted twice, by two men who do not like each other.' },
 									{
 										op: 'NARRATE',
 										text: 'Reynier Kleyn sets a grain sack on the carpet. It settles the way only money settles.'
 									},
 									{ op: 'SFX', sound: 'coin' },
-									{ op: 'LINE', actor: 'kleyn', text: 'Four hundred guilders, at eight the stuiver. My rate. Count it if you like.' },
+									{ op: 'LINE', actor: 'kleyn', text: 'Four hundred guilders, at four the fathom. My rate. Count it if you like.' },
 									{ op: 'SAY', text: 'I would not know how.' },
 									{ op: 'LINE', actor: 'kleyn', text: 'No. That is rather the arrangement.' },
 									{ op: 'GIVE', item: 'white-sewant' },
@@ -1372,8 +1372,8 @@ const countingHouse: Scene = {
 						else: [
 							{ op: 'NARRATE', text: '{{name}} reads the top sheet. Then {{they}} reads it again, from the top, slowly.' },
 							{ op: 'SFX', sound: 'lock' },
-							{ op: 'SAY', text: '"To deliver unto the honourable Company four hundred fathom of white sewant, at the rate of eight the stuiver."' },
-							{ op: 'THINK', text: 'Eight the stuiver. The rate is six. The rate has been six all year. Everyone in this colony is holding white sewant at six.' },
+							{ op: 'SAY', text: '"To deliver unto the honourable Company four hundred fathom of white sewant, at the rate of four the fathom."' },
+							{ op: 'THINK', text: 'Four the fathom. White has fetched two all year. Everyone in this colony is holding white sewant at six.' },
 							{ op: 'SAY', text: 'And the date on it is the tenth. Eleven days ago.' },
 							{
 								op: 'THINK',

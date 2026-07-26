@@ -18,8 +18,8 @@ Every legitimate way to raise four hundred guilders is closed to you.
 
 ## What's here
 
-**Acts I and II are fully playable** — eight scenes, two puzzle chains, nine characters
-with branching dialogue, inventory, save/load and a running scoreboard out of 500.
+**Acts I, II and III are fully playable** — twelve scenes, three puzzle chains, fifteen
+characters with branching dialogue, inventory, save/load and a running scoreboard out of 825.
 
 **Act I — "The Wall and the Wanting."** You wake in the Strand mud with no breeches and a
 summons nailed to your shirt. It ends with a page torn out of a tavern ledger and a name.
@@ -34,7 +34,18 @@ Your first fathom is the finest work you have ever done, and it is rejected **fo
 good** — real beads are drilled from both ends and the two bores never quite meet, and yours
 have no fault in them at all. The fix is to do it again, worse. That is the act.
 
-Acts III–IV are written and designed in [DESIGN.md](DESIGN.md) but not yet built.
+**Act III — "The Company's Conscience."** The Schout Fiscal hires you to write the town's
+case against two men who have asked to stand the night watch at the Wall — and mentions, very
+pleasantly, that he has read the pawnbroker's returns and knows what you did with a certain
+silver-banded leg. In the fort you find the letter the directors in Amsterdam sent in April,
+which already refused the Director-General on this exact question, for two reasons and
+neither of them mercy: the losses their Jewish shareholders took when Portugal retook Brazil,
+and the amount of capital those shareholders still have in the Company.
+
+Then you have three people who want it, and the game never tells you which one is right. The
+scoreboard has an opinion. It does not share it until afterwards.
+
+Act IV is written and designed in [DESIGN.md](DESIGN.md) but not yet built.
 
 **Two protagonists**, and not as a reskin. Roman-Dutch law let a woman trade, sue and hold
 property in her own name; English common law ninety miles east did not. Joost Baksteen is a
@@ -43,10 +54,12 @@ he will never have and a different set of doors closed to her. It pays off at th
 Act II, where the same transaction is two different scenes: Trijn signs for herself, and
 Joost — a man whose earnings his creditor may simply take — has to sign as nobody at all.
 
-**The Almanac** — forty-three historical notes on everyday life in the colony, unlocked by
+**The Almanac** — fifty-nine historical notes on everyday life in the colony, unlocked by
 examining the world: what a guilder bought, why everyone drank beer at breakfast, what
 half-freedom meant, how a wampum bead was actually made and how long it took, why the first
-paved street in New York was paved, what a mordant is and where you got one. Everything in
+paved street in New York was paved, what a mordant is and where you got one, what a notary
+actually did, why nobody was ever paid in coin, and what happened to Asser Levy afterwards
+— which is the best answer this game has to anything. Everything in
 it is true, and entries that rest on legend or disputed figures say so.
 
 ## Running it
@@ -65,6 +78,9 @@ puzzle chain breaks. Alongside that it checks every `GOTO` names a real scene, e
 `GIVE` a real item, every walk-to point sits inside its walkbox, every Almanac entry is
 reachable, every protagonist token is one the resolver knows, no scene narration hard-codes
 a gendered pronoun, and no scoring line can be picked twice.
+
+Act III has three endings, so the suite also proves all three are reachable and that only one
+of them scores — otherwise a well-meaning edit could quietly pay the player for selling out.
 
 It also locks in the specific ways each act could become unwinnable — that nothing can spend
 the four stuivers Act I needs for the redemption fee, and that Act II never consumes the
@@ -89,7 +105,7 @@ lets the placeholder art be swapped for painted backgrounds without touching cod
 
 ```
 src/lib/engine/     types · state · interpreter · geometry · save · audio
-src/lib/game/       scenes · dialogue · items · almanac · protagonists · act2/ · art/
+src/lib/game/       scenes · dialogue · items · almanac · protagonists · act2/ · act3/ · art/
 src/lib/components/ Stage · VerbCoin · Bubbles · Choices · Inventory · Almanac
 ```
 
@@ -117,9 +133,13 @@ palisade that faced the wrong way, sewant inflation, the tavern-saturated town, 
 and his evidence chest, the twenty-three refugees from Recife and the shareholder letter
 that let them stay — these are the puzzle material.
 
-Two subjects are handled straight, with the comedy stepping back: the enslaved and
-half-free Africans who built the wall and the roads, and the Peach Tree War of September
-1655, which is the clock ticking under all four acts. The jokes point up — at the Company,
+Three subjects are handled straight, with the comedy stepping back: the enslaved and
+half-free Africans who built the wall and the roads; the 1654 refugees and the exclusion
+Stuyvesant asked Amsterdam for in writing, which Act III quotes rather than softens; and the
+Peach Tree War of September 1655, which is the clock ticking under all four acts. Asser Levy
+and Jacob Barsimson are real men and they get the clearest arguments in the game — the
+bigotry in Act III belongs to institutions and to named officials' documented positions, and
+it is never played for a laugh. The jokes point up — at the Company,
 the Director-General, the customs men and the pious hypocrites — and never down. See
 [DESIGN.md §2](DESIGN.md).
 

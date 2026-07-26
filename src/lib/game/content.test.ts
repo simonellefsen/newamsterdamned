@@ -17,11 +17,14 @@ import { ITEMS } from './items';
 import { SCENES_ACT2 } from './act2/scenes';
 import { DIALOGUES_ACT2 } from './act2/dialogue';
 import { ITEMS_ACT2 } from './act2/items';
-import { ACT_ONE_MAX, ACT_TWO_MAX, SCORE_MAX } from './index';
+import { SCENES_ACT3 } from './act3/scenes';
+import { DIALOGUES_ACT3 } from './act3/dialogue';
+import { ITEMS_ACT3 } from './act3/items';
+import { ACT_ONE_MAX, ACT_THREE_MAX, ACT_TWO_MAX, SCORE_MAX } from './index';
 
-const ALL_SCENES: Scene[] = [...SCENES, ...SCENES_ACT2];
-const ALL_DIALOGUES: DialogueTree[] = [...DIALOGUES, ...DIALOGUES_ACT2];
-const ALL_ITEMS: Item[] = [...ITEMS, ...ITEMS_ACT2];
+const ALL_SCENES: Scene[] = [...SCENES, ...SCENES_ACT2, ...SCENES_ACT3];
+const ALL_DIALOGUES: DialogueTree[] = [...DIALOGUES, ...DIALOGUES_ACT2, ...DIALOGUES_ACT3];
+const ALL_ITEMS: Item[] = [...ITEMS, ...ITEMS_ACT2, ...ITEMS_ACT3];
 
 /** Every authored script in the game, tagged with where it came from. */
 function allScripts(): Array<{ where: string; actions: Action[] }> {
@@ -242,7 +245,12 @@ describe('protagonist tokens', () => {
 	 */
 	const NARRATES_A_NAMED_NPC = new Set([
 		'pearl-street/watchman-barrel.take',
-		'pearl-street/watchman-barrel+rattle'
+		'pearl-street/watchman-barrel+rattle',
+		// "the sergeant is standing right there with his mouth open" — Loockermans, named in
+		// the same sentence.
+		'secretary-chamber.onFirstEnter',
+		// Quoting Stuyvesant's letter of September 1654 back at the player. The "he" is him.
+		'secretary-chamber/pigeonholes.look'
 	]);
 
 	it('never hard-codes a gendered pronoun in scene narration', () => {
@@ -286,7 +294,8 @@ describe('scoring', () => {
 	it('the advertised ceiling is the score actually available', () => {
 		expect(actScore(SCENES, DIALOGUES, ITEMS)).toBe(ACT_ONE_MAX);
 		expect(actScore(SCENES_ACT2, DIALOGUES_ACT2, ITEMS_ACT2)).toBe(ACT_TWO_MAX);
-		expect(SCORE_MAX).toBe(ACT_ONE_MAX + ACT_TWO_MAX);
+		expect(actScore(SCENES_ACT3, DIALOGUES_ACT3, ITEMS_ACT3)).toBe(ACT_THREE_MAX);
+		expect(SCORE_MAX).toBe(ACT_ONE_MAX + ACT_TWO_MAX + ACT_THREE_MAX);
 	});
 
 	/**

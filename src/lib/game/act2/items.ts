@@ -162,7 +162,7 @@ export const ITEMS_ACT2: Item[] = [
 		id: 'kleyn-contract',
 		name: "Kleyn's undertaking",
 		description:
-			'An undertaking to deliver four hundred fathom of white sewant to the Company at eight the stuiver — signed, sealed, and dated eleven days before the burgomasters have published a rate of eight the stuiver. Either Reynier Kleyn can see the future, or he has been told it. There is no third reading and the date is in his own hand.',
+			'An undertaking to deliver four hundred fathom of white sewant to the Company at four the fathom — signed, sealed, and dated eleven days before the burgomasters have published a rate of eight the stuiver. Either Reynier Kleyn can see the future, or he has been told it. There is no third reading and the date is in his own hand.',
 		icon: icon(`
 			<path d="M 12 8 L 52 8 L 52 52 L 12 52 Z" fill="${mix(P.cream, P.ochre, 0.16)}"/>
 			<path d="M 12 8 L 52 8 L 52 16 L 12 16 Z" fill="${shade(P.cream, 0.16)}"/>
@@ -179,9 +179,9 @@ export const ITEMS_ACT2: Item[] = [
 	},
 	{
 		id: 'white-sewant',
-		name: 'Four hundred guilders in shell',
+		name: 'A sack of white sewant',
 		description:
-			'Eight hundred fathom of white sewant in a grain sack, counted out in front of me at Reynier Kleyn\'s own rate and worth, by that rate, exactly what I owe the West India Company. It is the most money I have ever held. It weighs a great deal more than money ought to, and the sack is warm, and I cannot stop thinking about how quickly a rate can be published.',
+			'A hundred fathom of white sewant in a grain sack, counted out in front of me at four guilders the fathom — Kleyn\'s rate, the purple rate — which made it four hundred guilders and exactly what I owe the West India Company. White fetches two. It is four hundred guilders for precisely as long as he gets his proclamation, and I have made rather sure he will not, so I am carrying two hundred, and it weighs the same either way.',
 		icon: icon(`
 			<path d="M 12 26 Q 5 46 14 58 L 50 58 Q 59 46 52 26 Z" fill="${mix(P.linen, P.ochre, 0.28)}"/>
 			<path d="M 12 26 Q 5 46 14 58 L 32 58 L 32 26 Z" fill="${tint(P.linen, 0.32)}" opacity="0.45"/>

@@ -313,6 +313,118 @@ export const ALMANAC: LoreEntry[] = [
 		title: 'A note on this character',
 		category: 'People',
 		body: 'Mattaneck is invented, and deliberately so. The Dutch records of the 1640s and 1650s name a great many real Munsee, Lenape and Long Island people — Oratam of the Hackensack, Tackapousha of the Massapequa, Mattano, Penhawitz and others — who negotiated, traded, signed deeds and argued with the colony on the record. This game does not put invented dialogue, an invented scheme or an invented change of heart into the mouth of any of them. The design document for this project originally named a documented sachem for this role; that was changed for exactly this reason. Everything Mattaneck says about how sewant was made, what it was worth, and who lost when its value fell is drawn from the historical record. Mattaneck himself is not.'
+	},
+
+	/* ==================================================================== ACT III
+	 * Everyone named in this act except the protagonist is a real person, and the
+	 * documents are real documents. Where the game has moved a date to fit its own
+	 * calendar, the entry says so.
+	 */
+	{
+		id: 'jews-1654',
+		title: 'September 1654',
+		category: 'People',
+		body: 'In September 1654 a ship put into New Amsterdam carrying Jewish refugees from Recife, in Dutch Brazil, which the Portuguese had just retaken after twenty-four years. They had lost effectively everything. The shipmaster promptly sued them on the quay for their unpaid passage money and won, and their remaining goods were sold at auction to cover it. One Jewish man, Jacob Barsimson, was already in the town, having arrived alone a month earlier. This is the founding moment of Jewish settlement in what became the United States, and it consisted of about two dozen destitute people being sued for the fare.',
+		caveat: 'The traditional figure is twenty-three people, which comes from the passage-money suit rather than a passenger list, and the ship\'s name is uncertain — the Ste. Catherine and the St. Charles both appear in the literature.'
+	},
+	{
+		id: 'stuyvesant-letter',
+		title: 'What the Director-General wrote',
+		category: 'Faith',
+		body: 'On 22 September 1654 Stuyvesant wrote to the Company\'s Amsterdam Chamber asking that the new arrivals not be permitted to remain. He described them as a deceitful race and asked that they be not allowed to infest and trouble the new colony. The town\'s Reformed consistory wrote in support, and so, at length and with feeling, did the Reverend Johannes Megapolensis. Stuyvesant was not a cynic about this and that is the uncomfortable part: he believed a colony of eight hundred souls could only hold together under one church, and he was consistent about it — he tried to exclude Lutherans and prosecuted Quakers too.',
+		caveat: 'The English wording everyone quotes comes from nineteenth-century translations of the Dutch originals, so the sting of individual phrases is partly a translator\'s.'
+	},
+	{
+		id: 'chamber-letter',
+		title: 'The letter of 26 April 1655',
+		category: 'Law',
+		body: 'The directors in Amsterdam refused him. Their letter gave two reasons and neither was mercy: the considerable loss the Jewish nation had sustained in the taking of Brazil, and the large amount of capital they still had invested in the shares of the Company. Jews might therefore travel, trade, live and remain in New Netherland, provided their poor were supported by their own nation and not by the Company. It is the single most consequential document in the colony\'s history on this question, and it reads like a board minute, because it is one.',
+		caveat: 'It was permission to stay and trade, not equality. Stuyvesant went on restricting Jewish residents — from the militia, from public worship, from some trades — for years afterwards, and the directors let most of it stand.'
+	},
+	{
+		id: 'militia',
+		title: 'The watch and the trained bands',
+		category: 'Law',
+		body: 'Every able-bodied male burgher owed the town watch: a night on the wall or at a gate in rotation, unpaid, with your own weapon. It was a duty and it was also a qualification, because standing the watch was part of what made a man a member of the community rather than a resident of it. In August 1655 the Council resolved that the town\'s Jewish inhabitants — having been refused enlistment in the trained bands in the first place — were exempt from the watch and should instead pay a monthly contribution. Being excused a duty you were never allowed to perform, and charged for the privilege, is the shape of a great deal of seventeenth-century toleration.',
+		caveat: 'The game names a figure for the monthly levy for the sake of a line of dialogue. Treat the number as illustrative; the duty and the exemption are the documented part.'
+	},
+	{
+		id: 'asser-levy',
+		title: 'Asser Levy',
+		category: 'People',
+		body: 'On 5 November 1655 Asser Levy and Jacob Barsimson petitioned to be allowed to stand watch like other burghers rather than pay the exemption. They were refused and told to pay. Levy kept going. In 1657 he was admitted to the burgher-right of the city, which gave him the standing to keep a shop and trade openly. He was licensed as a butcher and excused from slaughtering hogs. He acquired real estate, becoming one of the first Jewish landowners in North America; he was the first Jew known to have served on a jury here; he obtained a licence to keep a slaughterhouse; and he lent money towards the building of the first Lutheran church in the town — for people who had themselves been refused the right to worship in public. He died in 1682, prosperous, and the inventory of his estate ran to pages. He outlived van Tienhoven, Stuyvesant, and Dutch rule.',
+		caveat: 'The game moves the watch petition forward to early September 1655 so that it falls before Stuyvesant sails for the Delaware. The real petition is dated 5 November, after his return.'
+	},
+	{
+		id: 'barsimson',
+		title: 'Jacob Barsimson',
+		category: 'People',
+		body: 'Barsimson reached New Amsterdam on the Peartree on 22 August 1654, alone, a month before the Recife group, apparently with the Company\'s knowledge. He joined Levy\'s petition to stand watch. The most human thing surviving about him is a court entry: summoned as a defendant on a Saturday, he did not appear, and the record notes that though he was in default, the summons had fallen on his Sabbath and the plaintiff\'s claim was therefore not granted. Then he vanishes from the record almost entirely. He is a reminder of how thin the documentation of ordinary people is, even for someone standing at the exact beginning of something.',
+		caveat: 'Almost everything else said about Barsimson in popular accounts is inference from those few entries.'
+	},
+	{
+		id: 'burgher-right',
+		title: 'Burgher-right',
+		category: 'Law',
+		body: 'In 1657 New Amsterdam created two grades of citizenship. The great burgher-right, at fifty guilders, went to officials, ministers, former magistrates and their descendants, and carried exemption from some duties. The small burgher-right, at twenty guilders, went to shopkeepers, tradesmen and anyone who had kept a business in the city for a year and six weeks, and it carried the right to trade and keep shop at all. It sounds like a tax. It was in fact the moment the town stopped being a Company outpost where everyone lived at the Director-General\'s pleasure and became a city with citizens, and it is why a butcher spent two years arguing about four nights of guard duty.'
+	},
+	{
+		id: 'records',
+		title: 'Why we know all this',
+		category: 'Law',
+		body: 'The reason a game can be this specific about what people said in a tavern in 1655 is that the Dutch wrote everything down and the paper survived. The minutes of the Council, the court records of New Amsterdam, the notarial protocols, the pawn returns, the deeds and the ordinances were kept, shipped, stored, half-burned, rescued, and translated into English in the nineteenth and twentieth centuries. Whole lives are recoverable from them: what a woman sued her neighbour over, what a labourer was paid, what a man shouted in the street and what it cost him. In New Netherland the entry in the book was the reality, and three and a half centuries later it still is, because the book is what is left.',
+		caveat: 'The translations are of their time. Nineteenth-century translators smoothed, moralised and occasionally guessed, and a few famous phrases are shakier in Dutch than in English.'
+	},
+	{
+		id: 'notary-office',
+		title: 'The notary',
+		category: 'Work',
+		body: 'A Dutch notary was not a rubber stamp. He drew up and authenticated instruments — contracts, wills, powers of attorney, inventories, protests of unpaid bills, and certified copies — and entered each in his protocol, a bound register he kept for life and which passed to his successor. His copy of a document was a public act: it could be produced in court without the original, and its force came from his oath rather than from anyone\'s authority over him. Dirck van Schelluyne practised in New Amsterdam from 1650 and later at Fort Orange. Colonists used notaries constantly and about everything, which is why the protocols are now one of the richest sources for ordinary colonial life that exists.'
+	},
+	{
+		id: 'writing',
+		title: 'A clerk\'s kit',
+		category: 'Work',
+		body: 'A goose quill, cut with a penknife and recut every few hundred words. Iron-gall ink, brewed from oak galls, iron sulphate and gum, which bites into the fibre of the paper and cannot be scraped away without leaving a visible hole — this is why medieval and early modern alterations are usually detectable. Fine sand, shaken from a caster, to dry the page, blotting paper being a nineteenth-century thing. Rag paper, imported, expensive. The Dutch Republic had among the highest literacy rates in Europe, but in a colonial town plenty of substantial people still signed with a mark, and the handful who wrote a clean official hand were disproportionately powerful.'
+	},
+	{
+		id: 'van-tienhoven',
+		title: 'Cornelis van Tienhoven',
+		category: 'People',
+		body: 'Provincial secretary from the late 1630s and Schout Fiscal from 1652: prosecutor, sheriff and adviser to the bench at once. He was fluent, hard-working, indispensable and thoroughly disliked. He was deeply implicated in the massacre of sleeping Lenape families at Pavonia in February 1643, having advised and led part of the action, and he escaped consequences for it for thirteen years. What finally destroyed him was arithmetic: an investigation into his accounts in 1656 found large sums missing, he was suspended and dismissed, and he disappeared. His hat and cane were found floating in the North River.',
+		caveat: 'The drowning was never established. Contemporaries suspected he had staged it and gone to Barbados, and his brother, in similar trouble, did something very similar.'
+	},
+	{
+		id: 'stadt-huys',
+		title: 'The Stadt Huys',
+		category: 'Town',
+		body: 'The building was put up around 1641 as the Stadt Herberg, the city tavern, on the shore of the East River at what is now Pearl Street and Coenties Slip — the town needed somewhere to put visiting ship\'s officers, and a tavern was cheaper than hospitality. When New Amsterdam was granted its own municipal government in 1653, with two burgomasters and five schepenen, they had nowhere to sit, so they took the tavern. The seat of civil government in New York therefore began as a bar, which nobody who has read the minutes finds surprising. Its foundations were excavated in 1979 and 1980 and remain one of the most important urban digs in the city.'
+	},
+	{
+		id: 'delaware',
+		title: 'The Delaware expedition',
+		category: 'Town',
+		body: 'In early September 1655 Stuyvesant sailed for the South River — the Delaware — with a fleet of about seven vessels and somewhere over three hundred soldiers, to end New Sweden. It worked: Fort Casimir and then Fort Christina surrendered, and Swedish rule on the Delaware was finished. To do it he took nearly every soldier in New Netherland out of New Netherland, leaving a town of some fifteen hundred people behind a wooden fence with a skeleton garrison. What happened next is the subject of Act IV.'
+	},
+	{
+		id: 'bill-of-exchange',
+		title: 'Paper money before paper money',
+		category: 'Money',
+		body: 'Almost nobody in New Netherland was ever paid in coin, because there was almost no coin. Large sums moved by bill of exchange: a written order on a merchant or a chamber of the Company in Amsterdam, payable at sight or after a set period. A bill was worth exactly what the drawer\'s credit was worth, and a bill drawn on Amsterdam and presented in New Amsterdam was worth what it would fetch from someone willing to wait for the next ship. Getting a bill refused was so routine that formally protesting one before a notary was steady work.'
+	},
+	{
+		id: 'stuyvesant-leg',
+		title: 'The leg',
+		category: 'People',
+		body: 'Stuyvesant lost his right leg in April 1644 leading an assault on the Spanish fort at St. Martin. A cannonball smashed it and it was amputated below the knee; he was invalided home to Holland, recovered, was fitted with a wooden replacement, and was appointed Director-General of New Netherland two years later. He commanded the colony for seventeen years on that leg. It is worth holding on to, when he is at his worst, that he was a genuinely courageous man who paid a real price for this Company and got very little back for it.',
+		caveat: 'The silver bands are legend rather than record — a persistent story with no solid seventeenth-century source. This game leans on them heavily because Act I needed a famous object of a particular weight, and that is a novelist\'s licence, not a historian\'s.'
+	},
+	{
+		id: 'synagogue',
+		title: 'Worship in a room',
+		category: 'Faith',
+		body: 'Only the Dutch Reformed Church could worship publicly in New Netherland. Everyone else — Jews, Lutherans, Quakers, Catholics — was permitted at most private devotion behind a closed door, and in 1656 an ordinance sharpened the penalties for unauthorised gatherings. This was not the practice at home: Amsterdam by the 1650s had a large public synagogue and a working, if grudging, pluralism, and the Dutch Republic was the most tolerant state in Europe. The tolerance did not fully survive the voyage. New Amsterdam\'s Jewish congregation, which traces itself to 1654, met in private rooms and did not have a purpose-built synagogue until 1730.',
+		caveat: 'It was not one-way traffic: in 1657 the men of Flushing sent the Director-General a written remonstrance refusing to bar Quakers from their town. It is one of the earliest defences of religious liberty written in North America, and it cost several of them dearly.'
 	}
 ];
 
