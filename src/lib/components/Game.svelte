@@ -542,10 +542,11 @@
 					</div>
 					<p class="help">
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
-						thing · Double-click an item to examine · Hold <kbd>Space</kbd> or the Eye button to
-						show what is interactive · <kbd>H</kbd> for a hint · <kbd>M</kbd> for the map ·
-						<kbd>?</kbd> for controls · <kbd>A</kbd> for the Almanac ·
-						<kbd>[</kbd>/<kbd>]</kbd> dialog text size · <kbd>Esc</kbd> for this menu
+						thing · Double-click an item to examine · <kbd>Space</kbd> / Enter / Continue under a
+						line to skip · Hold <kbd>Space</kbd> or the Eye button to show what is interactive ·
+						<kbd>H</kbd> for a hint · <kbd>M</kbd> for the map · <kbd>?</kbd> for controls ·
+						<kbd>A</kbd> for the Almanac · <kbd>[</kbd>/<kbd>]</kbd> dialog text size ·
+						<kbd>Esc</kbd> for this menu
 					</p>
 				</div>
 			{/if}

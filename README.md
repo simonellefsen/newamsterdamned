@@ -152,7 +152,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | Right-click / long-press | Verb coin — Look, Talk, Take, Use |
 | Click an item, then a thing | Use it on that |
 | Double-click an item | Examine it |
-| `Space` / `Enter` | Skip the current line |
+| `Space` / `Enter` / **Continue** | Skip the current line (Continue appears under the bubble after a beat) |
 | `1`–`9` | Pick a dialogue option |
 | `A` | Almanac |
 | `H` | Hint — what am I doing? |

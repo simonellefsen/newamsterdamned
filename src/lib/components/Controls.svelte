@@ -40,6 +40,10 @@
 					<td>Skip the current line (hold Space to show hotspots)</td>
 				</tr>
 				<tr>
+					<th>Continue button</th>
+					<td>Appears under a line after a beat — same as click / Space</td>
+				</tr>
+				<tr>
 					<th><kbd>1</kbd>–<kbd>9</kbd></th>
 					<td>Pick a dialogue option</td>
 				</tr>
