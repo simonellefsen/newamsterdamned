@@ -343,7 +343,12 @@
 	role="presentation"
 >
 	{#if scene}
-		<div class="bg">{@html scene.background}</div>
+		{#if scene.background.trimStart().startsWith('<')}
+			<div class="bg">{@html scene.background}</div>
+		{:else}
+			<!-- Raster / URL backgrounds (DESIGN.md drop-in path). -->
+			<img class="bg bg--raster" src={scene.background} alt="" draggable="false" />
+		{/if}
 
 		<!-- Actors, depth-sorted. -->
 		{#each drawOrder as entry (entry.kind === 'player' ? 'player' : entry.kind === 'npc' ? entry.actor.id : entry.hotspot.id)}
@@ -453,6 +458,13 @@
 		height: 100%;
 		display: block;
 		pointer-events: none;
+	}
+
+	.bg--raster {
+		object-fit: cover;
+		object-position: center;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
 	.actor {

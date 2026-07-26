@@ -156,6 +156,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | `1`–`9` | Pick a dialogue option |
 | `A` | Almanac |
 | `H` | Hint — what am I doing? |
+| `M` | Map of visited places (no teleport) |
 | Hold `Space` or the 👁 button | Show what is interactive |
 | `Esc` | Menu (save/load + audio/text/voice preferences) |
 

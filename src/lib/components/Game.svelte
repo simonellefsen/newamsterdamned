@@ -10,6 +10,7 @@
 	import ActEnd from './ActEnd.svelte';
 	import Almanac from './Almanac.svelte';
 	import Hints from './Hints.svelte';
+	import Map from './Map.svelte';
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem, getScene } from '$lib/engine/registry';
 	import { loadContent, newGame, SCORE_MAX } from '$lib/game';
@@ -50,6 +51,7 @@
 	let menuOpen = $state(false);
 	let almanacOpen = $state(false);
 	let hintsOpen = $state(false);
+	let mapOpen = $state(false);
 	/** True only while Space is physically held, or the HUD reveal button is pressed. */
 	let revealing = $state(false);
 	let muted = $state(false);
@@ -259,6 +261,7 @@
 		if (e.key === 'Escape') {
 			if (coin) coin = null;
 			else if (hintsOpen) hintsOpen = false;
+			else if (mapOpen) mapOpen = false;
 			else if (almanacOpen) almanacOpen = false;
 			else if (started) menuOpen = !menuOpen;
 		}
@@ -266,6 +269,7 @@
 		if (!started || document.activeElement?.tagName === 'BUTTON') return;
 		if (e.key === 'a' || e.key === 'A') almanacOpen = !almanacOpen;
 		if (e.key === 'h' || e.key === 'H') hintsOpen = !hintsOpen;
+		if (e.key === 'm' || e.key === 'M') mapOpen = !mapOpen;
 		if (e.key === ' ' || e.key === 'Enter') {
 			e.preventDefault();
 			/**
@@ -302,6 +306,9 @@
 			{#if hintsOpen}
 				<Hints onClose={() => (hintsOpen = false)} />
 			{/if}
+			{#if mapOpen}
+				<Map onClose={() => (mapOpen = false)} />
+			{/if}
 
 			{#if toastText}
 				<div class="toast">{toastText}</div>
@@ -317,6 +324,7 @@
 				<span class="room">{scene?.name ?? ''}</span>
 				<span class="spacer"></span>
 				<button class="icon icon--text" onclick={() => (hintsOpen = true)}>Hint</button>
+				<button class="icon icon--text" onclick={() => (mapOpen = true)}>Map</button>
 				<button class="icon icon--text" onclick={() => (almanacOpen = true)}>
 					Almanac <span class="tally">{game.lore.length}/{ALMANAC.length}</span>
 				</button>
@@ -474,8 +482,8 @@
 					<p class="help">
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
 						thing · Double-click an item to examine · Hold <kbd>Space</kbd> or the Eye button to
-						show what is interactive · <kbd>H</kbd> for a hint · <kbd>A</kbd> for the Almanac ·
-						<kbd>Esc</kbd> for this menu
+						show what is interactive · <kbd>H</kbd> for a hint · <kbd>M</kbd> for the map ·
+						<kbd>A</kbd> for the Almanac · <kbd>Esc</kbd> for this menu
 					</p>
 				</div>
 			{/if}
