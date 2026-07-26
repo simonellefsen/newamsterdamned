@@ -194,9 +194,14 @@ Optional flags after `--`:
 ```bash
 npm run voice:generate -- --limit=20 --speakers=narrator
 npm run voice:generate:live -- --act=1 --speakers=narrator,joost,trijn
+npm run voice:generate:live -- --model=gpt-4o-mini-tts --limit=3
 ```
 
-Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. `npm run voice:generate:live` loads `.env` then `.env.local` automatically (Vite’s dev server does the same; a bare `node` process does not). You can also `export OPENAI_API_KEY=…` in the shell. MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
+Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. `npm run voice:generate:live` loads `.env` then `.env.local` automatically (Vite’s dev server does the same; a bare `node` process does not). You can also `export OPENAI_API_KEY=…` in the shell.
+
+**Default model is `tts-1`.** If OpenAI returns *Project … does not have access to model `tts-1`*, either enable `tts-1` under that project’s model limits in the [API dashboard](https://platform.openai.com/), or pass `--model=gpt-4o-mini-tts` (OpenAI’s current default speech model; different pricing).
+
+MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
 
 **TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
 

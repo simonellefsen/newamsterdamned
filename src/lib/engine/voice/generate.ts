@@ -52,7 +52,11 @@ export type GenerateOptions = {
 	cacheDir?: string;
 	/** Skip API; write manifest with estimated durations only. */
 	dryRun?: boolean;
-	/** OpenAI model: tts-1 | tts-1-hd */
+	/**
+	 * OpenAI speech model. Default `tts-1` (cheap, character-priced).
+	 * If your project returns 403 “does not have access to model tts-1”, either enable
+	 * that model under the project’s limits, or pass `--model=gpt-4o-mini-tts`.
+	 */
 	model?: string;
 	/** ms between API calls */
 	delayMs?: number;
@@ -133,7 +137,15 @@ async function synthesizeOpenAi(
 	});
 	if (!res.ok) {
 		const body = await res.text().catch(() => '');
-		throw new Error(`OpenAI TTS ${res.status}: ${body.slice(0, 200)}`);
+		const snippet = body.slice(0, 280);
+		if (res.status === 403 && /does not have access to model/i.test(body)) {
+			throw new Error(
+				`OpenAI TTS 403: this API key’s project cannot use model \`${model}\`. ` +
+					`Enable that model in the OpenAI project (platform.openai.com → Project → Limits), ` +
+					`or re-run with --model=gpt-4o-mini-tts (or tts-1-hd). Detail: ${snippet}`
+			);
+		}
+		throw new Error(`OpenAI TTS ${res.status}: ${snippet}`);
 	}
 	const ab = await res.arrayBuffer();
 	return Buffer.from(ab);
@@ -297,7 +309,16 @@ export async function generatePack(opts: GenerateOptions = {}): Promise<Generate
 			if (delayMs > 0) await sleep(delayMs);
 		} catch (err) {
 			failed++;
-			log(`  FAIL ${line.key} (${line.speaker}): ${err instanceof Error ? err.message : err}`);
+			const msg = err instanceof Error ? err.message : String(err);
+			log(`  FAIL ${line.key} (${line.speaker}): ${msg}`);
+			// Model/project access is not going to recover mid-run — stop burning rate limits.
+			if (/does not have access to model|project .* does not have access/i.test(msg)) {
+				log(
+					`Aborting: model \`${model}\` is blocked for this API key’s project. ` +
+						`Try: npm run voice:generate:live -- --model=gpt-4o-mini-tts --limit=3`
+				);
+				break;
+			}
 		}
 	}
 
