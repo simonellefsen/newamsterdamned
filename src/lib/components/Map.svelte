@@ -6,6 +6,7 @@
 	import { game } from '$lib/engine/state.svelte';
 	import { getScene } from '$lib/engine/registry';
 	import { ACT_LABEL, MAP_EDGES, MAP_NODES, type ActNumber } from '$lib/game/acts';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Props {
 		onClose: () => void;
@@ -40,7 +41,7 @@
 	}
 </script>
 
-<div class="wrap" role="dialog" aria-modal="true" aria-label="Map of the town">
+<div class="wrap" role="dialog" aria-modal="true" aria-label="Map of the town" use:focusTrap>
 	<div class="card">
 		<header>
 			<div>

@@ -10,6 +10,7 @@
 	 * yourself never leaves the next puzzle pre-spoiled.
 	 */
 	import { currentObjective } from '$lib/game/objectives';
+	import { focusTrap } from '$lib/actions/focusTrap';
 
 	interface Props {
 		onClose: () => void;
@@ -35,7 +36,7 @@
 	const deeperLabel = $derived(level === 0 ? 'Give me a nudge' : 'Just tell me');
 </script>
 
-<div class="wrap" role="dialog" aria-modal="true" aria-label="What am I doing?">
+<div class="wrap" role="dialog" aria-modal="true" aria-label="What am I doing?" use:focusTrap>
 	<div class="card">
 		<p class="rule"></p>
 		<h2>What am I doing?</h2>

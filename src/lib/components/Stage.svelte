@@ -13,6 +13,7 @@
 	import { clampToPolygon, depthScale, polygonToSvgPoints, polygonCentroid } from '$lib/engine/geometry';
 	import { interactWithHotspot, walkTo } from '$lib/engine/interaction';
 	import { advance, isAwaitingAdvance } from '$lib/engine/interpreter';
+	import { prefersReducedMotion } from '$lib/engine/settings';
 	import { sprite, PALETTES, SPRITE_TRAITS } from '$lib/game/art/actor';
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
 	import type { Hotspot, Point, SceneActor, Verb } from '$lib/engine/types';
@@ -127,7 +128,8 @@
 				const next = clampToPolygon([px + (dx / dist) * step, py + (dy / dist) * step], scene.walkbox);
 				game.setPos(next);
 				if (Math.abs(dx) > 6) game.setFacing(dx < 0 ? 'left' : 'right');
-				walkPhase = (walkPhase + dt * 2.6) % 1;
+				// Settings "Reduce motion" freezes the walk bob (instant slide still works).
+				walkPhase = prefersReducedMotion() ? 0 : (walkPhase + dt * 2.6) % 1;
 			}
 		} else if (walkPhase !== 0) {
 			walkPhase = 0;

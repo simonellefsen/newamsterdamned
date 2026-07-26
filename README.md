@@ -164,13 +164,14 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):
 
 - **Dialog text** — Normal through Huge (`[` / `]` or A−/A+ while playing)
+- **Motion** — Match system / Reduce / Full (walk bob + UI transitions)
 - **Spoken voice** — On / Off  
 - **Voice source** — Auto (pack → OpenAI → system), pack only, or system only  
 - **Test system voice** — free OS sample, no API key  
 - **OpenAI API key** — optional; Save / Test / Clear (this browser only). Test uses same-origin `/api/tts`.  
 - **How to get an API key** — foldout with links to platform signup, keys, and billing  
 
-Captions always stay on.
+Modals (menu, settings, almanac, hints, map) trap keyboard focus until closed. Captions always stay on.
 
 ```bash
 npm run voice:extract              # corpus size / dual-protag cost estimate

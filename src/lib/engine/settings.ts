@@ -191,3 +191,26 @@ export function prefersReducedMotion(s: Settings = getSettings()): boolean {
 	if (typeof window === 'undefined' || !window.matchMedia) return false;
 	return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
+
+/**
+ * Sync the `reduce-motion` class on <html> from settings (and OS when set to system).
+ * CSS and Stage walk bob both read this.
+ */
+export function applyMotionPreference(s: Settings = getSettings()) {
+	if (typeof document === 'undefined') return;
+	document.documentElement.classList.toggle('reduce-motion', prefersReducedMotion(s));
+}
+
+let motionMediaBound = false;
+
+/** Call once from the app shell — keeps `system` in sync with OS changes. */
+export function watchMotionPreference() {
+	if (typeof window === 'undefined' || motionMediaBound) return;
+	motionMediaBound = true;
+	const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+	const onChange = () => {
+		if (getSettings().reduceMotion === 'system') applyMotionPreference();
+	};
+	mq.addEventListener?.('change', onChange);
+	applyMotionPreference();
+}

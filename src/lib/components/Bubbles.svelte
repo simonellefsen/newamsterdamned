@@ -132,4 +132,8 @@
 			animation: none;
 		}
 	}
+
+	:global(html.reduce-motion) p {
+		animation: none;
+	}
 </style>

@@ -7,6 +7,7 @@
 	 */
 	import { game } from '$lib/engine/state.svelte';
 	import { ALMANAC, ALMANAC_CATEGORIES, type LoreEntry } from '$lib/game/almanac';
+	import { focusTrap } from '$lib/actions/focusTrap';
 	import Emphasis from './Emphasis.svelte';
 
 	interface Props {
@@ -33,7 +34,7 @@
 	});
 </script>
 
-<div class="wrap" role="dialog" aria-modal="true" aria-label="The Almanac">
+<div class="wrap" role="dialog" aria-modal="true" aria-label="The Almanac" use:focusTrap>
 	<header>
 		<h2>The Almanac</h2>
 		<span class="count">{found.size} of {ALMANAC.length} noted</span>

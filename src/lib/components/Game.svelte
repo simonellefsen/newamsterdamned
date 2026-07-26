@@ -12,6 +12,7 @@
 	import Hints from './Hints.svelte';
 	import Map from './Map.svelte';
 	import Preferences from './Preferences.svelte';
+	import { focusTrap } from '$lib/actions/focusTrap';
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem, getScene } from '$lib/engine/registry';
 	import { loadContent, newGame, SCORE_MAX } from '$lib/game';
@@ -34,6 +35,7 @@
 		stepTextScale,
 		TEXT_SCALE_LABEL,
 		TEXT_SCALE_STEPS,
+		watchMotionPreference,
 		type Settings
 	} from '$lib/engine/settings';
 	import {
@@ -83,6 +85,8 @@
 		applyVolumes(prefs);
 		applyTextScale(prefs.textScale);
 	}
+
+	// keep applyTextScale on boot via onMount refreshPrefs
 
 	function onPrefsChange(s: Settings) {
 		prefs = s;
@@ -258,6 +262,7 @@
 
 	onMount(() => {
 		refreshPrefs();
+		watchMotionPreference();
 	});
 
 	const statusLine = $derived.by(() => {
@@ -324,7 +329,13 @@
 			}}
 		/>
 		{#if titlePrefsOpen}
-			<div class="menu menu--title" role="dialog" aria-label="Settings">
+			<div
+				class="menu menu--title"
+				role="dialog"
+				aria-modal="true"
+				aria-label="Settings"
+				use:focusTrap
+			>
 				<h3>Settings</h3>
 				<p class="title-prefs-lead">
 					Set dialog size and voice before you begin. Changes are saved on this device.
@@ -402,7 +413,7 @@
 			</div>
 
 			{#if menuOpen}
-				<div class="menu" role="dialog" aria-label="Menu">
+				<div class="menu" role="dialog" aria-modal="true" aria-label="Menu" use:focusTrap>
 					<h3>Ledger</h3>
 					<div class="slots">
 						{#each SLOTS.filter((s) => s !== 'auto') as slot (slot)}

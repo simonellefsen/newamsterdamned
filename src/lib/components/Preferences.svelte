@@ -4,11 +4,13 @@
 	 * Used from the title screen and the in-game Esc menu.
 	 */
 	import {
+		applyMotionPreference,
 		getSettings,
 		loadSettings,
 		saveSettings,
 		TEXT_SCALE_LABEL,
 		TEXT_SCALE_STEPS,
+		type ReduceMotion,
 		type Settings,
 		type VoiceBackendPref
 	} from '$lib/engine/settings';
@@ -51,6 +53,7 @@
 		prefs = patch ? saveSettings(patch) : getSettings();
 		applyVolumes(prefs);
 		applyTextScale(prefs.textScale);
+		applyMotionPreference(prefs);
 		onChange?.(prefs);
 	}
 
@@ -184,6 +187,21 @@
 			<option value="1">Normal</option>
 			<option value="1.35">Slower</option>
 			<option value="1.7">Slowest</option>
+		</select>
+	</label>
+	<label class="pref">
+		<span>Motion</span>
+		<select
+			value={prefs.reduceMotion === true ? 'on' : prefs.reduceMotion === false ? 'off' : 'system'}
+			onchange={(e) => {
+				const v = (e.currentTarget as HTMLSelectElement).value;
+				const reduceMotion: ReduceMotion = v === 'on' ? true : v === 'off' ? false : 'system';
+				refreshPrefs({ reduceMotion });
+			}}
+		>
+			<option value="system">Match system</option>
+			<option value="on">Reduce motion</option>
+			<option value="off">Full motion</option>
 		</select>
 	</label>
 	<label class="pref">
