@@ -23,11 +23,25 @@ import {
 	ensurePackLoaded,
 	packHasKey,
 	packLookup,
+	pausePack,
 	preloadPackKey,
+	resumePack,
 	speakPack
 } from './voice/pack';
-import { speakWebSpeech, cancelWebSpeech, isWebSpeechAvailable } from './voice/webspeech';
-import { cancelOpenAiSpeech, preloadOpenAiLine, speakOpenAi } from './voice/openai';
+import {
+	speakWebSpeech,
+	cancelWebSpeech,
+	isWebSpeechAvailable,
+	pauseWebSpeech,
+	resumeWebSpeech
+} from './voice/webspeech';
+import {
+	cancelOpenAiSpeech,
+	pauseOpenAiSpeech,
+	preloadOpenAiLine,
+	resumeOpenAiSpeech,
+	speakOpenAi
+} from './voice/openai';
 import { resolveText } from './registry';
 
 export type { SpeechKind };
@@ -246,6 +260,22 @@ export function cancelVoice() {
 		cancelWebSpeech();
 		cancelPack();
 		cancelOpenAiSpeech();
+	}
+}
+
+/**
+ * Pause / resume spoken audio when the tab is backgrounded without cancelling
+ * the line. Pair with interpreter visible-time waits so the bubble stays put.
+ */
+export function setVoicePageHidden(hidden: boolean) {
+	if (hidden) {
+		pausePack();
+		pauseOpenAiSpeech();
+		pauseWebSpeech();
+	} else {
+		resumePack();
+		resumeOpenAiSpeech();
+		resumeWebSpeech();
 	}
 }
 

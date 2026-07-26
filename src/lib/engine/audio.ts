@@ -80,6 +80,23 @@ function ambOut(): AudioNode {
 /** When true, ambience is ducked under spoken voice. */
 let voiceDuck = false;
 
+/** True while the browser tab is in the background — freeze beds / suspend graph. */
+let pageHidden = false;
+
+/**
+ * Suspend the shared AudioContext while the tab is hidden so ambience does not
+ * keep running in the background. Resume on return (unless muted).
+ */
+export function setAudioPageHidden(hidden: boolean) {
+	pageHidden = hidden;
+	if (!ctx) return;
+	if (hidden) {
+		if (ctx.state === 'running') void ctx.suspend();
+	} else if (!getSettings().muted && ctx.state === 'suspended') {
+		void ctx.resume();
+	}
+}
+
 /** Duck ambience while a speech line is playing (pack / OpenAI / system). */
 export function setVoiceDuck(on: boolean) {
 	if (voiceDuck === on) return;
@@ -317,6 +334,14 @@ function scheduleEvery(
 ) {
 	const tick = () => {
 		if (currentAmbience !== bed || getSettings().muted) return;
+		// Skip one-shots while the tab is away so we do not queue a burst on return.
+		if (
+			pageHidden ||
+			(typeof document !== 'undefined' && document.visibilityState === 'hidden')
+		) {
+			ambTimers.push(setTimeout(tick, 900));
+			return;
+		}
 		try {
 			fn();
 		} catch {

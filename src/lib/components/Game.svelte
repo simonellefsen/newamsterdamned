@@ -27,9 +27,11 @@
 		clearAmbience,
 		initAudioFromSettings,
 		setAmbience,
+		setAudioPageHidden,
 		setMuted,
 		unlockAudio
 	} from '$lib/engine/audio';
+	import { setVoicePageHidden } from '$lib/engine/voice';
 	import {
 		getSettings,
 		loadSettings,
@@ -317,6 +319,15 @@
 	onMount(() => {
 		refreshPrefs();
 		watchMotionPreference();
+		// Freeze dialogue timers, ambience, and spoken voice while the tab is away.
+		const onVisibility = () => {
+			const hidden = document.visibilityState === 'hidden';
+			setAudioPageHidden(hidden);
+			setVoicePageHidden(hidden);
+		};
+		onVisibility();
+		document.addEventListener('visibilitychange', onVisibility);
+		return () => document.removeEventListener('visibilitychange', onVisibility);
 	});
 
 	const usingItemName = $derived.by(() => {

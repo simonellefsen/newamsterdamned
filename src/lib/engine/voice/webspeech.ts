@@ -18,6 +18,24 @@ export function cancelWebSpeech() {
 	}
 }
 
+export function pauseWebSpeech() {
+	if (!isWebSpeechAvailable()) return;
+	try {
+		window.speechSynthesis.pause();
+	} catch {
+		/* */
+	}
+}
+
+export function resumeWebSpeech() {
+	if (!isWebSpeechAvailable()) return;
+	try {
+		window.speechSynthesis.resume();
+	} catch {
+		/* */
+	}
+}
+
 type SpeakArgs = {
 	text: string;
 	profile: VoiceProfile;

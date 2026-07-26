@@ -38,6 +38,23 @@ export function cancelOpenAiSpeech() {
 	}
 }
 
+/** Pause live TTS without ending the line (tab background). */
+export function pauseOpenAiSpeech() {
+	try {
+		activeAudio?.pause();
+	} catch {
+		/* */
+	}
+}
+
+/** Resume after pauseOpenAiSpeech. */
+export function resumeOpenAiSpeech() {
+	if (!activeAudio) return;
+	void activeAudio.play().catch(() => {
+		/* */
+	});
+}
+
 async function cacheGet(key: string): Promise<Blob | null> {
 	if (typeof caches === 'undefined') return null;
 	try {

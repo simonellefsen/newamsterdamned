@@ -114,6 +114,23 @@ export function cancelPack() {
 	}
 }
 
+/** Pause active pack line (tab hidden) without cancelling generation. */
+export function pausePack() {
+	try {
+		activeAudio?.pause();
+	} catch {
+		/* */
+	}
+}
+
+/** Resume after pausePack when the tab is visible again. */
+export function resumePack() {
+	if (!activeAudio) return;
+	void activeAudio.play().catch(() => {
+		/* autoplay / decode quirks — silent path still holds the bubble */
+	});
+}
+
 /**
  * Play a pack line. Returns false if key missing or playback cannot start.
  * `soft` applies THINK low-pass filtering.

@@ -53,24 +53,128 @@ export function isAwaitingAdvance() {
 	return advanceResolver !== null;
 }
 
-/** Resolves on timeout or on an explicit advance(), whichever comes first. */
+function pageIsHidden(): boolean {
+	return typeof document !== 'undefined' && document.visibilityState === 'hidden';
+}
+
+/**
+ * Wait `ms` of *visible* wall-clock time. Hidden tabs do not burn the timer —
+ * otherwise a line auto-advances while the player is elsewhere and the joke is gone.
+ * Resolves early when `advance()` runs (via advanceResolver).
+ */
 function waitSkippable(ms: number): Promise<void> {
 	return new Promise((resolve) => {
 		let done = false;
+		let remaining = Math.max(0, ms);
+		let segmentStart = 0;
+		let timer: ReturnType<typeof setTimeout> | null = null;
+
+		const clearTimer = () => {
+			if (timer !== null) {
+				clearTimeout(timer);
+				timer = null;
+			}
+		};
+
+		const cleanupVis = () => {
+			if (typeof document === 'undefined') return;
+			document.removeEventListener('visibilitychange', onVisibility);
+		};
+
 		const finish = () => {
 			if (done) return;
 			done = true;
-			clearTimeout(timer);
+			clearTimer();
+			cleanupVis();
 			advanceResolver = null;
 			resolve();
 		};
-		const timer = setTimeout(finish, ms);
+
+		const freezeRemaining = () => {
+			if (timer === null) return;
+			remaining = Math.max(0, remaining - (performance.now() - segmentStart));
+			clearTimer();
+		};
+
+		const armTimer = () => {
+			if (done || pageIsHidden()) return;
+			if (remaining <= 0) {
+				finish();
+				return;
+			}
+			segmentStart = performance.now();
+			timer = setTimeout(finish, remaining);
+		};
+
+		const onVisibility = () => {
+			if (done) return;
+			if (pageIsHidden()) freezeRemaining();
+			else armTimer();
+		};
+
 		advanceResolver = finish;
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', onVisibility);
+		}
+		armTimer();
 	});
 }
 
+/**
+ * Hard wait for authored WAIT ops — also freezes while the tab is hidden so
+ * cutscene beats do not collapse if the player switches away.
+ */
 function wait(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => {
+		let remaining = Math.max(0, ms);
+		let segmentStart = 0;
+		let timer: ReturnType<typeof setTimeout> | null = null;
+		let done = false;
+
+		const clearTimer = () => {
+			if (timer !== null) {
+				clearTimeout(timer);
+				timer = null;
+			}
+		};
+
+		const finish = () => {
+			if (done) return;
+			done = true;
+			clearTimer();
+			if (typeof document !== 'undefined') {
+				document.removeEventListener('visibilitychange', onVisibility);
+			}
+			resolve();
+		};
+
+		const armTimer = () => {
+			if (done || pageIsHidden()) return;
+			if (remaining <= 0) {
+				finish();
+				return;
+			}
+			segmentStart = performance.now();
+			timer = setTimeout(finish, remaining);
+		};
+
+		const onVisibility = () => {
+			if (done) return;
+			if (pageIsHidden()) {
+				if (timer !== null) {
+					remaining = Math.max(0, remaining - (performance.now() - segmentStart));
+					clearTimer();
+				}
+			} else {
+				armTimer();
+			}
+		};
+
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', onVisibility);
+		}
+		armTimer();
+	});
 }
 
 /**

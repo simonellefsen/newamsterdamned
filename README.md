@@ -164,6 +164,8 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 
 Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc, empty stage click, or re-click the item after a pause). Double-tap an item to examine it. Loading a slot from the Ledger asks for confirmation, then autosaves current progress so a mistaken load is recoverable.
 
+Switching away from the tab freezes dialogue hold times, pauses spoken voice, and suspends ambience so lines do not auto-advance in the background.
+
 **Continue** on the title screen loads the newest save, or opens a picker when several slots exist — load, export, or delete each slot, and import JSON into slots 1–3. Esc → Ledger can also delete slots (including Autosave).
 
 Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):
