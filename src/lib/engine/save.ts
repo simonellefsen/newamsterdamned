@@ -66,6 +66,38 @@ export function hasAnySave(): boolean {
 	return SLOTS.some((s) => peek(s) !== null);
 }
 
+/**
+ * Most recently written valid save (any slot including auto).
+ * Used on the title screen for Continue summary.
+ */
+export function latestSave(): { slot: Slot; state: SaveState } | null {
+	let best: { slot: Slot; state: SaveState } | null = null;
+	for (const slot of SLOTS) {
+		const state = peek(slot);
+		if (!state) continue;
+		if (!best || (state.savedAt ?? 0) >= (best.state.savedAt ?? 0)) {
+			best = { slot, state };
+		}
+	}
+	return best;
+}
+
+/** One-line human summary for Continue UI. */
+export function formatSaveSummary(state: SaveState): string {
+	const who =
+		state.protagonist === 'trijn'
+			? 'Trijn'
+			: state.protagonist === 'joost'
+				? 'Joost'
+				: state.protagonist;
+	const scene = state.scene
+		.split('-')
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(' ');
+	const pts = typeof state.score === 'number' ? state.score : 0;
+	return `${who} · ${scene} · ${pts} pts`;
+}
+
 /** Serialise a slot (or current game if slot omitted) as downloadable JSON text. */
 export function exportSaveJson(slot?: Slot): string | null {
 	if (slot) {

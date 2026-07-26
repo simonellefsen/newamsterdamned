@@ -39,6 +39,19 @@ export const ACT_LABEL: Record<ActNumber, string> = {
 	4: 'IV — Peach Season'
 };
 
+/** Short roman for the HUD. */
+export const ACT_ROMAN: Record<ActNumber, string> = {
+	1: 'I',
+	2: 'II',
+	3: 'III',
+	4: 'IV'
+};
+
+export function actTitle(sceneId: string): string | null {
+	const a = actOf(sceneId);
+	return a ? ACT_LABEL[a] : null;
+}
+
 /**
  * Hand-laid map nodes in a 0–100 × 0–100 board (north up).
  * Rough geography of lower Manhattan c. 1655, not a survey.

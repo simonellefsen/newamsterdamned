@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { game, SAVE_VERSION } from './state.svelte';
-import { exportSaveJson, parseImport } from './save';
+import { exportSaveJson, formatSaveSummary, parseImport } from './save';
 
 beforeEach(() => {
 	game.reset('joost');
@@ -38,5 +38,16 @@ describe('save export/import', () => {
 		if (!result.ok) return;
 		expect(result.state.version).toBe(SAVE_VERSION);
 		expect(result.state.flags.trijn).toBe(true);
+	});
+
+	it('formats a continue summary line', () => {
+		const snap = game.snapshot('test');
+		snap.score = 40;
+		snap.scene = 'wooden-horse';
+		snap.protagonist = 'trijn';
+		const line = formatSaveSummary(snap);
+		expect(line).toContain('Trijn');
+		expect(line).toContain('Wooden Horse');
+		expect(line).toContain('40 pts');
 	});
 });

@@ -1,11 +1,12 @@
 <script lang="ts">
 	/** Title card. Painted harbour behind, and the joke stated up front. */
 	import { pearlStreet } from '$lib/game/art/scenes';
-	import { hasAnySave } from '$lib/engine/save';
+	import { formatSaveSummary, hasAnySave, latestSave } from '$lib/engine/save';
 	import { onMount } from 'svelte';
 
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
 	import { sprite } from '$lib/game/art/actor';
+	import { actOf, ACT_ROMAN } from '$lib/game/acts';
 
 	interface Props {
 		onStart: (who: ProtagonistId) => void;
@@ -16,6 +17,8 @@
 
 	const art = pearlStreet();
 	let canContinue = $state(false);
+	let continueSummary = $state<string | null>(null);
+	let continueAct = $state<string | null>(null);
 	let picking = $state(false);
 	let chosen = $state<ProtagonistId>('joost');
 
@@ -23,6 +26,12 @@
 
 	onMount(() => {
 		canContinue = hasAnySave();
+		const latest = latestSave();
+		if (latest) {
+			continueSummary = formatSaveSummary(latest.state);
+			const act = actOf(latest.state.scene);
+			continueAct = act ? `Act ${ACT_ROMAN[act]}` : null;
+		}
 	});
 
 	function portrait(id: ProtagonistId) {
@@ -44,7 +53,14 @@
 			<div class="actions">
 				<button class="btn btn--primary" onclick={() => (picking = true)}>Begin</button>
 				{#if canContinue}
-					<button class="btn" onclick={onContinue}>Continue</button>
+					<button class="btn btn--continue" onclick={onContinue}>
+						<span class="btn-main">Continue</span>
+						{#if continueSummary}
+							<span class="btn-sub">
+								{#if continueAct}{continueAct} · {/if}{continueSummary}
+							</span>
+						{/if}
+					</button>
 				{/if}
 				{#if onSettings}
 					<button class="btn" onclick={onSettings}>Settings</button>
@@ -292,6 +308,32 @@
 		background: linear-gradient(170deg, #8a6524, #513a15);
 		border-color: rgba(244, 220, 148, 0.6);
 		color: #f6e6b8;
+	}
+
+	.btn--continue {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.55rem 1.2rem 0.6rem;
+		line-height: 1.25;
+	}
+
+	.btn-main {
+		letter-spacing: 0.16em;
+	}
+
+	.btn-sub {
+		font-family: var(--font-body);
+		font-size: 0.68rem;
+		letter-spacing: 0.02em;
+		text-transform: none;
+		opacity: 0.75;
+		font-weight: normal;
+		max-width: 16rem;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.credit {

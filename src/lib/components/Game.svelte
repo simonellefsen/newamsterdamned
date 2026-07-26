@@ -12,11 +12,13 @@
 	import Hints from './Hints.svelte';
 	import Map from './Map.svelte';
 	import Preferences from './Preferences.svelte';
+	import Controls from './Controls.svelte';
 	import { focusTrap } from '$lib/actions/focusTrap';
 	import { game } from '$lib/engine/state.svelte';
 	import { getItem, getScene } from '$lib/engine/registry';
 	import { loadContent, newGame, SCORE_MAX } from '$lib/game';
 	import { ALMANAC, ALMANAC_BY_ID } from '$lib/game/almanac';
+	import { ACT_ROMAN, actOf } from '$lib/game/acts';
 	import type { ProtagonistId } from '$lib/game/protagonist';
 	import { interactWithHotspot, lookAtItem } from '$lib/engine/interaction';
 	import { run, runEntry, advance, isAwaitingAdvance } from '$lib/engine/interpreter';
@@ -60,6 +62,7 @@
 	let almanacOpen = $state(false);
 	let hintsOpen = $state(false);
 	let mapOpen = $state(false);
+	let controlsOpen = $state(false);
 	/** True only while Space is physically held, or the HUD reveal button is pressed. */
 	let revealing = $state(false);
 	let muted = $state(false);
@@ -73,6 +76,10 @@
 	initAudioFromSettings();
 
 	const scene = $derived(getScene(game.scene));
+	const actRoman = $derived.by(() => {
+		const a = actOf(game.scene);
+		return a ? ACT_ROMAN[a] : null;
+	});
 
 	function applyTextScale(scale: number) {
 		if (typeof document === 'undefined') return;
@@ -283,6 +290,7 @@
 			if (coin) coin = null;
 			else if (hintsOpen) hintsOpen = false;
 			else if (mapOpen) mapOpen = false;
+			else if (controlsOpen) controlsOpen = false;
 			else if (almanacOpen) almanacOpen = false;
 			else if (titlePrefsOpen) titlePrefsOpen = false;
 			else if (started) menuOpen = !menuOpen;
@@ -292,6 +300,10 @@
 		if (e.key === 'a' || e.key === 'A') almanacOpen = !almanacOpen;
 		if (e.key === 'h' || e.key === 'H') hintsOpen = !hintsOpen;
 		if (e.key === 'm' || e.key === 'M') mapOpen = !mapOpen;
+		if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+			e.preventDefault();
+			controlsOpen = !controlsOpen;
+		}
 		// [ and ] enlarge/shrink dialog text without opening the menu.
 		if (e.key === ']' || e.key === '}') {
 			e.preventDefault();
@@ -365,6 +377,9 @@
 			{#if mapOpen}
 				<Map onClose={() => (mapOpen = false)} />
 			{/if}
+			{#if controlsOpen}
+				<Controls onClose={() => (controlsOpen = false)} />
+			{/if}
 
 			{#if toastText}
 				<div class="toast">{toastText}</div>
@@ -377,10 +392,16 @@
 			{/if}
 
 			<div class="topbar">
+				{#if actRoman}
+					<span class="act" title={scene?.name ?? ''}>Act {actRoman}</span>
+				{/if}
 				<span class="room">{scene?.name ?? ''}</span>
 				<span class="spacer"></span>
 				<button class="icon icon--text" onclick={() => (hintsOpen = true)}>Hint</button>
 				<button class="icon icon--text" onclick={() => (mapOpen = true)}>Map</button>
+				<button class="icon icon--text" onclick={() => (controlsOpen = true)} title="Controls (?)">
+					?
+				</button>
 				<button class="icon icon--text" onclick={() => (almanacOpen = true)}>
 					Almanac <span class="tally">{game.lore.length}/{ALMANAC.length}</span>
 				</button>
@@ -453,8 +474,8 @@
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
 						thing · Double-click an item to examine · Hold <kbd>Space</kbd> or the Eye button to
 						show what is interactive · <kbd>H</kbd> for a hint · <kbd>M</kbd> for the map ·
-						<kbd>A</kbd> for the Almanac · <kbd>[</kbd>/<kbd>]</kbd> dialog text size ·
-						<kbd>Esc</kbd> for this menu
+						<kbd>?</kbd> for controls · <kbd>A</kbd> for the Almanac ·
+						<kbd>[</kbd>/<kbd>]</kbd> dialog text size · <kbd>Esc</kbd> for this menu
 					</p>
 				</div>
 			{/if}
@@ -539,7 +560,8 @@
 	}
 
 	.room,
-	.score {
+	.score,
+	.act {
 		font-family: var(--font-display);
 		font-size: 0.68rem;
 		letter-spacing: 0.16em;
@@ -548,6 +570,12 @@
 		text-shadow:
 			0 1px 2px #000,
 			0 0 10px rgba(0, 0, 0, 0.9);
+	}
+
+	.act {
+		color: var(--gold);
+		opacity: 0.9;
+		margin-right: 0.15rem;
 	}
 
 	.score {
