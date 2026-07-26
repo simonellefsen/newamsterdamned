@@ -163,8 +163,21 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 Spoken voice is **off by default**. Turn on **System / pack (beta)** in the Esc menu to hear lines (narrator, protagonists, NPCs). If a pre-generated pack is present under `/voice/v1/`, those clips play first; otherwise the browser’s system voices are used. Captions always stay on.
 
 ```bash
-npm run voice:extract   # corpus size / dual-protag cost estimate for packs
+npm run voice:extract              # corpus size / dual-protag cost estimate
+npm run voice:generate             # dry-run Act I → .voice-out/v1 (no API key)
+npm run voice:generate:live        # OpenAI TTS → static/voice/v1/ (needs OPENAI_API_KEY)
 ```
+
+Optional flags after `--`:
+
+```bash
+npm run voice:generate -- --limit=20 --speakers=narrator
+npm run voice:generate:live -- --act=1 --speakers=narrator,joost,trijn
+```
+
+Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
+
+Default cast (OpenAI voices): narrator=`onyx`, Joost=`echo`, Trijn=`nova`. Edit `OPENAI_VOICE_CAST` in `src/lib/engine/voice/generate.ts` after listening.
 
 ## A note on the history
 
