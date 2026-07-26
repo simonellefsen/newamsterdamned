@@ -166,6 +166,8 @@ Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc,
 
 Switching away from the tab freezes dialogue hold times, pauses spoken voice, and suspends ambience so lines do not auto-advance in the background.
 
+The first time you enter play on a device, a short **How to play** card appears after a few seconds (dismiss with Got it, Esc, or open the full list). Reopen any time with **?**.
+
 **Continue** on the title screen loads the newest save, or opens a picker when several slots exist — load, export, or delete each slot, and import JSON into slots 1–3. Esc → Ledger can also delete slots (including Autosave).
 
 Spoken voice is **off by default**. Open **Settings** on the title screen (or **Esc → Preferences** in-game):

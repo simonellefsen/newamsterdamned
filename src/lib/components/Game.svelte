@@ -53,6 +53,7 @@
 		SLOTS,
 		type Slot
 	} from '$lib/engine/save';
+	import { hasSeenControlsTip, markControlsTipSeen } from '$lib/engine/tips';
 	import type { Hotspot, Verb } from '$lib/engine/types';
 
 	type CoinTarget = { kind: 'hotspot'; hotspot: Hotspot } | { kind: 'item'; itemId: string };
@@ -67,6 +68,9 @@
 	let hintsOpen = $state(false);
 	let mapOpen = $state(false);
 	let controlsOpen = $state(false);
+	/** One-shot "how to play" card — delayed so the opening lines get the first beat. */
+	let howTipOpen = $state(false);
+	let howTipTimer: ReturnType<typeof setTimeout> | undefined;
 	/** True only while Space is physically held, or the HUD reveal button is pressed. */
 	let revealing = $state(false);
 	let muted = $state(false);
@@ -136,17 +140,47 @@
 		}, 4200);
 	});
 
+	function scheduleHowTip() {
+		if (howTipTimer !== undefined) clearTimeout(howTipTimer);
+		howTipOpen = false;
+		if (hasSeenControlsTip()) return;
+		// Let the first room's opening lines land before the card.
+		howTipTimer = setTimeout(() => {
+			if (started && !hasSeenControlsTip()) howTipOpen = true;
+		}, 3200);
+	}
+
+	function dismissHowTip() {
+		howTipOpen = false;
+		markControlsTipSeen();
+		if (howTipTimer !== undefined) {
+			clearTimeout(howTipTimer);
+			howTipTimer = undefined;
+		}
+	}
+
+	function openFullControlsFromTip() {
+		dismissHowTip();
+		controlsOpen = true;
+	}
+
 	function begin(who: ProtagonistId) {
 		// Title click is a user gesture — unlock Web Audio so the first room's bed starts.
 		unlockAudio();
 		newGame(who);
 		started = true;
+		scheduleHowTip();
 		void runEntry('pearl-street');
 	}
 
 	function goTitle() {
 		menuOpen = false;
 		started = false;
+		howTipOpen = false;
+		if (howTipTimer !== undefined) {
+			clearTimeout(howTipTimer);
+			howTipTimer = undefined;
+		}
 		clearAmbience();
 	}
 
@@ -172,6 +206,7 @@
 		}
 		game.restore(s);
 		started = true;
+		scheduleHowTip();
 		// Restoring a save does not go through enterScene — re-arm ambience for the room.
 		const sc = getScene(game.scene);
 		setAmbience(sc?.ambience ?? null);
@@ -351,6 +386,7 @@
 		unlockAudio();
 		if (e.key === 'Escape') {
 			if (coin) coin = null;
+			else if (howTipOpen) dismissHowTip();
 			else if (hintsOpen) hintsOpen = false;
 			else if (mapOpen) mapOpen = false;
 			else if (controlsOpen) controlsOpen = false;
@@ -464,6 +500,36 @@
 						{#if hover}<span class="use-banner-target"> · {hover}</span>{/if}
 					</span>
 					<button type="button" class="use-banner-cancel" onclick={cancelUse}>Cancel</button>
+				</div>
+			{/if}
+
+			{#if howTipOpen}
+				<div class="how-tip" role="dialog" aria-label="How to play" aria-modal="false">
+					<header class="how-tip-head">
+						<h3>How to play</h3>
+						<button type="button" class="how-tip-x" onclick={dismissHowTip} aria-label="Dismiss"
+							>×</button
+						>
+					</header>
+					<ul class="how-tip-list">
+						<li>
+							<strong>Click</strong> to walk or act · <strong>right-click / long-press</strong> for
+							verbs
+						</li>
+						<li>
+							<strong>Tap an item</strong>, then a thing to use it · <strong>double-tap</strong> to
+							examine
+						</li>
+						<li>
+							<strong>Continue</strong> under a line (or Space) to skip · hold Space or the eye for
+							hotspots
+						</li>
+						<li><kbd>?</kbd> full controls · <kbd>H</kbd> hint · <kbd>Esc</kbd> menu</li>
+					</ul>
+					<div class="how-tip-actions">
+						<button type="button" class="mini" onclick={openFullControlsFromTip}>Full list</button>
+						<button type="button" class="mini mini--primary" onclick={dismissHowTip}>Got it</button>
+					</div>
 				</div>
 			{/if}
 
@@ -743,6 +809,109 @@
 		padding: 0.35rem 0.7rem;
 		animation: slidein 260ms ease-out;
 		max-width: 20rem;
+	}
+
+	/* First-run tip — non-blocking so opening dialogue can keep playing underneath. */
+	.how-tip {
+		position: absolute;
+		left: 50%;
+		bottom: 0.85rem;
+		transform: translateX(-50%);
+		z-index: 18;
+		width: min(92%, 26rem);
+		padding: 0.75rem 0.9rem 0.85rem;
+		background: rgba(14, 11, 8, 0.96);
+		border: 1px solid rgba(230, 199, 107, 0.5);
+		border-radius: 3px;
+		box-shadow:
+			0 10px 36px rgba(0, 0, 0, 0.55),
+			0 0 20px rgba(230, 199, 107, 0.1);
+		pointer-events: auto;
+		animation: slidein 260ms ease-out;
+	}
+
+	.how-tip-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-bottom: 0.45rem;
+	}
+
+	.how-tip-head h3 {
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: 0.78rem;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--gold-bright);
+		font-weight: 500;
+	}
+
+	.how-tip-x {
+		background: none;
+		border: none;
+		color: var(--parchment-dim);
+		font-size: 1.25rem;
+		line-height: 1;
+		cursor: pointer;
+		padding: 0.15rem 0.35rem;
+		min-width: 44px;
+		min-height: 44px;
+	}
+
+	.how-tip-x:hover,
+	.how-tip-x:focus-visible {
+		color: var(--gold-bright);
+		outline: none;
+	}
+
+	.how-tip-list {
+		margin: 0 0 0.7rem;
+		padding: 0 0 0 1.05rem;
+		font-size: 0.82rem;
+		line-height: 1.45;
+		color: var(--parchment);
+	}
+
+	.how-tip-list li {
+		margin-bottom: 0.35rem;
+	}
+
+	.how-tip-list li:last-child {
+		margin-bottom: 0;
+	}
+
+	.how-tip-list strong {
+		color: var(--gold-bright);
+		font-weight: 600;
+	}
+
+	.how-tip-list kbd {
+		font: inherit;
+		font-size: 0.9em;
+		border: 1px solid currentColor;
+		border-radius: 2px;
+		padding: 0 0.28em;
+		opacity: 0.85;
+	}
+
+	.how-tip-actions {
+		display: flex;
+		gap: 0.45rem;
+		justify-content: flex-end;
+	}
+
+	.mini--primary {
+		border-color: rgba(230, 199, 107, 0.55);
+		color: var(--gold-bright);
+		background: rgba(70, 50, 28, 0.9);
+	}
+
+	.mini--primary:hover:not(:disabled),
+	.mini--primary:focus-visible:not(:disabled) {
+		border-color: var(--gold-bright);
+		box-shadow: 0 0 10px rgba(230, 199, 107, 0.22);
 	}
 
 	/* Inventory "use X on…" mode — sits under the top bar, above the stage art. */
@@ -1052,7 +1221,8 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.toast,
-		.use-banner {
+		.use-banner,
+		.how-tip {
 			animation: none;
 		}
 	}
