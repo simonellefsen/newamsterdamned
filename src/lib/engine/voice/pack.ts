@@ -1,7 +1,9 @@
 /**
- * Pre-generated voice pack backend. Manifest + MP3 files on the static CDN.
- * No packs shipped in-repo yet — loader is ready; missing keys fall through to
- * Web Speech / silent in the facade.
+ * Pre-generated voice pack backend. Manifest + MP3 files under static/voice/v1/.
+ *
+ * Git tracks `manifest.json` (line inventory). MP3s live in `lines/` (gitignored) —
+ * generate locally with `npm run voice:generate:live`, then play via `npm run dev`
+ * with Spoken voice On. Missing keys fall through to OpenAI / Web Speech / silent.
  */
 
 import { packFileName } from './keys';

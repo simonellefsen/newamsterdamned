@@ -201,7 +201,15 @@ Copy `.env.example` → `.env.local` and set `OPENAI_API_KEY` for live runs. `np
 
 **Default model is `tts-1`.** If OpenAI returns *Project … does not have access to model `tts-1`*, either enable `tts-1` under that project’s model limits in the [API dashboard](https://platform.openai.com/), or pass `--model=gpt-4o-mini-tts` (OpenAI’s current default speech model; different pricing).
 
-MP3s go under `lines/` (gitignored). Ship by uploading `manifest.json` + `lines/` to your CDN or including them in the Vercel static deploy. Confirm provider ToS allows public redistribution before shipping packs.
+MP3s go under `static/voice/v1/lines/` (**gitignored** — ~50MB+ for Act I). The tracked `manifest.json` lists every line so the game knows what the pack contains. After a live generate:
+
+```bash
+npm run voice:verify                 # 521 files, no missing/tiny clips
+npm run dev                          # play locally; Settings → Spoken voice On, source Auto
+```
+
+**Local play:** pack files are served from `/voice/v1/` by Vite. Enable voice in Settings (title or Esc → Preferences).  
+**Deploy:** Vercel from git will **not** include MP3s (gitignored). Either upload `manifest.json` + `lines/` to a CDN and point `baseUrl` there, or deploy a build that includes the local `static/voice/v1/lines/` tree. Confirm provider ToS allows public redistribution before shipping packs.
 
 **TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
 

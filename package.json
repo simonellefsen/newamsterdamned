@@ -14,7 +14,8 @@
 		"test:watch": "vitest",
 		"voice:extract": "vitest run src/lib/engine/voice/corpus.test.ts --reporter=verbose",
 		"voice:generate": "node scripts/voice/run-generate.mjs",
-		"voice:generate:live": "node scripts/voice/run-generate.mjs --live"
+		"voice:generate:live": "node scripts/voice/run-generate.mjs --live",
+		"voice:verify": "node scripts/voice/verify-pack.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
