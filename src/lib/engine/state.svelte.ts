@@ -276,6 +276,13 @@ function createGame() {
 			facing = s.facing;
 			inventory = [...s.inventory];
 			flags = { ...s.flags };
+			// Keep the content-facing `trijn` flag aligned with protagonist even if an old
+			// save only stored the field and not the flag (scripts branch on the flag).
+			if (protagonist === 'trijn') flags = { ...flags, trijn: true };
+			else {
+				const { trijn: _drop, ...rest } = flags;
+				flags = rest;
+			}
 			visited = [...s.visited];
 			score = s.score ?? 0;
 			bubbles = [];

@@ -50,6 +50,24 @@ describe('save export/import', () => {
 		expect(line).toContain('Wooden Horse');
 		expect(line).toContain('40 pts');
 	});
+
+	it('restores the trijn content flag from protagonist when missing', () => {
+		const snap = game.snapshot('test');
+		snap.protagonist = 'trijn';
+		delete snap.flags.trijn;
+		game.restore(snap);
+		expect(game.protagonist).toBe('trijn');
+		expect(game.flag('trijn')).toBe(true);
+	});
+
+	it('clears a stale trijn flag when restoring Joost', () => {
+		const snap = game.snapshot('test');
+		snap.protagonist = 'joost';
+		snap.flags = { ...snap.flags, trijn: true };
+		game.restore(snap);
+		expect(game.protagonist).toBe('joost');
+		expect(game.flag('trijn')).toBeFalsy();
+	});
 });
 
 describe('slot labels', () => {

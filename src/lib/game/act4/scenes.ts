@@ -525,8 +525,7 @@ const townRaid: Scene = {
 					{
 						op: 'IF',
 						cond: { flag: 'savedKleyn' },
-						then: spendTrip('Reynier Kleyn bars his own door from the inside, and the sound of it carries a long way up an empty street.'),
-						else: []
+						then: spendTrip('Reynier Kleyn bars his own door from the inside, and the sound of it carries a long way up an empty street.')
 					}
 				]
 			}
@@ -627,8 +626,7 @@ const townRaid: Scene = {
 					{
 						op: 'IF',
 						cond: { flag: 'savedMattaneck' },
-						then: spendTrip('And nobody at that gate ever writes down that it happened, because nothing happened, which is the entire point of having done it.'),
-						else: []
+						then: spendTrip('And nobody at that gate ever writes down that it happened, because nothing happened, which is the entire point of having done it.')
 					}
 				]
 			}
@@ -753,11 +751,9 @@ const townRaid: Scene = {
 							{
 								op: 'IF',
 								cond: { flag: 'savedVanDyck' },
-								then: spendTrip('Hendrick van Dyck goes up the Broad Way leaning on the arm of a man he has never spoken to before today, complaining about the surgeon.'),
-								else: []
+								then: spendTrip('Hendrick van Dyck goes up the Broad Way leaning on the arm of a man he has never spoken to before today, complaining about the surgeon.')
 							}
-						],
-						else: []
+						]
 					}
 				],
 				use: [{ op: 'THINK', text: 'He is bleeding on his own step. There is nothing here to be clever with.' }]

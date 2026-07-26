@@ -187,8 +187,7 @@ const pearlStreet: Scene = {
 											op: 'THINK',
 											text: 'Though — nobody has looked at my face since I stood up. They see grey wool and they see the watch. I have been invisible for ninety seconds and I have never crossed this town so quickly in my life.'
 										}
-									],
-									else: []
+									]
 								},
 								{ op: 'LORE', id: 'clothing' },
 							{

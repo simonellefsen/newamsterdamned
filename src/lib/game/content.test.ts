@@ -362,6 +362,122 @@ describe('scoring', () => {
 	});
 });
 
+describe('reachability & flag integrity', () => {
+	/** Flags set outside scripts (bootstrap / engine), so content may read them freely. */
+	const BOOTSTRAP_FLAGS = new Set(['trijn']);
+
+	const VALID_SFX = new Set([
+		'rattle',
+		'door',
+		'coin',
+		'splash',
+		'thud',
+		'chime',
+		'fail',
+		'gull',
+		'lock'
+	]);
+
+	function flagsIn(c: unknown, out: Set<string>): Set<string> {
+		if (!c || typeof c !== 'object') return out;
+		const o = c as Record<string, unknown>;
+		if (typeof o.flag === 'string') out.add(o.flag);
+		if (typeof o.flagAtLeast === 'string') out.add(o.flagAtLeast);
+		for (const k of ['all', 'any']) if (Array.isArray(o[k])) for (const s of o[k] as unknown[]) flagsIn(s, out);
+		if (o.not) flagsIn(o.not, out);
+		return out;
+	}
+
+	function collect() {
+		const written = new Set<string>();
+		const read = new Set<string>();
+		const dialoguesRef = new Set<string>();
+		const given = new Set<string>();
+		const gotoScenes = new Set<string>(['pearl-street']);
+		const lineActors = new Set<string>();
+		const movedActors = new Set<string>();
+		const sfx = new Set<string>();
+		const emptyBranch: string[] = [];
+
+		for (const { where, actions } of allScripts()) {
+			forEachAction(actions, (a) => {
+				if (a.op === 'SET' || a.op === 'INC') written.add(a.flag);
+				if (a.op === 'IF') {
+					flagsIn(a.cond, read);
+					if (a.then.length === 0) emptyBranch.push(`${where}: empty then`);
+					if (a.else && a.else.length === 0) emptyBranch.push(`${where}: empty else`);
+				}
+				if (a.op === 'DIALOGUE') dialoguesRef.add(a.tree);
+				if (a.op === 'GIVE') given.add(a.item);
+				if (a.op === 'GOTO') gotoScenes.add(a.scene);
+				if (a.op === 'ACT_END' && a.next) gotoScenes.add(a.next.scene);
+				if (a.op === 'LINE') lineActors.add(a.actor);
+				if (a.op === 'SHOW' || a.op === 'PLACE') movedActors.add(a.actor);
+				if (a.op === 'FACE' && a.actor) movedActors.add(a.actor);
+				if (a.op === 'SFX') sfx.add(a.sound);
+			});
+		}
+		for (const s of ALL_SCENES) {
+			for (const h of s.hotspots) flagsIn(h.visibleIf, read);
+			for (const a of s.actors ?? []) flagsIn(a.visibleIf, read);
+		}
+		for (const d of ALL_DIALOGUES) {
+			for (const l of d.lines) flagsIn(l.visibleIf, read);
+		}
+		for (const o of OBJECTIVES) {
+			flagsIn(o.done, read);
+			flagsIn(o.when, read);
+		}
+		return { written, read, dialoguesRef, given, gotoScenes, lineActors, movedActors, sfx, emptyBranch };
+	}
+
+	it('never reads a flag that no script (or bootstrap) writes', () => {
+		const { written, read } = collect();
+		const orphans = [...read]
+			.filter((f) => !written.has(f) && !BOOTSTRAP_FLAGS.has(f) && !f.startsWith('__'))
+			.sort();
+		expect(orphans, 'flags read but never SET/INC').toEqual([]);
+	});
+
+	it('references every dialogue tree from a DIALOGUE action', () => {
+		const { dialoguesRef } = collect();
+		const unused = ALL_DIALOGUES.map((d) => d.id).filter((id) => !dialoguesRef.has(id));
+		expect(unused, 'dialogue trees never opened').toEqual([]);
+	});
+
+	it('gives every item at least once', () => {
+		const { given } = collect();
+		const never = ALL_ITEMS.map((i) => i.id).filter((id) => !given.has(id));
+		expect(never, 'items never awarded via GIVE').toEqual([]);
+	});
+
+	it('reaches every scene via GOTO, ACT_END.next, or the start room', () => {
+		const { gotoScenes } = collect();
+		const unreached = ALL_SCENES.map((s) => s.id).filter((id) => !gotoScenes.has(id));
+		expect(unreached, 'scenes with no inbound transition').toEqual([]);
+	});
+
+	it('only uses LINE / SHOW / PLACE / FACE actors that exist in some scene', () => {
+		const actorIds = new Set(ALL_SCENES.flatMap((s) => (s.actors ?? []).map((a) => a.id)));
+		const { lineActors, movedActors } = collect();
+		const badLine = [...lineActors].filter((a) => a !== 'player' && !actorIds.has(a)).sort();
+		const badMoved = [...movedActors].filter((a) => !actorIds.has(a)).sort();
+		expect(badLine, 'LINE actors missing from scenes').toEqual([]);
+		expect(badMoved, 'SHOW/PLACE/FACE actors missing from scenes').toEqual([]);
+	});
+
+	it('only fires SFX names the audio graph knows', () => {
+		const { sfx } = collect();
+		const unknown = [...sfx].filter((s) => !VALID_SFX.has(s)).sort();
+		expect(unknown).toEqual([]);
+	});
+
+	it('has no empty IF then/else branches', () => {
+		const { emptyBranch } = collect();
+		expect(emptyBranch).toEqual([]);
+	});
+});
+
 describe('objectives', () => {
 	/** Every item id named anywhere inside a condition tree. */
 	function itemsIn(c: unknown, out: Set<string>): Set<string> {
