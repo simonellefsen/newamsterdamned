@@ -72,7 +72,7 @@ Joost — a man whose earnings his creditor may simply take — has to sign as n
 **Getting unstuck.** Three separate affordances, because being lost in an adventure game is
 three different problems. The cursor tells you what a thing *is* before you click it — a
 magnifier over an object, a speech bubble over a person, a blue arrow pointing the way an exit
-goes. **Holding <kbd>R</kbd>** (or the 👁 button) rings everything the scene is currently offering; not every
+goes. **Press <kbd>R</kbd>** (or the 👁 button) to toggle rings on everything the scene is currently offering; not every
 polygon that will ever exist in the room, only what is live right now, which is what makes it
 help rather than a wall of boxes. And <kbd>H</kbd> opens **"What am I doing?"** — the current
 objective, then a nudge if you ask, then the plain answer if you ask again. Asking costs
@@ -160,7 +160,7 @@ frame-rate problem to solve. The game is fully playable without a mouse.
 | `M` | Map of visited places (no teleport) |
 | `?` | Controls reference |
 | `[` / `]` or top-bar **A−** / **A+** | Smaller / larger dialog text (bubbles + choices) |
-| Hold `R` or the 👁 button | Show what is interactive (works during dialogue too) |
+| `R` or the 👁 button | Toggle hotspot outlines (works during dialogue too) |
 | `Esc` | Cancel “use item”, close panels, or open the menu |
 
 Selecting **Use** on an inventory item shows a banner with **Cancel** (also Esc, empty stage click, or re-click the item after a pause). Double-tap an item to examine it. Loading a slot from the Ledger asks for confirmation, then autosaves current progress so a mistaken load is recoverable.

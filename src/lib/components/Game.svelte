@@ -80,8 +80,13 @@
 		const hidden = document.visibilityState === 'hidden';
 		document.title = started && hidden ? PAUSED_TITLE : PAGE_TITLE;
 	}
-	/** True only while Space is physically held, or the HUD reveal button is pressed. */
-	let revealing = $state(false);
+	/**
+	 * Hotspot reveal: pinned (toggle with R / eye click) or held (Space while idle).
+	 * Pin survives dialogue so players can find the rattle during speech.
+	 */
+	let revealPinned = $state(false);
+	let revealHeld = $state(false);
+	const revealing = $derived(revealPinned || revealHeld);
 	let muted = $state(false);
 	let toastText = $state<string | null>(null);
 	let loreToastText = $state<string | null>(null);
@@ -187,6 +192,8 @@
 		menuOpen = false;
 		started = false;
 		howTipOpen = false;
+		revealPinned = false;
+		revealHeld = false;
 		if (howTipTimer !== undefined) {
 			clearTimeout(howTipTimer);
 			howTipTimer = undefined;
@@ -399,6 +406,7 @@
 		if (usingItemName) {
 			return hover ? `Use ${usingItemName} on ${hover}` : `Use ${usingItemName} on…`;
 		}
+		if (revealPinned) return hover ? hover : 'Showing hotspots · R to hide';
 		return hover ?? '';
 	});
 
@@ -424,19 +432,20 @@
 			else if (started) menuOpen = !menuOpen;
 		}
 		/**
-		 * Hold R to show hotspots. Dedicated key so it still works during dialogue / voice
-		 * (when Space only skips) and when a HUD button has focus.
+		 * Toggle R to pin hotspot outlines. Works during dialogue / voice and when a HUD
+		 * button has focus (Space is reserved for skip while a line is up).
 		 */
 		if (
 			started &&
 			!game.actEnd &&
 			(e.key === 'r' || e.key === 'R') &&
+			!e.repeat &&
 			document.activeElement?.tagName !== 'INPUT' &&
 			document.activeElement?.tagName !== 'TEXTAREA' &&
 			document.activeElement?.tagName !== 'SELECT'
 		) {
 			e.preventDefault();
-			revealing = true;
+			revealPinned = !revealPinned;
 		}
 
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
@@ -461,17 +470,19 @@
 		if (e.key === ' ' || e.key === 'Enter') {
 			e.preventDefault();
 			/**
-			 * Space / Enter skip a line while one is up. When idle, Space still holds reveal
-			 * as a fallback; prefer hold R — it works during speech too.
+			 * Space / Enter skip a line while one is up. When idle, Space briefly holds
+			 * reveal as a fallback; prefer R to pin outlines on.
 			 */
 			if (isAwaitingAdvance() || e.key === 'Enter') advance();
-			else revealing = true;
+			else revealHeld = true;
 		}
 	}}
 	onkeyup={(e) => {
-		if (e.key === ' ' || e.key === 'r' || e.key === 'R') revealing = false;
+		if (e.key === ' ') revealHeld = false;
 	}}
-	onblur={() => (revealing = false)}
+	onblur={() => {
+		revealHeld = false;
+	}}
 />
 
 <div class="frame">
@@ -568,8 +579,8 @@
 							examine
 						</li>
 						<li>
-							<strong>Continue</strong> under a line (or Space) to skip · hold <kbd>R</kbd> or the
-							eye button to show hotspots
+							<strong>Continue</strong> under a line (or Space) to skip · press <kbd>R</kbd> or the
+							eye button to show/hide hotspots
 						</li>
 						<li><kbd>?</kbd> full controls · <kbd>H</kbd> hint · <kbd>Esc</kbd> menu</li>
 					</ul>
@@ -674,7 +685,7 @@
 					<p class="help">
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
 						thing · Double-tap an item to examine · <kbd>Space</kbd> / Enter / Continue under a
-						line to skip · Hold <kbd>R</kbd> or the Eye button to show what is interactive ·
+						line to skip · <kbd>R</kbd> or the Eye button toggles hotspot outlines ·
 						<kbd>H</kbd> for a hint · <kbd>M</kbd> for the map · <kbd>?</kbd> for controls ·
 						<kbd>A</kbd> for the Almanac · <kbd>[</kbd>/<kbd>]</kbd> dialog text size ·
 						<kbd>Esc</kbd> for this menu
@@ -687,15 +698,13 @@
 			<button
 				class="reveal"
 				class:reveal--on={revealing}
-				aria-label="Show interactive things"
-				aria-pressed={revealing}
-				onpointerdown={(e) => {
+				aria-label={revealPinned ? 'Hide interactive things' : 'Show interactive things'}
+				aria-pressed={revealPinned}
+				title="Show hotspots (R)"
+				onclick={(e) => {
 					e.preventDefault();
-					revealing = true;
+					revealPinned = !revealPinned;
 				}}
-				onpointerup={() => (revealing = false)}
-				onpointerleave={() => (revealing = false)}
-				onpointercancel={() => (revealing = false)}
 			>
 				👁
 			</button>
@@ -703,7 +712,9 @@
 				onContextVerb={(itemId, x, y) => (coin = { target: { kind: 'item', itemId }, x, y })}
 				onHover={(l) => (hover = l)}
 			/>
-			<p class="status" class:status--use={usingItem}>{statusLine}</p>
+			<p class="status" class:status--use={usingItem} class:status--reveal={revealPinned && !usingItem}>
+				{statusLine}
+			</p>
 		</div>
 	{/if}
 </div>
@@ -1253,6 +1264,11 @@
 		color: var(--gold-bright);
 		opacity: 1;
 		text-shadow: 0 0 12px rgba(230, 199, 107, 0.35);
+	}
+
+	.status--reveal {
+		color: #86c4e8;
+		opacity: 1;
 	}
 
 	@keyframes slidein {
