@@ -54,8 +54,8 @@ export const OBJECTIVES: Objective[] = [
 		id: 'a1-rattle',
 		act: 1,
 		goal: 'I am in the street with no breeches on. That is the whole of my situation.',
-		hint: 'The klapperman is asleep on the Strand and he is wearing a perfectly good pair. Shaking a sleeping watchman is a poor plan; look at what he has put down beside himself.',
-		spoiler: 'Take the rattle out of the mud next to him.',
+		hint: 'The klapperman is asleep on the Strand and he is wearing a perfectly good pair. Shaking a sleeping watchman is a poor plan; look at what he has put down in the mud beside him. Press R (or the eye button) if you want every clickable thing outlined.',
+		spoiler: 'Take the rattle from the mud next to him — press R if the outlines would help you find it.',
 		done: { any: [{ has: 'rattle' }, { flag: 'watchmanFled' }] }
 	},
 	{

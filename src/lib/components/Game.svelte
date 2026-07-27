@@ -53,10 +53,17 @@
 		SLOTS,
 		type Slot
 	} from '$lib/engine/save';
-	import { hasSeenControlsTip, markControlsTipSeen } from '$lib/engine/tips';
+	import {
+		hasSeenControlsTip,
+		hasSeenRevealTip,
+		markControlsTipSeen,
+		markRevealTipSeen
+	} from '$lib/engine/tips';
 	import type { Hotspot, Verb } from '$lib/engine/types';
 
 	type CoinTarget = { kind: 'hotspot'; hotspot: Hotspot } | { kind: 'item'; itemId: string };
+
+	const REVEAL_COACH_TEXT = 'Press R or the eye button to outline things you can click';
 
 	let started = $state(false);
 	let hover = $state<string | null>(null);
@@ -71,6 +78,8 @@
 	/** One-shot "how to play" card — delayed so the opening lines get the first beat. */
 	let howTipOpen = $state(false);
 	let howTipTimer: ReturnType<typeof setTimeout> | undefined;
+	/** One-shot "press R" toast after the how-to card (or alone for returning players). */
+	let revealCoachTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const PAGE_TITLE = 'New Amsterdamned — a comedy of manners, mud and manifest larceny';
 	const PAUSED_TITLE = 'Paused · New Amsterdamned';
@@ -154,10 +163,60 @@
 		}, 4200);
 	});
 
+	function clearRevealCoachTimer() {
+		if (revealCoachTimer !== undefined) {
+			clearTimeout(revealCoachTimer);
+			revealCoachTimer = undefined;
+		}
+	}
+
+	function showRevealCoachToast() {
+		if (!started || hasSeenRevealTip() || howTipOpen) return;
+		// Skip once the player already found the first Act I prop — they know how to click.
+		if (game.inventory.includes('rattle') || game.flags.watchmanFled) {
+			markRevealTipSeen();
+			return;
+		}
+		toastText = REVEAL_COACH_TEXT;
+		markRevealTipSeen();
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => {
+			if (toastText === REVEAL_COACH_TEXT) toastText = null;
+		}, 5200);
+	}
+
+	/**
+	 * After the how-to card (or instead of it for returning players), nudge once about R.
+	 * Space is reserved for skip while a line is up, so pin-with-R is the discoverable path.
+	 */
+	function scheduleRevealCoach(delayMs = 1800) {
+		clearRevealCoachTimer();
+		if (hasSeenRevealTip()) return;
+		revealCoachTimer = setTimeout(() => {
+			revealCoachTimer = undefined;
+			showRevealCoachToast();
+		}, delayMs);
+	}
+
+	function noteRevealUsed() {
+		markRevealTipSeen();
+		clearRevealCoachTimer();
+		if (toastText === REVEAL_COACH_TEXT) toastText = null;
+	}
+
+	function toggleRevealPinned() {
+		revealPinned = !revealPinned;
+		noteRevealUsed();
+	}
+
 	function scheduleHowTip() {
 		if (howTipTimer !== undefined) clearTimeout(howTipTimer);
 		howTipOpen = false;
-		if (hasSeenControlsTip()) return;
+		if (hasSeenControlsTip()) {
+			// Returning players already dismissed the card — still coach R once if needed.
+			scheduleRevealCoach(4200);
+			return;
+		}
 		// Let the first room's opening lines land before the card.
 		howTipTimer = setTimeout(() => {
 			if (started && !hasSeenControlsTip()) howTipOpen = true;
@@ -171,6 +230,7 @@
 			clearTimeout(howTipTimer);
 			howTipTimer = undefined;
 		}
+		scheduleRevealCoach(1400);
 	}
 
 	function openFullControlsFromTip() {
@@ -198,6 +258,8 @@
 			clearTimeout(howTipTimer);
 			howTipTimer = undefined;
 		}
+		clearRevealCoachTimer();
+		if (toastText === REVEAL_COACH_TEXT) toastText = null;
 		clearAmbience();
 		applyPageTitle();
 	}
@@ -445,7 +507,7 @@
 			document.activeElement?.tagName !== 'SELECT'
 		) {
 			e.preventDefault();
-			revealPinned = !revealPinned;
+			toggleRevealPinned();
 		}
 
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
@@ -700,10 +762,10 @@
 				class:reveal--on={revealing}
 				aria-label={revealPinned ? 'Hide interactive things' : 'Show interactive things'}
 				aria-pressed={revealPinned}
-				title="Show hotspots (R)"
+				title="Toggle hotspot outlines (R)"
 				onclick={(e) => {
 					e.preventDefault();
-					revealPinned = !revealPinned;
+					toggleRevealPinned();
 				}}
 			>
 				👁

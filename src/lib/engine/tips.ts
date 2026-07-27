@@ -4,9 +4,11 @@
  */
 
 const CONTROLS_TIP_KEY = 'newamsterdamned:tip:controls';
+const REVEAL_TIP_KEY = 'newamsterdamned:tip:reveal';
 
 /** In-memory cache so headless tests (no localStorage) still behave. */
 let controlsTipSeen: boolean | null = null;
+let revealTipSeen: boolean | null = null;
 
 function storage(): Storage | null {
 	if (typeof localStorage === 'undefined') return null;
@@ -41,11 +43,36 @@ export function markControlsTipSeen(): void {
 	}
 }
 
+export function hasSeenRevealTip(): boolean {
+	if (revealTipSeen !== null) return revealTipSeen;
+	const store = storage();
+	if (!store) {
+		revealTipSeen = false;
+		return false;
+	}
+	revealTipSeen = store.getItem(REVEAL_TIP_KEY) === '1';
+	return revealTipSeen;
+}
+
+export function markRevealTipSeen(): void {
+	revealTipSeen = true;
+	const store = storage();
+	if (!store) return;
+	try {
+		store.setItem(REVEAL_TIP_KEY, '1');
+	} catch {
+		/* private mode — memory still holds for this session */
+	}
+}
+
 /** Test helper. */
 export function __resetTipsForTests(): void {
 	controlsTipSeen = null;
+	revealTipSeen = null;
 	try {
-		storage()?.removeItem(CONTROLS_TIP_KEY);
+		const store = storage();
+		store?.removeItem(CONTROLS_TIP_KEY);
+		store?.removeItem(REVEAL_TIP_KEY);
 	} catch {
 		/* */
 	}
