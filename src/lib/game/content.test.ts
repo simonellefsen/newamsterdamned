@@ -256,6 +256,8 @@ describe('protagonist tokens', () => {
 	const NARRATES_A_NAMED_NPC = new Set([
 		'pearl-street/watchman-barrel.take',
 		'pearl-street/watchman-barrel+rattle',
+		// Same scare beat when the rattle is used on Aert himself.
+		'pearl-street/@klapperman+rattle',
 		// "the sergeant is standing right there with his mouth open" — Loockermans, named in
 		// the same sentence.
 		'secretary-chamber.onFirstEnter',

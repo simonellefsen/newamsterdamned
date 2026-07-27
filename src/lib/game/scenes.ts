@@ -149,6 +149,8 @@ const pearlStreet: Scene = {
 			],
 			walkTo: [432, 662],
 			facing: 'left',
+			/** Left-click tries Take (fails until the watchman is gone; succeeds after). */
+			defaultVerb: 'take',
 			visibleIf: { lacks: 'breeches' },
 			art: { svg: breechesProp(), at: [398, 600], height: 86 },
 			verbs: {
@@ -533,6 +535,30 @@ const pearlStreet: Scene = {
 				],
 				use: [{ op: 'THINK', text: 'Shaking him wakes him, and a woken watchman is a witness. I want him *gone*, not conscious.' }],
 				take: [{ op: 'SAY', text: 'I am not stealing a man.' }, { op: 'THINK', text: 'The Company does it, but the Company has the paperwork for it.' }]
+			},
+			/**
+			 * Rattle works on the man as well as on the barrel (same beat, one SCORE total —
+			 * the barrel script awards the points; this path sets the flag if needed so Take
+			 * on the breeches unlocks without a second SCORE op in the content totals).
+			 */
+			useWith: {
+				rattle: [
+					{ op: 'THINK', text: 'A watchman sleeps through thunder, through weather, through his own wife.' },
+					{ op: 'THINK', text: 'He does not sleep through the one sound he has spent nine years being paid to make.' },
+					{ op: 'NARRATE', text: '{{name}} winds the rattle. It goes off like a cartload of bones down a stair.' },
+					{ op: 'SFX', sound: 'rattle' },
+					{ op: 'LINE', actor: 'klapperman', text: 'FIRE! FIRE IN THE WARD! FIRE — where — WHO SHOUTED FIRE —' },
+					{ op: 'SFX', sound: 'rattle' },
+					{
+						op: 'NARRATE',
+						text: 'Aert Teunissen, klapperman of the second ward, is upright, running, and fully a hundred yards up the Strand before the question of his own trousers occurs to him.'
+					},
+					{ op: 'SHOW', actor: 'klapperman', visible: false },
+					{ op: 'SET', flag: 'watchmanFled' },
+					// Points live on the barrel useWith only (content score ceiling sums every SCORE).
+					{ op: 'SAY', text: 'Sorry, Aert.' },
+					{ op: 'THINK', text: 'Not very sorry. But sorry.' }
+				]
 			}
 		}
 	]

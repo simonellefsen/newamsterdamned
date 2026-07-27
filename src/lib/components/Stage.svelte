@@ -73,7 +73,21 @@
 		};
 	}
 
-	const allTargets = $derived([...liveHotspots, ...liveActors.map(actorHotspot)]);
+	/**
+	 * Hit-test paint order (later = on top = wins the click).
+	 * Ambient floors/exits first, then people, then interactive props — so a barrel of
+	 * breeches under a sleeping watchman stays clickable, instead of the actor poly
+	 * swallowing Take/Use forever.
+	 */
+	const allTargets = $derived.by(() => {
+		const ambient: Hotspot[] = [];
+		const props: Hotspot[] = [];
+		for (const h of liveHotspots) {
+			if (h.ambient || h.exit) ambient.push(h);
+			else props.push(h);
+		}
+		return [...ambient, ...liveActors.map(actorHotspot), ...props];
+	});
 
 	/**
 	 * What hold-to-reveal actually rings.
