@@ -22,7 +22,14 @@
 		saveSecrets
 	} from '$lib/engine/secrets';
 	import { applyVolumes } from '$lib/engine/audio';
-	import { prefetchVoicePack, testOpenAiKey } from '$lib/engine/voice';
+	import {
+		playPackSample,
+		prefetchVoicePack,
+		probePackHealth,
+		testOpenAiKey,
+		type PackHealth
+	} from '$lib/engine/voice';
+	import { cancelPack } from '$lib/engine/voice/pack';
 	import { isWebSpeechAvailable, speakWebSpeech, cancelWebSpeech } from '$lib/engine/voice/webspeech';
 	import { getVoiceProfile } from '$lib/engine/registry';
 
@@ -38,6 +45,9 @@
 	let keyTestBusy = $state(false);
 	let keyTestNote = $state<string | null>(null);
 	let systemTestNote = $state<string | null>(null);
+	let packHealth = $state<PackHealth | null>(null);
+	let packProbeBusy = $state(false);
+	let packTestNote = $state<string | null>(null);
 
 	function applyTextScale(scale: number) {
 		if (typeof document === 'undefined') return;
@@ -47,6 +57,26 @@
 	// Apply scale on mount so title-screen changes stick before play.
 	$effect(() => {
 		applyTextScale(prefs.textScale);
+	});
+
+	// When voice is on, show whether the Act I pack is present for this origin.
+	$effect(() => {
+		if (!prefs.voiceEnabled) {
+			packHealth = null;
+			return;
+		}
+		let cancelled = false;
+		packProbeBusy = true;
+		prefetchVoicePack();
+		void probePackHealth().then((h) => {
+			if (!cancelled) {
+				packHealth = h;
+				packProbeBusy = false;
+			}
+		});
+		return () => {
+			cancelled = true;
+		};
 	});
 
 	function refreshPrefs(patch?: Partial<Settings>) {
@@ -97,6 +127,7 @@
 
 	function testSystemVoice() {
 		cancelWebSpeech();
+		cancelPack();
 		if (!isWebSpeechAvailable()) {
 			systemTestNote = 'System voice is not available in this browser.';
 			setTimeout(() => (systemTestNote = null), 3200);
@@ -124,6 +155,37 @@
 			? 'Playing a system-voice sample…'
 			: 'Could not start system voice.';
 		setTimeout(() => (systemTestNote = null), 3200);
+	}
+
+	async function refreshPackHealth() {
+		packProbeBusy = true;
+		packHealth = await probePackHealth();
+		packProbeBusy = false;
+	}
+
+	async function testPackVoice() {
+		cancelWebSpeech();
+		cancelPack();
+		if (!prefs.voiceEnabled) refreshPrefs({ voiceEnabled: true });
+		packTestNote = 'Checking pack…';
+		const h = await probePackHealth();
+		packHealth = h;
+		if (!h.ok || !h.audioOk) {
+			packTestNote = h.message;
+			setTimeout(() => (packTestNote = null), 4200);
+			return;
+		}
+		const started = playPackSample({
+			volume: prefs.voiceVolume,
+			onEnd: () => {
+				packTestNote = 'Pack sample finished.';
+				setTimeout(() => (packTestNote = null), 2400);
+			}
+		});
+		packTestNote = started
+			? 'Playing a pack sample…'
+			: 'Pack is listed but playback could not start.';
+		if (!started) setTimeout(() => (packTestNote = null), 3200);
 	}
 </script>
 
@@ -262,10 +324,30 @@
 		</label>
 
 		<div class="pref-block">
-			<p class="pref-block-title">Voice checks</p>
+			<p class="pref-block-title">Voice pack</p>
+			<p
+				class="keynote"
+				class:keynote--ok={packHealth?.audioOk}
+				class:keynote--warn={packHealth && !packHealth.audioOk}
+			>
+				{#if packProbeBusy && !packHealth}
+					Checking for Act I pack…
+				{:else if packHealth}
+					{packHealth.message}
+				{:else}
+					Enable voice to detect a local pack.
+				{/if}
+			</p>
 			<div class="keyactions">
+				<button type="button" class="mini" disabled={packProbeBusy} onclick={() => void refreshPackHealth()}>
+					Refresh
+				</button>
+				<button type="button" class="mini" onclick={() => void testPackVoice()}>Test pack</button>
 				<button type="button" class="mini" onclick={testSystemVoice}>Test system voice</button>
 			</div>
+			{#if packTestNote}
+				<p class="keynote">{packTestNote}</p>
+			{/if}
 			{#if systemTestNote}
 				<p class="keynote">{systemTestNote}</p>
 			{/if}
@@ -469,6 +551,17 @@
 		font-size: 0.72rem;
 		line-height: 1.4;
 		color: var(--gold);
+		text-transform: none;
+		letter-spacing: 0.02em;
+		font-family: var(--font-body);
+	}
+
+	.keynote--ok {
+		color: var(--gold-bright);
+	}
+
+	.keynote--warn {
+		color: #e8a090;
 	}
 
 	.howto {

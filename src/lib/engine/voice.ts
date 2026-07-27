@@ -24,10 +24,16 @@ import {
 	packHasKey,
 	packLookup,
 	pausePack,
+	playPackSample,
 	preloadPackKey,
+	probePackHealth,
 	resumePack,
-	speakPack
+	speakPack,
+	type PackHealth
 } from './voice/pack';
+
+export type { PackHealth };
+export { probePackHealth, playPackSample };
 import {
 	speakWebSpeech,
 	cancelWebSpeech,

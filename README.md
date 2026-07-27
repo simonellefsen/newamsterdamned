@@ -208,7 +208,7 @@ npm run voice:verify                 # 521 files, no missing/tiny clips
 npm run dev                          # play locally; Settings → Spoken voice On, source Auto
 ```
 
-**Local play:** pack files are served from `/voice/v1/` by Vite. Enable voice in Settings (title or Esc → Preferences).  
+**Local play:** pack files are served from `/voice/v1/` by Vite. Enable voice in Settings (title or Esc → Preferences) — the **Voice pack** panel shows whether Act I audio is present and can **Test pack** with a short clip.  
 **Deploy:** Vercel from git will **not** include MP3s (gitignored). Either upload `manifest.json` + `lines/` to a CDN and point `baseUrl` there, or deploy a build that includes the local `static/voice/v1/lines/` tree. Confirm provider ToS allows public redistribution before shipping packs.
 
 **TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
