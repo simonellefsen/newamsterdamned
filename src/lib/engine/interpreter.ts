@@ -178,20 +178,92 @@ function wait(ms: number): Promise<void> {
 }
 
 /**
- * Voiced wait: user skip always wins; otherwise hold until holdTarget OR
- * (audio ended AND at least MIN_HOLD_MS has elapsed).
+ * Voiced wait:
+ * - User skip always wins (`advance()` cancels voice then settles).
+ * - Auto-advance only after speech ends, then until readingTime / min floor.
+ * - Safety max is soft-lock prevention only — not the normal end condition.
+ *
+ * Previously this raced readingTime against voice end. Pack `ms` is a text estimate
+ * (often short of real TTS), so the bubble flipped and cancelled audio mid-line.
  */
-async function waitSkippableWhileVoice(holdTarget: number, handle: VoiceHandle): Promise<void> {
+async function waitSkippableWhileVoice(readMs: number, handle: VoiceHandle): Promise<void> {
 	const start = performance.now();
-	await Promise.race([
-		waitSkippable(holdTarget),
-		(async () => {
-			await handle.done;
+	// Hard ceiling so a stuck download never freezes the game; players can still skip.
+	const SAFETY_MAX_MS = 45_000;
+
+	return new Promise((resolve) => {
+		let settled = false;
+		let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+		let postVoiceTimer: ReturnType<typeof setTimeout> | null = null;
+		let safetyRemaining = SAFETY_MAX_MS;
+		let safetySegmentStart = 0;
+
+		const clearTimers = () => {
+			if (safetyTimer !== null) {
+				clearTimeout(safetyTimer);
+				safetyTimer = null;
+			}
+			if (postVoiceTimer !== null) {
+				clearTimeout(postVoiceTimer);
+				postVoiceTimer = null;
+			}
+		};
+
+		const settle = () => {
+			if (settled) return;
+			settled = true;
+			clearTimers();
+			if (typeof document !== 'undefined') {
+				document.removeEventListener('visibilitychange', onVisibility);
+			}
+			// Only clear if we still own the slot — a later line may have claimed it.
+			if (advanceResolver === settle) advanceResolver = null;
+			resolve();
+		};
+
+		const armSafety = () => {
+			if (settled || pageIsHidden()) return;
+			if (safetyRemaining <= 0) {
+				settle();
+				return;
+			}
+			safetySegmentStart = performance.now();
+			safetyTimer = setTimeout(settle, safetyRemaining);
+		};
+
+		const freezeSafety = () => {
+			if (safetyTimer === null) return;
+			safetyRemaining = Math.max(0, safetyRemaining - (performance.now() - safetySegmentStart));
+			clearTimeout(safetyTimer);
+			safetyTimer = null;
+		};
+
+		const onVisibility = () => {
+			if (settled) return;
+			if (pageIsHidden()) freezeSafety();
+			else armSafety();
+		};
+
+		advanceResolver = settle;
+		if (typeof document !== 'undefined') {
+			document.addEventListener('visibilitychange', onVisibility);
+		}
+		armSafety();
+
+		void handle.done.then(() => {
+			if (settled) return;
+			// Speech finished — keep the caption up for any remaining reading-time floor.
 			const elapsed = performance.now() - start;
-			const remainingFloor = Math.max(0, MIN_HOLD_MS - elapsed);
-			if (remainingFloor > 0) await wait(remainingFloor);
-		})()
-	]);
+			const minHold = Math.max(MIN_HOLD_MS, readMs);
+			const remaining = Math.max(0, minHold - elapsed);
+			if (remaining <= 0) {
+				settle();
+				return;
+			}
+			// Still skippable via advanceResolver / settle.
+			postVoiceTimer = setTimeout(settle, remaining);
+		});
+	});
 }
 
 class SceneChanged extends Error {
@@ -217,8 +289,8 @@ async function speak(actor: string, raw: string, kind: 'say' | 'think' | 'narrat
 			// Silent path — identical to pre-voice behaviour (modulo textSpeed).
 			await waitSkippable(readMs);
 		} else {
-			const holdTarget = Math.min(Math.max(readMs, handle.estimatedMs ?? readMs), 12_000);
-			await waitSkippableWhileVoice(holdTarget, handle);
+			// Hold until speech ends (or the player skips). readingTime is a minimum floor only.
+			await waitSkippableWhileVoice(readMs, handle);
 		}
 	} finally {
 		handle?.cancel();
