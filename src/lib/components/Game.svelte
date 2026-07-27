@@ -423,6 +423,22 @@
 			else if (started && game.pendingVerb) cancelUse();
 			else if (started) menuOpen = !menuOpen;
 		}
+		/**
+		 * Hold R to show hotspots. Dedicated key so it still works during dialogue / voice
+		 * (when Space only skips) and when a HUD button has focus.
+		 */
+		if (
+			started &&
+			!game.actEnd &&
+			(e.key === 'r' || e.key === 'R') &&
+			document.activeElement?.tagName !== 'INPUT' &&
+			document.activeElement?.tagName !== 'TEXTAREA' &&
+			document.activeElement?.tagName !== 'SELECT'
+		) {
+			e.preventDefault();
+			revealing = true;
+		}
+
 		// Never steal a key from a focused button: choices and the HUD are keyboard-operable.
 		// Also ignore global shortcuts while an act-end card owns the stage.
 		if (!started || game.actEnd || document.activeElement?.tagName === 'BUTTON') return;
@@ -445,16 +461,15 @@
 		if (e.key === ' ' || e.key === 'Enter') {
 			e.preventDefault();
 			/**
-			 * Space does double duty and the split is by state, not by key: while a line is on
-			 * screen it skips, and the rest of the time it holds up what is interactive. A player
-			 * never wants both at once, so this never needs explaining. Enter only ever skips.
+			 * Space / Enter skip a line while one is up. When idle, Space still holds reveal
+			 * as a fallback; prefer hold R — it works during speech too.
 			 */
 			if (isAwaitingAdvance() || e.key === 'Enter') advance();
 			else revealing = true;
 		}
 	}}
 	onkeyup={(e) => {
-		if (e.key === ' ') revealing = false;
+		if (e.key === ' ' || e.key === 'r' || e.key === 'R') revealing = false;
 	}}
 	onblur={() => (revealing = false)}
 />
@@ -553,8 +568,8 @@
 							examine
 						</li>
 						<li>
-							<strong>Continue</strong> under a line (or Space) to skip · hold Space or the eye for
-							hotspots
+							<strong>Continue</strong> under a line (or Space) to skip · hold <kbd>R</kbd> or the
+							eye button to show hotspots
 						</li>
 						<li><kbd>?</kbd> full controls · <kbd>H</kbd> hint · <kbd>Esc</kbd> menu</li>
 					</ul>
@@ -659,7 +674,7 @@
 					<p class="help">
 						Left-click to walk or act · Right-click or long-press for verbs · Click an item, then a
 						thing · Double-tap an item to examine · <kbd>Space</kbd> / Enter / Continue under a
-						line to skip · Hold <kbd>Space</kbd> or the Eye button to show what is interactive ·
+						line to skip · Hold <kbd>R</kbd> or the Eye button to show what is interactive ·
 						<kbd>H</kbd> for a hint · <kbd>M</kbd> for the map · <kbd>?</kbd> for controls ·
 						<kbd>A</kbd> for the Almanac · <kbd>[</kbd>/<kbd>]</kbd> dialog text size ·
 						<kbd>Esc</kbd> for this menu

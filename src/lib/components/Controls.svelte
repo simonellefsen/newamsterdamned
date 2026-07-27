@@ -41,7 +41,11 @@
 				</tr>
 				<tr>
 					<th><kbd>Space</kbd> / <kbd>Enter</kbd></th>
-					<td>Skip the current line (hold Space to show hotspots)</td>
+					<td>Skip the current line</td>
+				</tr>
+				<tr>
+					<th>Hold <kbd>R</kbd> · Eye button</th>
+					<td>Show interactive things (works during dialogue too)</td>
 				</tr>
 				<tr>
 					<th>Continue button</th>

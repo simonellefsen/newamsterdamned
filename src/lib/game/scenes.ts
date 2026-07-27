@@ -237,17 +237,18 @@ const pearlStreet: Scene = {
 		{
 			id: 'rattle-ground',
 			name: "Watchman's rattle",
+			// Next to the sleeping klapperman (not halfway across the mud).
 			poly: [
-				[660, 656],
-				[744, 656],
-				[744, 706],
-				[660, 706]
+				[470, 650],
+				[580, 650],
+				[580, 730],
+				[470, 730]
 			],
-			walkTo: [700, 690],
+			walkTo: [540, 700],
 			facing: 'left',
 			visibleIf: { lacks: 'rattle' },
 			defaultVerb: 'take',
-			art: { svg: rattleProp(), at: [700, 696], height: 64 },
+			art: { svg: rattleProp(), at: [525, 708], height: 96 },
 			verbs: {
 				look: [
 					{

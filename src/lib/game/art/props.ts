@@ -27,18 +27,27 @@ export function breechesProp(): string {
 		<path d="M 24 40 q 26 8 52 0" stroke="${shade(wool, 0.45)}" stroke-width="2" fill="none" opacity="0.6"/>`);
 }
 
-/** The klapperman's rattle, dropped in the mud. */
+/** The klapperman's rattle, dropped in the mud. Brighter metal so it reads on wet earth. */
 export function rattleProp(): string {
+	const wood = tint(P.brownWarm, 0.12);
+	const iron = '#8a9098';
+	const ironHi = '#c5cad0';
 	return box(`
-		<ellipse cx="50" cy="92" rx="34" ry="6" fill="#000" opacity="0.26"/>
-		<g transform="rotate(-14 50 70)">
-			<rect x="44" y="52" width="13" height="38" rx="5" fill="${P.brownMid}"/>
-			<rect x="44" y="52" width="5" height="38" rx="2.5" fill="${tint(P.brownMid, 0.3)}" opacity="0.6"/>
-			<rect x="28" y="18" width="45" height="38" rx="4" fill="${shade(P.brownMid, 0.2)}"/>
-			<rect x="34" y="24" width="33" height="26" rx="3" fill="${P.brownWarm}"/>
-			<rect x="17" y="26" width="13" height="19" rx="3" fill="${P.umber}"/>
-			<rect x="71" y="26" width="13" height="19" rx="3" fill="${P.umber}"/>
-			<rect x="47" y="8" width="7" height="13" fill="${P.umberDeep}"/>
+		<ellipse cx="50" cy="94" rx="38" ry="7" fill="#000" opacity="0.32"/>
+		<g transform="rotate(-18 50 68)">
+			<!-- handle -->
+			<rect x="43" y="48" width="15" height="42" rx="6" fill="${wood}" stroke="${P.umberDeep}" stroke-width="1.5"/>
+			<rect x="45" y="50" width="5" height="38" rx="2" fill="${tint(wood, 0.35)}" opacity="0.55"/>
+			<!-- body -->
+			<rect x="24" y="14" width="53" height="42" rx="5" fill="${shade(wood, 0.15)}" stroke="${P.umberDeep}" stroke-width="2"/>
+			<rect x="30" y="20" width="41" height="30" rx="3" fill="${wood}"/>
+			<!-- iron tines / racket head — high contrast -->
+			<rect x="12" y="22" width="16" height="22" rx="3" fill="${iron}" stroke="${ironHi}" stroke-width="1.2"/>
+			<rect x="73" y="22" width="16" height="22" rx="3" fill="${iron}" stroke="${ironHi}" stroke-width="1.2"/>
+			<rect x="46" y="4" width="9" height="14" rx="1" fill="${iron}" stroke="${ironHi}" stroke-width="1"/>
+			<!-- rivets catch the eye -->
+			<circle cx="38" cy="35" r="2.2" fill="${P.leadTinYellow}"/>
+			<circle cx="62" cy="35" r="2.2" fill="${P.leadTinYellow}"/>
 		</g>`);
 }
 
