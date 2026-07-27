@@ -18,6 +18,12 @@ describe('probePackHealth', () => {
 		expect(h.message).toMatch(/no voice pack/i);
 	});
 
+	it('exports a default pack base', async () => {
+		const { configuredPackBase, defaultManifestUrl } = await import('./pack');
+		expect(configuredPackBase().endsWith('/')).toBe(true);
+		expect(defaultManifestUrl()).toContain('manifest.json');
+	});
+
 	it('reports ready when a manifest is injected (no audio probe)', async () => {
 		const m: PackManifest = {
 			version: 'v1',

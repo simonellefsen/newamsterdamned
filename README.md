@@ -208,8 +208,17 @@ npm run voice:verify                 # 521 files, no missing/tiny clips
 npm run dev                          # play locally; Settings → Spoken voice On, source Auto
 ```
 
-**Local play:** pack files are served from `/voice/v1/` by Vite. Enable voice in Settings (title or Esc → Preferences) — the **Voice pack** panel shows whether Act I audio is present and can **Test pack** with a short clip.  
-**Deploy:** Vercel from git will **not** include MP3s (gitignored). Either upload `manifest.json` + `lines/` to a CDN and point `baseUrl` there, or deploy a build that includes the local `static/voice/v1/lines/` tree. Confirm provider ToS allows public redistribution before shipping packs.
+**Local play:** pack files are served from `/voice/v1/` by Vite. Enable voice in Settings (title or Esc → Preferences) — the **Voice pack** panel shows whether Act I audio is present and can **Test pack** with a short clip.
+
+**Deploy (MP3s are gitignored — GitHub→Vercel will not ship them):**
+
+| Path | How |
+|---|---|
+| **A. Prebuilt CLI** (includes local `lines/`) | With pack on disk: `npm run build && npx vercel deploy --prebuilt` |
+| **B. CDN** | `npm run voice:stage` → upload `.voice-out/voice-v1.tar.gz` contents so `…/voice/v1/manifest.json` is public → set Vercel env `PUBLIC_VOICE_BASE_URL=https://YOUR_CDN/voice/v1/` (rebuild after setting) |
+| **C. No pack on prod** | Game still works; voice falls through to browser OpenAI key / system TTS / silent |
+
+CDN hosts must allow cross-origin `fetch` of `manifest.json` if the CDN origin differs from the game (`Access-Control-Allow-Origin`). Confirm provider ToS allows public redistribution before shipping packs.
 
 **TTS cache (cost control):** every successful API clip is stored under `.voice-cache/{model}/{voice}/{key}.mp3`. Re-runs check, in order: pack `lines/` → durable cache → API. Unchanged lines never re-bill. Summary logs `api` / `cacheHits` / `diskHits` and rough `$ avoided`.
 

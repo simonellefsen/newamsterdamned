@@ -1,5 +1,6 @@
 /**
- * Pre-generated voice pack backend. Manifest + MP3 files under static/voice/v1/.
+ * Pre-generated voice pack backend. Manifest + MP3 files under static/voice/v1/
+ * (or a CDN via PUBLIC_VOICE_BASE_URL).
  *
  * Git tracks `manifest.json` (line inventory). MP3s live in `lines/` (gitignored) —
  * generate locally with `npm run voice:generate:live`, then play via `npm run dev`
@@ -22,7 +23,7 @@ export type PackManifest = {
 	bytes: number;
 	speakers: string[];
 	format: 'mp3';
-	/** e.g. `/voice/v1/` */
+	/** e.g. `/voice/v1/` or `https://cdn.example.com/voice/v1/` */
 	baseUrl: string;
 	/** audioKey → entry */
 	lines: Record<string, PackLineEntry>;
@@ -32,7 +33,28 @@ let manifest: PackManifest | null = null;
 let loadPromise: Promise<PackManifest | null> | null = null;
 let activeAudio: HTMLAudioElement | null = null;
 
-const DEFAULT_MANIFEST_URL = '/voice/v1/manifest.json';
+const DEFAULT_PACK_BASE = '/voice/v1/';
+
+/**
+ * Pack root ending with `/`. Override with Vite/SvelteKit public env
+ * `PUBLIC_VOICE_BASE_URL` (CDN or absolute same-origin path).
+ */
+export function configuredPackBase(): string {
+	let raw = '';
+	try {
+		// Vite injects import.meta.env.PUBLIC_* at build time.
+		const env = (import.meta as ImportMeta & { env?: Record<string, string> }).env;
+		raw = (env?.PUBLIC_VOICE_BASE_URL ?? '').trim();
+	} catch {
+		raw = '';
+	}
+	if (!raw) return DEFAULT_PACK_BASE;
+	return raw.endsWith('/') ? raw : `${raw}/`;
+}
+
+export function defaultManifestUrl(): string {
+	return `${configuredPackBase()}manifest.json`;
+}
 
 export function getPackManifest(): PackManifest | null {
 	return manifest;
@@ -53,24 +75,40 @@ export function __resetPackForTests() {
  * Fetch and cache the pack manifest. Safe to call repeatedly.
  * Returns null if missing / network error (not an exception).
  */
-export function ensurePackLoaded(url = DEFAULT_MANIFEST_URL): Promise<PackManifest | null> {
+export function ensurePackLoaded(url?: string): Promise<PackManifest | null> {
 	if (manifest) return Promise.resolve(manifest);
 	if (loadPromise) return loadPromise;
 	if (typeof fetch === 'undefined') return Promise.resolve(null);
 
+	const manifestUrl = url ?? defaultManifestUrl();
+
 	loadPromise = (async () => {
 		try {
-			const res = await fetch(url, { credentials: 'omit' });
+			const res = await fetch(manifestUrl, { credentials: 'omit' });
 			if (!res.ok) {
 				manifest = null;
 				return null;
 			}
 			const data = (await res.json()) as PackManifest;
-			if (!data?.version || !data.lines || !data.baseUrl) {
+			if (!data?.version || !data.lines) {
 				manifest = null;
 				return null;
 			}
-			manifest = data;
+			// Prefer configured base (CDN) over whatever was written at generate time,
+			// so one pack can ship from disk locally and from a CDN in production.
+			const base = configuredPackBase();
+			const fromFile =
+				typeof data.baseUrl === 'string' && data.baseUrl.trim()
+					? data.baseUrl.endsWith('/')
+						? data.baseUrl
+						: `${data.baseUrl}/`
+					: base;
+			// Absolute PUBLIC_VOICE_BASE_URL always wins; otherwise keep relative pack base.
+			const useBase =
+				base.startsWith('http://') || base.startsWith('https://') || base !== DEFAULT_PACK_BASE
+					? base
+					: fromFile;
+			manifest = { ...data, baseUrl: useBase };
 			return manifest;
 		} catch {
 			manifest = null;
@@ -214,7 +252,7 @@ export async function probePackHealth(opts?: { probeAudio?: boolean }): Promise<
 			bytes: 0,
 			version: null,
 			speakers: [],
-			message: 'No voice pack found. Generate with npm run voice:generate:live for Act I audio.'
+			message: `No voice pack found at ${configuredPackBase()}. Generate with npm run voice:generate:live for Act I audio.`
 		};
 	}
 	const lineCount = Object.keys(m.lines).length;
@@ -267,6 +305,8 @@ export async function probePackHealth(opts?: { probeAudio?: boolean }): Promise<
 			message: `Pack listed (${lineCount} lines, ~${mb} MB) but sample audio is missing — run voice:generate:live or deploy lines/.`
 		};
 	}
+	const baseNote =
+		m.baseUrl.startsWith('http') ? ` · ${m.baseUrl}` : '';
 	return {
 		ok: true,
 		audioOk: true,
@@ -274,7 +314,7 @@ export async function probePackHealth(opts?: { probeAudio?: boolean }): Promise<
 		bytes: m.bytes ?? 0,
 		version: m.version,
 		speakers: m.speakers ?? [],
-		message: `Act I pack ready — ${lineCount} lines (~${mb} MB)${speakers ? ` · ${speakers}` : ''}.`
+		message: `Act I pack ready — ${lineCount} lines (~${mb} MB)${speakers ? ` · ${speakers}` : ''}${baseNote}.`
 	};
 }
 

@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "node scripts/voice/check-pack-for-build.mjs && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -15,7 +15,8 @@
 		"voice:extract": "vitest run src/lib/engine/voice/corpus.test.ts --reporter=verbose",
 		"voice:generate": "node scripts/voice/run-generate.mjs",
 		"voice:generate:live": "node scripts/voice/run-generate.mjs --live",
-		"voice:verify": "node scripts/voice/verify-pack.mjs"
+		"voice:verify": "node scripts/voice/verify-pack.mjs",
+		"voice:stage": "node scripts/voice/stage-pack.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
