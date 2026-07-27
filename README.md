@@ -215,8 +215,31 @@ npm run dev                          # play locally; Settings → Spoken voice O
 | Path | How |
 |---|---|
 | **A. Prebuilt CLI** (includes local `lines/`) | With pack on disk: `npm run build && npx vercel deploy --prebuilt` |
-| **B. CDN** | `npm run voice:stage` → upload `.voice-out/voice-v1.tar.gz` contents so `…/voice/v1/manifest.json` is public → set Vercel env `PUBLIC_VOICE_BASE_URL=https://YOUR_CDN/voice/v1/` (rebuild after setting) |
-| **C. No pack on prod** | Game still works; voice falls through to browser OpenAI key / system TTS / silent |
+| **B. Cloudflare R2 (recommended free tier)** | See **R2 setup** below |
+| **C. Generic CDN** | `npm run voice:stage` → upload tarball contents → set `PUBLIC_VOICE_BASE_URL` |
+| **D. No pack on prod** | Game still works; voice falls through to browser OpenAI key / system TTS / silent |
+
+### R2 setup (Cloudflare)
+
+1. **Enable R2 once** in the dashboard: [R2 Overview](https://dash.cloudflare.com/?to=/:account/r2) → Get started (accept free tier if prompted).
+2. Log the CLI into Cloudflare: `npx wrangler login`
+3. From a machine that has the pack (`npm run voice:verify` OK):
+
+```bash
+npm run voice:upload-r2
+# optional: -- --bucket=my-bucket-name
+```
+
+4. In the bucket **Settings**:
+   - **Public Development URL** → Enable (dev/rate-limited; fine for a hobby game)
+   - **CORS**: allow `GET`/`HEAD` from `https://newamsterdamned.vercel.app` and `http://localhost:5173`
+5. Set on Vercel (Production + Preview), then redeploy:
+
+```text
+PUBLIC_VOICE_BASE_URL=https://pub-XXXX.r2.dev/voice/v1/
+```
+
+(Use the public URL shown in the bucket settings, with `/voice/v1/` at the end.)
 
 CDN hosts must allow cross-origin `fetch` of `manifest.json` if the CDN origin differs from the game (`Access-Control-Allow-Origin`). Confirm provider ToS allows public redistribution before shipping packs.
 
