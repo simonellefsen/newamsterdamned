@@ -11,7 +11,7 @@
  */
 
 import type { Scene } from '$lib/engine/types';
-import { BACKGROUNDS } from './art/scenes';
+import { BACKGROUNDS, pearlStreetOccluder } from './art/scenes';
 import { PALETTES } from './art/actor';
 import { breechesProp, openChestProp, oysterProp, pigProp, rattleProp } from './art/props';
 
@@ -21,6 +21,10 @@ const pearlStreet: Scene = {
 	id: 'pearl-street',
 	name: 'Pearl Street, on the Strand',
 	background: BACKGROUNDS['pearl-street'](),
+	// Tavern facade + near barrels. Contact y sits between the tavern walk-to (664)
+	// and the rattle (708): approaching the door puts you behind the wall; the rattle
+	// on the mud stays in front.
+	layers: [{ src: pearlStreetOccluder(), y: 688 }],
 	walkbox: [
 		[262, 500],
 		[1226, 496],

@@ -15,6 +15,8 @@ export interface SpriteOptions {
 	facing: Facing;
 	/** 0–1 walk cycle phase; 0 means standing. */
 	phase?: number;
+	/** 0–1 idle breath when standing. Ignored while `phase` is non-zero. */
+	idle?: number;
 	/** Wide-brimmed hat. */
 	hat?: boolean;
 	/** Big falling band collar vs. plain. */
@@ -34,6 +36,7 @@ export function sprite(opts: SpriteOptions): string {
 		palette: pal,
 		facing,
 		phase = 0,
+		idle = 0,
 		hat = true,
 		collar = true,
 		noBreeches = false,
@@ -47,8 +50,12 @@ export function sprite(opts: SpriteOptions): string {
 	const back = facing === 'back';
 
 	// Walk cycle: legs counter-swing, body bobs a couple of units.
-	const swing = Math.sin(phase * Math.PI * 2) * (phase > 0 ? 11 : 0);
-	const bob = phase > 0 ? Math.abs(Math.cos(phase * Math.PI * 2)) * 2.5 : 0;
+	// Standing: a one-unit breath so people are not cutouts.
+	const walking = phase > 0;
+	const swing = Math.sin(phase * Math.PI * 2) * (walking ? 11 : 0);
+	const bob = walking
+		? Math.abs(Math.cos(phase * Math.PI * 2)) * 2.5
+		: Math.sin(idle * Math.PI * 2) * 1.15;
 
 	const coatDark = shade(pal.coat, 0.42);
 	const coatLight = tint(pal.coat, 0.16);

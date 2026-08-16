@@ -32,7 +32,7 @@ import {
  * up the quay, Fort Amsterdam's bulk on the right. Cuyp light: low, honeyed, forgiving —
  * which is more than the town is.
  */
-export function pearlStreet(): string {
+function pearlStreetScene(opts: { occluders: boolean }): string {
 	const lo = P.skyDawn;
 	const hi = P.skyDawnHigh;
 	const horizon = 322;
@@ -80,6 +80,23 @@ export function pearlStreet(): string {
 
 	s += mud(464, lo, 21, P.brownWarm);
 
+	if (opts.occluders) s += pearlStreetOccluderBody(lo);
+
+	// The klapperman's barrel, stage right of the tavern — his breeches are on it.
+	// Stays on the plate: the takeable prop sits on this barrel, so it must not be an occluder.
+	s += barrel(378, 640, 0.9, 0.06, lo);
+
+	s += canvasGrain(7, 0.06);
+	return svgScene(s);
+}
+
+/**
+ * Near-plane paint for Pearl Street: tavern facade + bottom-edge clutter.
+ * Full-frame, transparent everywhere else. Stage draws this as a `Scene.layers` entry
+ * so the player walks behind the left wall and the near barrels.
+ */
+function pearlStreetOccluderBody(lo: string): string {
+	let s = '';
 	// The Wooden Horse: signboard and doorway, hard left, in near-foreground shadow.
 	s += `<path d="M 0 720 L 0 300 L 208 300 L 208 720 Z" fill="${shade(P.brickRed, 0.55)}"/>`;
 	s += `<rect x="0" y="296" width="216" height="16" fill="${shade(P.roofTile, 0.4)}"/>`;
@@ -97,12 +114,21 @@ export function pearlStreet(): string {
 	s += barrel(238, 690, 1.15, 0, lo);
 	s += crate(1046, 700, 1.2, 0, lo);
 	s += barrel(1136, 712, 1.3, 0, lo);
+	return s;
+}
 
-	// The klapperman's barrel, stage right of the tavern — his breeches are on it.
-	s += barrel(378, 640, 0.9, 0.06, lo);
+/** Flattened Pearl Street — title card and anything that wants one SVG. */
+export function pearlStreet(): string {
+	return pearlStreetScene({ occluders: true });
+}
 
-	s += canvasGrain(7, 0.06);
-	return svgScene(s);
+/** Plate only. The game scene uses this as `background` plus `pearlStreetOccluder` as a layer. */
+export function pearlStreetPlate(): string {
+	return pearlStreetScene({ occluders: false });
+}
+
+export function pearlStreetOccluder(): string {
+	return svgScene(pearlStreetOccluderBody(P.skyDawn));
 }
 
 /* =========================================================== WOODEN HORSE */
@@ -372,7 +398,7 @@ export function landGate(): string {
 }
 
 export const BACKGROUNDS: Record<string, () => string> = {
-	'pearl-street': pearlStreet,
+	'pearl-street': pearlStreetPlate,
 	'wooden-horse': woodenHorse,
 	'fort-gate': fortGate,
 	'land-gate': landGate

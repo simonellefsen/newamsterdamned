@@ -17,7 +17,10 @@
 		"voice:generate:live": "node scripts/voice/run-generate.mjs --live",
 		"voice:verify": "node scripts/voice/verify-pack.mjs",
 		"voice:stage": "node scripts/voice/stage-pack.mjs",
-		"voice:upload-r2": "node scripts/voice/upload-r2.mjs"
+		"voice:upload-r2": "node scripts/voice/upload-r2.mjs",
+		"art:plates": "ART_EXPORT=1 vitest run src/lib/game/art/plates.test.ts",
+		"art:raster": "ART_RASTER=1 vitest run src/lib/game/art/raster.test.ts",
+		"art:blender": "zsh tools/blender/open-mcp.sh"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",

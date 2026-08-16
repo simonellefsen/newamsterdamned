@@ -225,6 +225,17 @@ describe('geometry', () => {
 			for (const h of s.hotspots)
 				expect(h.poly.length, `${s.id}/${h.id}`).toBeGreaterThanOrEqual(3);
 	});
+
+	it('every scene layer has markup or a url, and a finite contact y', () => {
+		for (const s of ALL_SCENES) {
+			for (const [i, layer] of (s.layers ?? []).entries()) {
+				expect(layer.src.trim().length, `${s.id} layer ${i} src`).toBeGreaterThan(0);
+				expect(Number.isFinite(layer.y), `${s.id} layer ${i} y`).toBe(true);
+			}
+		}
+		const pearl = ALL_SCENES.find((s) => s.id === 'pearl-street');
+		expect(pearl?.layers?.length, 'pearl-street ships an occluder layer').toBeGreaterThan(0);
+	});
 });
 
 describe('protagonist tokens', () => {

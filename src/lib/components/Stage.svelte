@@ -15,8 +15,10 @@
 	import { advance, isAwaitingAdvance } from '$lib/engine/interpreter';
 	import { prefersReducedMotion } from '$lib/engine/settings';
 	import { sprite, PALETTES, SPRITE_TRAITS } from '$lib/game/art/actor';
+	import { isInlineSvg, resolveBackground, resolveLayers } from '$lib/game/art/resolve';
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
-	import type { Hotspot, Point, SceneActor, Verb } from '$lib/engine/types';
+	import { sortDrawOrder } from '$lib/engine/drawOrder';
+	import type { Hotspot, Point, SceneActor, SceneLayer, Verb } from '$lib/engine/types';
 
 	interface Props {
 		onContextVerb: (target: { kind: 'hotspot'; hotspot: Hotspot }, x: number, y: number) => void;
@@ -34,8 +36,11 @@
 
 	let stageEl = $state<HTMLDivElement | null>(null);
 	let walkPhase = $state(0);
+	let idlePhase = $state(0);
 
 	const scene = $derived(getScene(game.scene));
+	const background = $derived(scene ? resolveBackground(scene.id, scene.background) : '');
+	const layers = $derived(scene ? resolveLayers(scene.id, scene.layers) : []);
 
 	/** Actors currently visible, after per-actor overrides from the interpreter. */
 	const liveActors = $derived.by(() => {
@@ -145,8 +150,9 @@
 				// Settings "Reduce motion" freezes the walk bob (instant slide still works).
 				walkPhase = prefersReducedMotion() ? 0 : (walkPhase + dt * 2.6) % 1;
 			}
-		} else if (walkPhase !== 0) {
+		} else {
 			walkPhase = 0;
+			if (!prefersReducedMotion()) idlePhase = (idlePhase + dt * 0.38) % 1;
 		}
 
 		raf = requestAnimationFrame(frame);
@@ -314,8 +320,17 @@
 			palette: me.palette,
 			facing: game.facing,
 			phase: walkPhase,
+			idle: walkPhase > 0 ? 0 : idlePhase,
 			...traits
 		});
+	}
+
+	function npcIdle(id: string): number {
+		if (prefersReducedMotion()) return 0;
+		// Desync the cast so a room of people is not one metronome.
+		let h = 0;
+		for (let i = 0; i < id.length; i++) h = (h * 33 + id.charCodeAt(i)) >>> 0;
+		return (idlePhase + (h % 100) / 100) % 1;
 	}
 
 	function npcSprite(a: SceneActor) {
@@ -324,19 +339,21 @@
 			palette: a.palette ?? PALETTES.joost,
 			facing: (game.actorOverrides[a.id]?.facing ?? a.facing ?? 'front') as never,
 			phase: 0,
+			idle: npcIdle(a.id),
 			...traits
 		});
 	}
 
-	/** Painter's algorithm: whoever's feet are lower is nearer the camera. */
+	/** Painter's algorithm: whoever's feet are lower is nearer the camera. Layers join the sort. */
 	const drawOrder = $derived(
-		[
+		sortDrawOrder([
 			{ kind: 'player' as const, y: game.pos[1] },
 			...liveActors.map((a) => ({ kind: 'npc' as const, y: a.pos[1], actor: a })),
 			...liveHotspots
 				.filter((h) => h.art)
-				.map((h) => ({ kind: 'prop' as const, y: h.art!.at[1], hotspot: h }))
-		].sort((a, b) => a.y - b.y)
+				.map((h) => ({ kind: 'prop' as const, y: h.art!.at[1], hotspot: h })),
+			...layers.map((layer, index) => ({ kind: 'layer' as const, y: layer.y, layer, index }))
+		])
 	);
 
 	function propStyle(at: Point, height: number) {
@@ -359,15 +376,19 @@
 	role="presentation"
 >
 	{#if scene}
-		{#if scene.background.trimStart().startsWith('<')}
-			<div class="bg">{@html scene.background}</div>
+		{#if isInlineSvg(background)}
+			<div class="bg">{@html background}</div>
 		{:else}
 			<!-- Raster / URL backgrounds (DESIGN.md drop-in path). -->
-			<img class="bg bg--raster" src={scene.background} alt="" draggable="false" />
+			<img class="bg bg--raster" src={background} alt="" draggable="false" />
 		{/if}
 
-		<!-- Actors, depth-sorted. -->
-		{#each drawOrder as entry (entry.kind === 'player' ? 'player' : entry.kind === 'npc' ? entry.actor.id : entry.hotspot.id)}
+		{#if scene.ambience && !prefersReducedMotion()}
+			<div class="fx fx--{scene.ambience}" aria-hidden="true"></div>
+		{/if}
+
+		<!-- Actors, props, and occluder layers, depth-sorted. -->
+		{#each drawOrder as entry (entry.kind === 'player' ? 'player' : entry.kind === 'npc' ? entry.actor.id : entry.kind === 'layer' ? `layer:${entry.index}` : entry.hotspot.id)}
 			{#if entry.kind === 'player'}
 				<div class="actor" style={actorStyle(game.pos, PLAYER_HEIGHT)}>
 					{@html playerSprite()}
@@ -376,6 +397,13 @@
 				<div class="actor" style={actorStyle(entry.actor.pos, entry.actor.height ?? PLAYER_HEIGHT)}>
 					{@html npcSprite(entry.actor)}
 				</div>
+			{:else if entry.kind === 'layer'}
+				{@const layer = entry.layer as SceneLayer}
+				{#if isInlineSvg(layer.src)}
+					<div class="layer">{@html layer.src}</div>
+				{:else}
+					<img class="layer layer--raster" src={layer.src} alt="" draggable="false" />
+				{/if}
 			{:else}
 				<div class="prop" style={propStyle(entry.hotspot.art!.at, entry.hotspot.art!.height)}>
 					{@html entry.hotspot.art!.svg}
@@ -476,11 +504,94 @@
 		pointer-events: none;
 	}
 
-	.bg--raster {
+	.bg--raster,
+	.layer--raster {
 		object-fit: cover;
 		object-position: center;
 		user-select: none;
 		-webkit-user-drag: none;
+	}
+
+	.layer,
+	.layer :global(svg) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		display: block;
+		pointer-events: none;
+	}
+
+	.fx {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	.fx--harbour,
+	.fx--wall {
+		background: linear-gradient(
+			180deg,
+			transparent 38%,
+			rgba(239, 223, 184, 0.07) 46%,
+			rgba(47, 91, 140, 0.08) 54%,
+			transparent 64%
+		);
+		background-size: 100% 220%;
+		animation: fx-shimmer 7s ease-in-out infinite;
+	}
+
+	.fx--tavern {
+		background: radial-gradient(ellipse 38% 55% at 82% 62%, rgba(246, 201, 106, 0.16), transparent 70%);
+		animation: fx-flicker 2.4s ease-in-out infinite;
+	}
+
+	.fx--chamber,
+	.fx--fort {
+		background: radial-gradient(ellipse 28% 36% at 50% 58%, rgba(246, 201, 106, 0.1), transparent 72%);
+		animation: fx-flicker 3.6s ease-in-out infinite;
+	}
+
+	.fx--market,
+	.fx--workshop {
+		background: linear-gradient(180deg, transparent 70%, rgba(36, 26, 18, 0.08) 100%);
+		animation: fx-shimmer 11s ease-in-out infinite;
+	}
+
+	@keyframes fx-shimmer {
+		0%,
+		100% {
+			background-position: 0 0;
+			opacity: 0.55;
+		}
+		50% {
+			background-position: 0 40%;
+			opacity: 1;
+		}
+	}
+
+	@keyframes fx-flicker {
+		0%,
+		100% {
+			opacity: 0.45;
+		}
+		40% {
+			opacity: 0.95;
+		}
+		62% {
+			opacity: 0.55;
+		}
+		78% {
+			opacity: 0.85;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fx {
+			animation: none;
+			opacity: 0;
+		}
 	}
 
 	.actor {
@@ -514,6 +625,7 @@
 		inset: 0;
 		width: 100%;
 		height: 100%;
+		z-index: 2;
 	}
 
 	/**

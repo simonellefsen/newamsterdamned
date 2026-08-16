@@ -249,25 +249,14 @@ Manual test checklist lives in PR 3 description (scroll conflict, rapid tap, coi
 
 ### 1.6 Art upgrade path (minimal Stage change)
 
-`DESIGN.md` §5–7 and `types.ts` already allow URL **or** inline SVG. **Runtime Stage does not.**
+`DESIGN.md` §5–7 and `types.ts` already allow URL **or** inline SVG. **Runtime Stage now does** (`isInlineSvg` in `art/resolve.ts`; raster `<img>` + `Scene.layers` occluders). Painted plates register in `src/lib/game/art/manifest.ts`.
 
-**Required Stage change (PR 14):**
-
-```svelte
-{#if isInlineSvg(scene.background)}
-  <div class="bg">{@html scene.background}</div>
-{:else}
-  <div class="bg bg--raster" style="background-image:url({scene.background})"></div>
-  <!-- or <img class="bg-img" src={scene.background} alt="" /> with object-fit cover -->
-{/if}
-```
-
-Helper: `isInlineSvg(src) => src.trimStart().startsWith('<svg')`. Same rule for `SceneLayer.src` if raster layers appear later.
+**PR 14 remainder:** one painted Pearl Street webp (see `docs/ART.md`). SVG occluder already on Pearl Street as the engine proof.
 
 **Path after Stage fix:**
 
-1. Commission or paint per-scene `.webp` under `static/art/`.
-2. Point `background` at `/art/{sceneId}.webp`.
+1. Author per-scene `.webp` in **Blender 5.2 LTS** (installed at `/Applications/Blender.app`; see `docs/ART.md`) and drop them under `static/art/`.
+2. Register the plate (and optional occluder) in `src/lib/game/art/manifest.ts`.
 3. Keep procedural SVG as fallback / low-data mode via settings.
 4. Optional progressive load: SVG first paint, swap webp when loaded.
 
@@ -1018,7 +1007,7 @@ No server alerting required.
 4. **Act IV override:** keep default (ambience on) or force near-silence after canoes?
 5. **THINK default:** Soft vs Off for purists?
 6. **Power-user cloud TTS key paste** — want or reject?
-7. **Painted art** commission schedule?
+7. **Painted art** — Blender 5.2 LTS is now installed locally. Still open: paint Pearl Street as the PR 14 pilot ourselves, or commission a painter against the same drop-in contract?
 8. **Analytics** anonymous funnel — yes/no?
 9. **TTS provider** choice given licence for public CDN in MIT game?
 10. **English-only** voice packs commitment?
@@ -1029,6 +1018,7 @@ No server alerting required.
 
 - `DESIGN.md` — pitch, tone §2, history §3, systems, tech, art
 - `README.md` — player-facing summary
+- `tools/blender/README.md` — local Blender 5.2 LTS install and painted-art drop-in contract
 - `src/lib/engine/interpreter.ts` — `speak()`, `advance()`, `run()`, `enterScene()`
 - `src/lib/engine/audio.ts` — procedural SFX, mute, direct `destination`
 - `src/lib/engine/registry.ts` — content registration boundary

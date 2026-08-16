@@ -4,6 +4,7 @@
 	 * Continue opens a slot picker when more than one save exists.
 	 */
 	import { pearlStreet } from '$lib/game/art/scenes';
+	import { isInlineSvg, resolveBackground } from '$lib/game/art/resolve';
 	import {
 		clear as clearSlot,
 		exportSaveJson,
@@ -33,7 +34,7 @@
 	}
 	let { onStart, onContinue, onSettings, onImport }: Props = $props();
 
-	const art = pearlStreet();
+	const art = resolveBackground('pearl-street', pearlStreet());
 	let canContinue = $state(false);
 	let continueSummary = $state<string | null>(null);
 	let continueAct = $state<string | null>(null);
@@ -127,7 +128,11 @@
 </script>
 
 <div class="title">
-	<div class="art">{@html art}</div>
+	{#if isInlineSvg(art)}
+		<div class="art">{@html art}</div>
+	{:else}
+		<img class="art art--raster" src={art} alt="" draggable="false" />
+	{/if}
 	<div class="veil"></div>
 
 	{#if pickingSave}
@@ -301,6 +306,11 @@
 	.art {
 		filter: blur(2px) saturate(0.85);
 		transform: scale(1.04);
+	}
+
+	.art--raster {
+		object-fit: cover;
+		object-position: center 42%;
 	}
 
 	.veil {

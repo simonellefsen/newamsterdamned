@@ -124,7 +124,7 @@ know about yet.
 |---|---|
 | Framework | SvelteKit 2 + Svelte 5 runes, TypeScript strict |
 | Rendering | DOM and CSS transforms over an SVG background — no canvas |
-| Art | Procedurally generated painted SVG; drop-in replaceable with painted `.webp` |
+| Art | Procedural painted SVG placeholders; **Blender 5.2 LTS** is installed locally for drop-in `.webp` |
 | Audio | Web Audio — synthesised SFX plus procedural scene ambience beds |
 | Deploy | Static prerender on Vercel; ~420 KB total |
 
@@ -143,6 +143,12 @@ src/lib/components/ Stage · VerbCoin · Bubbles · Choices · Inventory · Alma
 **Why DOM and not canvas.** The whole game is hotspots and text. The DOM gives keyboard
 navigation, screen-reader labels and free scaling for nothing, and a 2D adventure has no
 frame-rate problem to solve. The game is fully playable without a mouse.
+
+**Blender.** 5.2 LTS is installed at `/Applications/Blender.app`. Painted scene backgrounds
+are authored there and dropped in as `.webp` — the scene manifest does not change. The
+look-dev contract is [`docs/ART.md`](docs/ART.md); camera plates via `npm run art:plates`.
+Krita or Affinity for paint-over; TexturePacker later for character sheets. Agent control
+is **blender-mcp** — `npm run art:blender` opens the GUI, then Grok can drive the scene.
 
 ## Controls
 

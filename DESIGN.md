@@ -334,7 +334,7 @@ serialisable object by construction — inventory ids, flag map, scene id, actor
 | Framework | **SvelteKit 2** + **Svelte 5 runes** |
 | Language | TypeScript, strict |
 | Rendering | DOM + CSS transforms over an SVG/raster background. No canvas — hotspots stay inspectable and accessible |
-| Art | Procedural SVG placeholders now, drop-in painted `.webp` later. The manifest never changes |
+| Art | Procedural SVG placeholders now; painted `.webp` authored in **Blender 5.2 LTS** (installed locally). The manifest never changes |
 | Audio | Web Audio, procedural stings; no binary assets in v1 |
 | Deploy | Vercel, `adapter-static`, fully prerendered |
 
@@ -354,4 +354,10 @@ occluders — with atmospheric perspective (things far away lose contrast and sh
 the sky's hue). That is what sells "painted 2.5D" more than brushwork does.
 
 Placeholders are generated SVG that commits to the palette and the layering, so the game
-looks *intentional* rather than *unfinished* while the real art is commissioned.
+looks *intentional* rather than *unfinished* while the real art is painted.
+
+**Blender 5.2 LTS is installed** at `/Applications/Blender.app` (headless:
+`/Applications/Blender.app/Contents/MacOS/Blender`). That is the authoring tool for
+painted 2.5D backgrounds — 1280×720, same layer order as the SVG placeholders, dropped
+in as `.webp` under `static/art/` without touching the engine. Character sprites stay
+procedural until a second pass. See `tools/blender/README.md`.

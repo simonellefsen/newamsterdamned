@@ -32,3 +32,12 @@ static/voice/v1/corpus-*.json
 .voice-out/
 # Durable TTS cache — keeps API costs down across regenerate runs
 .voice-cache/
+
+# Generated Blender camera plates (regenerate with npm run art:plates)
+tools/blender/plates/*.svg
+tools/blender/plates/*.png
+!tools/blender/plates/.gitkeep
+
+# Local Blender working files (not a pack yet)
+tools/blender/*.blend
+tools/blender/*.blend1
