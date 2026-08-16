@@ -232,7 +232,7 @@ export const PALETTES: Record<string, ActorPalette> = {
 export const SPRITE_TRAITS: Record<string, Partial<SpriteOptions>> = {
 	griet: { skirt: true, apron: true, hat: false, collar: true },
 	klapperman: { noBreeches: true },
-	yankee: { hat: true, collar: false },
+	yankee: { hat: true, collar: true },
 	domingo: { hat: true, collar: true },
 	kleyn: { hat: true, collar: true },
 	// No Dutch hat and no falling band: at sprite size that silhouette alone tells you he is

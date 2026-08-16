@@ -128,6 +128,7 @@ get large.
 3. Idle breath on the player and NPCs; ambience light overlays (water / fire /
    candle). Honour reduced motion.
 4. Act I outdoor rooms painted: `fort-gate.webp` (noon) and `land-gate.webp`
-   (dusk), same locked cameras. Occluders still only Pearl Street's shed strip.
+   (dusk), same locked cameras. Occluders: Pearl Street shed and the Wooden
+   Horse counter (Griet stands behind the bar).
 5. Next: painted near-plane occluders for the sentry box / stall, remaining
    hero NPCs, then Joost's walk cycle.

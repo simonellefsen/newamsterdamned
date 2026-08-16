@@ -61,7 +61,7 @@
 	function actorHotspot(a: SceneActor & { pos: Point }): Hotspot {
 		const ds = scene ? depthScale(a.pos[1], scene.walkbox, scene.scale) : 1;
 		const h = (a.height ?? PLAYER_HEIGHT) * ds;
-		const w = h * 0.46;
+		const w = h * 0.55;
 		return {
 			id: `actor:${a.id}`,
 			name: a.name,
@@ -302,12 +302,15 @@
 		return `${(n / of) * 100}%`;
 	}
 
-	function actorStyle(pos: Point, height: number, flip = false, bob = 0) {
+	function actorStyle(pos: Point, height: number, flip = false, bob = 0, png = false) {
 		const ds = scene ? depthScale(pos[1], scene.walkbox, scene.scale) : 1;
 		const h = height * ds;
 		const flipX = flip ? ' scaleX(-1)' : '';
 		const lift = bob ? ` translateY(${(-bob).toFixed(1)}%)` : '';
-		return `left:${pct(pos[0], SCENE_W)};top:${pct(pos[1], SCENE_H)};height:${pct(h, SCENE_H)};width:${pct(h / 2, SCENE_W)};transform:translate(-50%,-100%)${flipX}${lift};`;
+		// SVG sprites are authored 100×200. Painted frames are 2:3; letterboxing
+		// them into the old 1:2 box shrinks the figure inside the height.
+		const w = png ? h * (2 / 3) : h / 2;
+		return `left:${pct(pos[0], SCENE_W)};top:${pct(pos[1], SCENE_H)};height:${pct(h, SCENE_H)};width:${pct(w, SCENE_W)};transform:translate(-50%,-100%)${flipX}${lift};`;
 	}
 
 	function spriteBob(walking: boolean, idle: number) {
@@ -414,7 +417,8 @@
 						game.pos,
 						PLAYER_HEIGHT,
 						game.facing === 'right' && !isInlineSvg(psrc),
-						spriteBob(walkPhase > 0, idlePhase)
+						spriteBob(walkPhase > 0, idlePhase),
+						!isInlineSvg(psrc)
 					)}
 				>
 					{#if isInlineSvg(psrc)}
@@ -432,7 +436,8 @@
 						entry.actor.pos,
 						entry.actor.height ?? PLAYER_HEIGHT,
 						nface === 'right' && !isInlineSvg(nsrc),
-						spriteBob(false, npcIdle(entry.actor.id))
+						spriteBob(false, npcIdle(entry.actor.id)),
+						!isInlineSvg(nsrc)
 					)}
 				>
 					{#if isInlineSvg(nsrc)}

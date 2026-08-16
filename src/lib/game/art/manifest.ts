@@ -23,7 +23,11 @@ export const ART_PLATES: Record<string, ArtPlate> = {
 		occluder: '/art/pearl-street-occluder.webp',
 		occluderY: 688
 	},
-	'wooden-horse': { plate: '/art/wooden-horse.webp' },
+	'wooden-horse': {
+		plate: '/art/wooden-horse.webp',
+		occluder: '/art/wooden-horse-occluder.webp',
+		occluderY: 600
+	},
 	'fort-gate': { plate: '/art/fort-gate.webp' },
 	'land-gate': { plate: '/art/land-gate.webp' }
 };
