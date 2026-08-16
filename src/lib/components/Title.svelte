@@ -21,6 +21,7 @@
 
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
 	import { sprite } from '$lib/game/art/actor';
+	import { resolveActorPng } from '$lib/game/art/sprites';
 	import { actOf, ACT_ROMAN } from '$lib/game/acts';
 	import { focusTrap } from '$lib/actions/focusTrap';
 
@@ -63,6 +64,8 @@
 	onMount(refreshSaves);
 
 	function portrait(id: ProtagonistId) {
+		const png = resolveActorPng(id, 'front', 'dressed');
+		if (png) return png;
 		const p = PROTAGONISTS[id];
 		return sprite({ palette: p.palette, facing: 'front', ...p.dressed });
 	}
@@ -259,7 +262,13 @@
 						onclick={() => (chosen = p.id)}
 						ondblclick={() => onStart(p.id)}
 					>
-						<div class="figure">{@html portrait(p.id)}</div>
+						<div class="figure">
+							{#if isInlineSvg(portrait(p.id))}
+								{@html portrait(p.id)}
+							{:else}
+								<img src={portrait(p.id)} alt="" draggable="false" />
+							{/if}
+						</div>
 						<h2>{p.name} {p.surname}</h2>
 						<p class="blurb">{p.blurb}</p>
 						<p class="standing"><span>Standing —</span> {p.standing}</p>
@@ -511,10 +520,13 @@
 		aspect-ratio: 1 / 2;
 	}
 
-	.figure :global(svg) {
+	.figure :global(svg),
+	.figure img {
 		width: 100%;
 		height: 100%;
 		overflow: visible;
+		object-fit: contain;
+		object-position: bottom center;
 	}
 
 	.card h2 {

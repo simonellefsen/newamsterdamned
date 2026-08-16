@@ -94,6 +94,11 @@ table lip) that can occlude the actor. That is what `Scene.layers` is for.
 
 ## People
 
+Painted PNG frames live in `static/art/sprites/` and register in
+`src/lib/game/art/sprites.ts`. Magenta studio backdrops are keyed with
+`node scripts/art/key-magenta.mjs`. Right views flip the left frame.
+SVG `sprite()` remains the fallback.
+
 1650s Dutch silhouette first: wide-brimmed hat, falling-band collar, barrel
 doublet, baggy knee breeches. Must read at 40px tall.
 

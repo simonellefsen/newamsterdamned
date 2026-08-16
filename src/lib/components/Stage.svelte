@@ -16,9 +16,10 @@
 	import { prefersReducedMotion } from '$lib/engine/settings';
 	import { sprite, PALETTES, SPRITE_TRAITS } from '$lib/game/art/actor';
 	import { isInlineSvg, resolveBackground, resolveLayers } from '$lib/game/art/resolve';
+	import { actorVariant, resolveActorPng, resolvePropPng } from '$lib/game/art/sprites';
 	import { PROTAGONISTS, type ProtagonistId } from '$lib/game/protagonist';
 	import { sortDrawOrder } from '$lib/engine/drawOrder';
-	import type { Hotspot, Point, SceneActor, SceneLayer, Verb } from '$lib/engine/types';
+	import type { Facing, Hotspot, Point, SceneActor, SceneLayer, Verb } from '$lib/engine/types';
 
 	interface Props {
 		onContextVerb: (target: { kind: 'hotspot'; hotspot: Hotspot }, x: number, y: number) => void;
@@ -301,10 +302,17 @@
 		return `${(n / of) * 100}%`;
 	}
 
-	function actorStyle(pos: Point, height: number) {
+	function actorStyle(pos: Point, height: number, flip = false, bob = 0) {
 		const ds = scene ? depthScale(pos[1], scene.walkbox, scene.scale) : 1;
 		const h = height * ds;
-		return `left:${pct(pos[0], SCENE_W)};top:${pct(pos[1], SCENE_H)};height:${pct(h, SCENE_H)};width:${pct(h / 2, SCENE_W)};`;
+		const flipX = flip ? ' scaleX(-1)' : '';
+		const lift = bob ? ` translateY(${(-bob).toFixed(1)}%)` : '';
+		return `left:${pct(pos[0], SCENE_W)};top:${pct(pos[1], SCENE_H)};height:${pct(h, SCENE_H)};width:${pct(h / 2, SCENE_W)};transform:translate(-50%,-100%)${flipX}${lift};`;
+	}
+
+	function spriteBob(walking: boolean, idle: number) {
+		if (prefersReducedMotion()) return 0;
+		return walking ? Math.abs(Math.cos(walkPhase * Math.PI * 2)) * 1.6 : Math.sin(idle * Math.PI * 2) * 0.7;
 	}
 
 	function playerSprite() {
@@ -316,6 +324,8 @@
 				? { ...me.dressed, skirt: false }
 				: me.dressed
 			: me.undressed;
+		const png = resolveActorPng(me.id, game.facing, actorVariant(me.id, !!game.flags.dressed));
+		if (png) return png;
 		return sprite({
 			palette: me.palette,
 			facing: game.facing,
@@ -333,11 +343,18 @@
 		return (idlePhase + (h % 100) / 100) % 1;
 	}
 
+	function npcFacing(a: SceneActor) {
+		return (game.actorOverrides[a.id]?.facing ?? a.facing ?? 'front') as Facing;
+	}
+
 	function npcSprite(a: SceneActor) {
+		const facing = npcFacing(a);
+		const png = resolveActorPng(a.id, facing, 'default');
+		if (png) return png;
 		const traits = SPRITE_TRAITS[a.id] ?? {};
 		return sprite({
 			palette: a.palette ?? PALETTES.joost,
-			facing: (game.actorOverrides[a.id]?.facing ?? a.facing ?? 'front') as never,
+			facing,
 			phase: 0,
 			idle: npcIdle(a.id),
 			...traits
@@ -390,12 +407,39 @@
 		<!-- Actors, props, and occluder layers, depth-sorted. -->
 		{#each drawOrder as entry (entry.kind === 'player' ? 'player' : entry.kind === 'npc' ? entry.actor.id : entry.kind === 'layer' ? `layer:${entry.index}` : entry.hotspot.id)}
 			{#if entry.kind === 'player'}
-				<div class="actor" style={actorStyle(game.pos, PLAYER_HEIGHT)}>
-					{@html playerSprite()}
+				{@const psrc = playerSprite()}
+				<div
+					class="actor"
+					style={actorStyle(
+						game.pos,
+						PLAYER_HEIGHT,
+						game.facing === 'right' && !isInlineSvg(psrc),
+						spriteBob(walkPhase > 0, idlePhase)
+					)}
+				>
+					{#if isInlineSvg(psrc)}
+						{@html psrc}
+					{:else}
+						<img class="actor-img" src={psrc} alt="" draggable="false" />
+					{/if}
 				</div>
 			{:else if entry.kind === 'npc'}
-				<div class="actor" style={actorStyle(entry.actor.pos, entry.actor.height ?? PLAYER_HEIGHT)}>
-					{@html npcSprite(entry.actor)}
+				{@const nsrc = npcSprite(entry.actor)}
+				{@const nface = npcFacing(entry.actor)}
+				<div
+					class="actor"
+					style={actorStyle(
+						entry.actor.pos,
+						entry.actor.height ?? PLAYER_HEIGHT,
+						nface === 'right' && !isInlineSvg(nsrc),
+						spriteBob(false, npcIdle(entry.actor.id))
+					)}
+				>
+					{#if isInlineSvg(nsrc)}
+						{@html nsrc}
+					{:else}
+						<img class="actor-img" src={nsrc} alt="" draggable="false" />
+					{/if}
 				</div>
 			{:else if entry.kind === 'layer'}
 				{@const layer = entry.layer as SceneLayer}
@@ -405,8 +449,13 @@
 					<img class="layer layer--raster" src={layer.src} alt="" draggable="false" />
 				{/if}
 			{:else}
+				{@const psrc = resolvePropPng(entry.hotspot.id)}
 				<div class="prop" style={propStyle(entry.hotspot.art!.at, entry.hotspot.art!.height)}>
-					{@html entry.hotspot.art!.svg}
+					{#if psrc}
+						<img class="prop-img" src={psrc} alt="" draggable="false" />
+					{:else}
+						{@html entry.hotspot.art!.svg}
+					{/if}
 				</div>
 			{/if}
 		{/each}
@@ -599,6 +648,17 @@
 		transform: translate(-50%, -100%);
 		pointer-events: none;
 		filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+	}
+
+	.actor-img,
+	.prop-img {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		object-position: bottom center;
+		display: block;
+		pointer-events: none;
+		user-select: none;
 	}
 
 	.actor :global(svg) {

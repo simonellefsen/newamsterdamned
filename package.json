@@ -20,7 +20,8 @@
 		"voice:upload-r2": "node scripts/voice/upload-r2.mjs",
 		"art:plates": "ART_EXPORT=1 vitest run src/lib/game/art/plates.test.ts",
 		"art:raster": "ART_RASTER=1 vitest run src/lib/game/art/raster.test.ts",
-		"art:blender": "zsh tools/blender/open-mcp.sh"
+		"art:blender": "zsh tools/blender/open-mcp.sh",
+		"art:key": "node scripts/art/key-magenta.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",
