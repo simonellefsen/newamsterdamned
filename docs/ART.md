@@ -127,5 +127,7 @@ get large.
    uses the Pearl Street plate. SVG remains the fallback if those files vanish.
 3. Idle breath on the player and NPCs; ambience light overlays (water / fire /
    candle). Honour reduced motion.
-4. Next: Blender blockout of Pearl Street (`npm run art:blender`) so the
-   painted plate can gain a true occluder pass, then Joost's walk cycle.
+4. Act I outdoor rooms painted: `fort-gate.webp` (noon) and `land-gate.webp`
+   (dusk), same locked cameras. Occluders still only Pearl Street's shed strip.
+5. Next: painted near-plane occluders for the sentry box / stall, remaining
+   hero NPCs, then Joost's walk cycle.

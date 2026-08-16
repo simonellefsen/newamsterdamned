@@ -1111,7 +1111,7 @@ const landGate: Scene = {
 		[70, 704]
 	],
 	scale: { near: 0.95, far: 0.58 },
-	entry: [420, 640],
+	entry: [640, 670],
 	ambience: 'wall',
 
 	onFirstEnter: [

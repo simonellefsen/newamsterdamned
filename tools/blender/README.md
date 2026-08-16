@@ -62,6 +62,7 @@ Stage already accepts a URL background and sorts `Scene.layers` against actor fe
 /Applications/Blender.app/Contents/MacOS/Blender --background --python tools/blender/<script>.py
 ```
 
-Pearl Street (`pearl-street`) is look-dev. Do not factory the other fourteen until that plate is signed off.
+Pearl Street is the look-dev sign-off. Act I plates now ship for `pearl-street`,
+`wooden-horse`, `fort-gate`, and `land-gate`. Same camera lock for the rest.
 
 Do **not** commit `.blend` files or raw renders to git until a pack policy is decided.
