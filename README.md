@@ -160,7 +160,7 @@ to make the next ones. The look-dev contract is [`docs/ART.md`](docs/ART.md).
 | Character and prop sprites (`static/art/sprites/`) | Imagine studies on a magenta studio field, then `npm run art:key` ([sharp](https://sharp.pixelplumbing.com/)) knocks the field to alpha |
 | Encode | `sharp` → WebP q~84, ~80–130 KB per plate |
 
-[Krita](https://krita.org/), [Affinity](https://affinity.serif.com/) and [TexturePacker](https://www.codeandweb.com/texturepacker) are installed on the authoring machine for paint-over and future walk-cycle sheets. They did **not** author the plates that are in git yet.
+[Krita](https://krita.org/), [Affinity](https://affinity.serif.com/) and [TexturePacker](https://www.codeandweb.com/texturepacker) are installed on the authoring machine for paint-over and future walk-cycle sheets. [`@gltf-transform/cli`](https://gltf-transform.dev/) (via `npx`) is installed to inspect and pack a Blender `.glb` if a whitebox is exported. None of those authored the plates that are in git yet.
 
 **Install (macOS), if you want to continue the art**
 
@@ -184,6 +184,15 @@ to make the next ones. The look-dev contract is [`docs/ART.md`](docs/ART.md).
    ```
 
    Affinity: [affinity.serif.com](https://affinity.serif.com/). TexturePacker: [codeandweb.com/texturepacker](https://www.codeandweb.com/texturepacker).
+
+5. **Optional glTF packer** (only if a `.glb` leaves Blender)
+
+   ```bash
+   npx @gltf-transform/cli inspect tools/blender/pearl-street.glb
+   npx @gltf-transform/cli optimize in.glb out.glb --compress draco --texture-compress webp
+   ```
+
+   Not a project dependency. The playable game never loads a mesh.
 
 **Repo scripts**
 

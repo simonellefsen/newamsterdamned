@@ -4,7 +4,7 @@
 
 The look, camera lock, and drop-in contract live in **[`docs/ART.md`](../../docs/ART.md)**. Read that before opening a second room.
 
-Also on this machine: **Krita** (paint-over), **Affinity** (paint-over), **TexturePacker** (character sheets, later).
+Also on this machine: **Krita** (paint-over), **Affinity** (paint-over), **TexturePacker** (character sheets, later), **gltf-transform** (pack a `.glb` if you export one).
 
 ```bash
 /Applications/Blender.app/Contents/MacOS/Blender --version
@@ -65,4 +65,12 @@ Stage already accepts a URL background and sorts `Scene.layers` against actor fe
 Pearl Street is the look-dev sign-off. Act I plates now ship for `pearl-street`,
 `wooden-horse`, `fort-gate`, and `land-gate`. Same camera lock for the rest.
 
-Do **not** commit `.blend` files or raw renders to git until a pack policy is decided.
+Do **not** commit `.blend` files, `.glb` / `.gltf` exports, or raw renders to git
+until a pack policy is decided. If a whitebox is exported:
+
+```bash
+npx @gltf-transform/cli inspect tools/blender/<scene>.glb
+npx @gltf-transform/cli optimize in.glb out.glb --compress draco --texture-compress webp
+```
+
+The game does not load meshes. This is archive / re-import hygiene only.

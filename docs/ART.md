@@ -50,7 +50,7 @@ Headless Blender: `/Applications/Blender.app/Contents/MacOS/Blender` (5.2.0 LTS)
 
 Install and role of each tool: **[README → Art tooling](../README.md#art-tooling)**.
 
-Shipped plates and sprites were locked in Blender (Pearl Street whitebox), painted with xAI Imagine, and encoded / keyed with `sharp`. Krita, Affinity and TexturePacker are available for later paint-over and walk-cycle sheets.
+Shipped plates and sprites were locked in Blender (Pearl Street whitebox), painted with xAI Imagine, and encoded / keyed with `sharp`. Krita, Affinity and TexturePacker are available for later paint-over and walk-cycle sheets. `npx @gltf-transform/cli` is available to inspect / optimize a `.glb` export; the game never loads one.
 
 To let an agent talk to Blender:
 

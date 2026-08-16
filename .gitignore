@@ -41,3 +41,5 @@ tools/blender/plates/*.png
 # Local Blender working files (not a pack yet)
 tools/blender/*.blend
 tools/blender/*.blend1
+tools/blender/*.glb
+tools/blender/*.gltf
