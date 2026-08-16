@@ -46,17 +46,11 @@ Headless Blender: `/Applications/Blender.app/Contents/MacOS/Blender` (5.2.0 LTS)
 
 ---
 
-## Local tool belt (installed)
+## Local tool belt
 
-| Tool | Role |
-|---|---|
-| **Blender 5.2 LTS** | Blockout, locked camera, beauty + occluder render |
-| **blender-mcp** | Agent drives the live Blender session (see `tools/blender/README.md`) |
-| **Krita** | Default 2D paint-over of the beauty pass |
-| **Affinity** | Alternate paint-over if you prefer it to Krita |
-| **TexturePacker** | Sprite sheets later (Joost / Trijn walk-idle-talk). Not for rooms. |
+Install and role of each tool: **[README → Art tooling](../README.md#art-tooling)**.
 
-Look-dev order: Blender blockout → 2560×1440 beauty → paint in **Krita or Affinity** → encode WebP → register in `manifest.ts`. TexturePacker waits until Phase 2 characters.
+Shipped plates and sprites were locked in Blender (Pearl Street whitebox), painted with xAI Imagine, and encoded / keyed with `sharp`. Krita, Affinity and TexturePacker are available for later paint-over and walk-cycle sheets.
 
 To let an agent talk to Blender:
 

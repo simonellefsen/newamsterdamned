@@ -124,7 +124,7 @@ know about yet.
 |---|---|
 | Framework | SvelteKit 2 + Svelte 5 runes, TypeScript strict |
 | Rendering | DOM and CSS transforms over an SVG background — no canvas |
-| Art | Procedural painted SVG placeholders; **Blender 5.2 LTS** is installed locally for drop-in `.webp` |
+| Art | Procedural SVG fallback; painted `.webp` plates and sprites (see **Art tooling** below) |
 | Audio | Web Audio — synthesised SFX plus procedural scene ambience beds |
 | Deploy | Static prerender on Vercel; ~420 KB total |
 
@@ -144,11 +144,57 @@ src/lib/components/ Stage · VerbCoin · Bubbles · Choices · Inventory · Alma
 navigation, screen-reader labels and free scaling for nothing, and a 2D adventure has no
 frame-rate problem to solve. The game is fully playable without a mouse.
 
-**Blender.** 5.2 LTS is installed at `/Applications/Blender.app`. Painted scene backgrounds
-are authored there and dropped in as `.webp` — the scene manifest does not change. The
-look-dev contract is [`docs/ART.md`](docs/ART.md); camera plates via `npm run art:plates`.
-Krita or Affinity for paint-over; TexturePacker later for character sheets. Agent control
-is **blender-mcp** — `npm run art:blender` opens the GUI, then Grok can drive the scene.
+## Art tooling
+
+The playable game does not need any of this. `npm install && npm run dev` is enough.
+These tools are how the painted plates and sprites in `static/art/` were made, and how
+to make the next ones. The look-dev contract is [`docs/ART.md`](docs/ART.md).
+
+**What produced the files that ship today**
+
+| Asset | How |
+|---|---|
+| Scene cameras / walkbox lock | Procedural SVG in `src/lib/game/art/`, dumped with `npm run art:plates` / `npm run art:raster` |
+| Pearl Street whitebox | [Blender](https://www.blender.org/) 5.2 LTS, driven from this repo via [blender-mcp](https://github.com/ahujasid/blender-mcp) |
+| Painted room plates (`static/art/*.webp`) | xAI **Imagine** (`image_gen` / `image_edit`) over those locked cameras |
+| Character and prop sprites (`static/art/sprites/`) | Imagine studies on a magenta studio field, then `npm run art:key` ([sharp](https://sharp.pixelplumbing.com/)) knocks the field to alpha |
+| Encode | `sharp` → WebP q~84, ~80–130 KB per plate |
+
+[Krita](https://krita.org/), [Affinity](https://affinity.serif.com/) and [TexturePacker](https://www.codeandweb.com/texturepacker) are installed on the authoring machine for paint-over and future walk-cycle sheets. They did **not** author the plates that are in git yet.
+
+**Install (macOS), if you want to continue the art**
+
+1. **Node** — whatever this repo already needs. `sharp` arrives with `npm install`.
+2. **Blender 5.2 LTS** — [blender.org/download](https://www.blender.org/download/) (LTS). On this machine it lives at `/Applications/Blender.app`.
+3. **uv** (for blender-mcp) — [docs.astral.sh/uv](https://docs.astral.sh/uv/getting-started/installation/)
+
+   ```bash
+   brew install uv
+   uvx blender-mcp install-addon
+   ```
+
+   Then in Blender: **Edit → Preferences → Add-ons** → enable **Interface: Blender MCP**.
+   Each session: open the GUI (`npm run art:blender`), press **N** → **BlenderMCP** → **Connect to MCP server** (port 9876).
+   Grok picks up the server from [`.grok/config.toml`](.grok/config.toml). Do not run `uvx blender-mcp` by hand.
+
+4. **Optional paint / sheets**
+
+   ```bash
+   brew install --cask krita
+   ```
+
+   Affinity: [affinity.serif.com](https://affinity.serif.com/). TexturePacker: [codeandweb.com/texturepacker](https://www.codeandweb.com/texturepacker).
+
+**Repo scripts**
+
+```bash
+npm run art:plates    # SVG camera plates + walkbox guides → tools/blender/plates/
+npm run art:raster    # 2560×1440 PNG refs for Imagine (ART_RASTER=1)
+npm run art:blender   # open the Blender GUI
+npm run art:key -- in.jpg static/art/sprites/out.webp   # magenta → alpha WebP
+```
+
+Register a finished plate in `src/lib/game/art/manifest.ts` and a sprite in `src/lib/game/art/sprites.ts`. Delete `static/art/` and the procedural SVG comes back.
 
 ## Controls
 
