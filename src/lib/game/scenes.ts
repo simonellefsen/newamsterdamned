@@ -1308,7 +1308,7 @@ const landGate: Scene = {
 		{
 			id: 'domingo',
 			name: 'Domingo Antonys',
-			at: [500, 648],
+			at: [548, 650],
 			facing: 'right',
 			palette: PALETTES.domingo,
 			walkTo: [590, 682],

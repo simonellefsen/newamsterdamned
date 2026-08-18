@@ -26,7 +26,9 @@ export const ACTOR_FRAMES: Record<string, true> = {
 	'sergeant-default-front': true,
 	'pawnbroker-default-front': true,
 	'yankee-default-front': true,
-	'yankee-default-left': true
+	'yankee-default-left': true,
+	'domingo-default-front': true,
+	'domingo-default-left': true
 };
 
 export const PROP_FRAMES: Record<string, string> = {
