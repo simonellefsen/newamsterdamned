@@ -581,9 +581,9 @@ const woodenHorse: Scene = {
 		[1220, 700],
 		[80, 700]
 	],
-	// Painted furniture is closer than the SVG bar; bump depth scale so people
-	// match the counter and trestle instead of reading as tabletop figurines.
-	scale: { near: 1.2, far: 0.78 },
+	// Furniture is painted at sitting-room scale; people need to match the bar
+	// and trestle, not the old SVG doll-height.
+	scale: { near: 1.38, far: 0.92 },
 	entry: [640, 660],
 	ambience: 'tavern',
 
@@ -740,11 +740,11 @@ const woodenHorse: Scene = {
 		{
 			id: 'griet',
 			name: 'Griet Bogaert, tapster',
-			at: [318, 536],
+			at: [500, 636],
 			facing: 'front',
 			palette: PALETTES.griet,
-			height: 268,
-			walkTo: [360, 630],
+			height: 220,
+			walkTo: [460, 656],
 			defaultVerb: 'talk',
 			verbs: {
 				talk: [{ op: 'DIALOGUE', tree: 'griet' }],
@@ -780,11 +780,11 @@ const woodenHorse: Scene = {
 		{
 			id: 'yankee',
 			name: 'Ezekiel Mudge, of New Haven',
-			at: [980, 612],
+			at: [1184, 698],
 			facing: 'left',
 			palette: PALETTES.yankee,
 			height: 210,
-			walkTo: [900, 690],
+			walkTo: [1080, 690],
 			defaultVerb: 'talk',
 			verbs: {
 				talk: [{ op: 'DIALOGUE', tree: 'mudge' }],
